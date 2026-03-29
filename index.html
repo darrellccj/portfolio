@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>[NAME]</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Outfit:wght@200;300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<!-- ── HERO ──────────────────────────────── -->
+<section class="hero">
+  <h1 class="name">[NAME]</h1>
+  <a href="#folderSection" class="scroll-arrow">
+    <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
+      <path d="M1 1L8 8L15 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
+</section>
+
+<!-- ── FOLDER SCROLL SECTION ─────────────── -->
+<section class="folder-section" id="folderSection">
+  <div class="sticky-stage" id="stickyStage">
+
+    <img id="folder-img" src="images/folder.svg" alt="Folder" />
+
+    <div class="card" id="card-0">
+      <div class="card-num">01 — About</div>
+      <div class="card-title">Who I Am</div>
+      <div class="card-rule"></div>
+      <div class="card-body">Designer, developer, and builder of thoughtful digital products. I believe in the quiet power of restraint — where every element earns its place.</div>
+    </div>
+    <div class="card" id="card-1">
+      <div class="card-num">02 — Work</div>
+      <div class="card-title">Selected Projects</div>
+      <div class="card-rule"></div>
+      <div class="card-body">A curated collection spanning fintech tools, AI-powered experiences, and interactive interfaces — each built with intention and purpose.</div>
+    </div>
+    <div class="card" id="card-2">
+      <div class="card-num">03 — Stack</div>
+      <div class="card-title">What I Build With</div>
+      <div class="card-rule"></div>
+      <div class="card-body">React, Node.js, Python, Power Automate, and the occasional obsessive attention to kerning. Tools matter less than knowing when not to use them.</div>
+    </div>
+    <div class="card" id="card-3">
+      <div class="card-num">04 — Contact</div>
+      <div class="card-title">Let's Talk</div>
+      <div class="card-rule"></div>
+      <div class="card-body">Open to selected projects and collaborations. Reach out at hello@name.com — I reply to every message, usually within a day.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── SAFE SECTION ───────────────────────── -->
+<section class="safe-section" id="safeSection">
+  <p class="safe-label">Vault · Restricted Access</p>
+
+  <div class="vault-wrap" id="vaultWrap">
+
+    <!-- Vault -->
+    <div class="vault" id="vault">
+      <!-- Interior (behind door) -->
+      <div class="safe-interior" id="safeInterior">
+        <div class="kiv-shelf"><div class="kiv-dot"></div><div class="kiv-text">Bloomberger Terminal</div></div>
+        <div class="kiv-shelf"><div class="kiv-dot"></div><div class="kiv-text">AI Website Factory</div></div>
+        <div class="kiv-shelf"><div class="kiv-dot"></div><div class="kiv-text">Ember — Discovery App</div></div>
+        <div class="kiv-shelf"><div class="kiv-dot"></div><div class="kiv-text">Smart Contract Builder</div></div>
+      </div>
+      <!-- Safe shell -->
+      <div class="safe-body"></div>
+      <!-- Door -->
+      <div class="safe-door" id="safeDoor">
+        <div class="safe-dial" id="safeDial"></div>
+        <div class="bolt-strip">
+          <div class="bolt" id="bolt0"></div>
+          <div class="bolt" id="bolt1"></div>
+          <div class="bolt" id="bolt2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Passcode pad -->
+    <div class="passcode-wrap" id="passcodeWrap">
+      <div class="passcode-display" id="passcodeDisplay">
+        <div class="digit-cell" id="dc0">—</div>
+        <div class="digit-cell" id="dc1">—</div>
+        <div class="digit-cell" id="dc2">—</div>
+        <div class="digit-cell" id="dc3">—</div>
+      </div>
+      <div class="numpad" id="numpad">
+        <button class="numpad-btn" data-d="1">1</button>
+        <button class="numpad-btn" data-d="2">2</button>
+        <button class="numpad-btn" data-d="3">3</button>
+        <button class="numpad-btn" data-d="4">4</button>
+        <button class="numpad-btn" data-d="5">5</button>
+        <button class="numpad-btn" data-d="6">6</button>
+        <button class="numpad-btn" data-d="7">7</button>
+        <button class="numpad-btn" data-d="8">8</button>
+        <button class="numpad-btn" data-d="9">9</button>
+        <button class="numpad-btn zero" data-d="0">0</button>
+        <button class="numpad-btn del" data-d="del">⌫</button>
+      </div>
+      <p class="code-hint" id="codeHint">Enter passcode</p>
+    </div>
+
+  </div>
+
+  <!-- KIV ideas revealed -->
+  <div class="kiv-reveal" id="kivReveal">
+    <div class="kiv-header">KIV Ideas</div>
+    <div class="kiv-sub">Keep in View · Concepts in progress</div>
+    <div class="kiv-grid" id="kivGrid">
+      <div class="kiv-card">
+        <div class="kiv-card-tag">Fintech</div>
+        <div class="kiv-card-title">Bloomberger Terminal</div>
+        <div class="kiv-card-desc">Bloomberg-inspired web app with free/low-cost APIs. React + Vite, dark editorial aesthetic.</div>
+      </div>
+      <div class="kiv-card">
+        <div class="kiv-card-tag">AI · Proptech</div>
+        <div class="kiv-card-title">Website Factory</div>
+        <div class="kiv-card-desc">Multi-agent pipeline that generates bespoke sites for Singapore property agents. Fast. Elevated. Yours.</div>
+      </div>
+      <div class="kiv-card">
+        <div class="kiv-card-tag">Social</div>
+        <div class="kiv-card-title">Ember</div>
+        <div class="kiv-card-desc">Hobby discovery app. Private by design, real-world by intention. Warm amber aesthetic with a "today's spark" home screen.</div>
+      </div>
+      <div class="kiv-card">
+        <div class="kiv-card-tag">Web3</div>
+        <div class="kiv-card-title">Smart Contract Builder</div>
+        <div class="kiv-card-desc">Figma-style drag-and-drop Solidity generator. Visual logic → deployable contracts.</div>
+      </div>
+      <div class="kiv-card">
+        <div class="kiv-card-tag">Construction</div>
+        <div class="kiv-card-title">Site Ecosystem</div>
+        <div class="kiv-card-desc">Interconnected apps for contracts, approvals, VOs, and BIM. One source of truth for on-site teams.</div>
+      </div>
+      <div class="kiv-card">
+        <div class="kiv-card-tag">Watches</div>
+        <div class="kiv-card-title">Seiko Catalogue</div>
+        <div class="kiv-card-desc">Dark luxury editorial catalogue app. Proof of concept for a curated watch discovery experience.</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ── END ────────────────────────────────── -->
+<div class="end-section">
+  <p class="end-label">[NAME] · Portfolio</p>
+</div>
+
+<script src="https://unpkg.com/lenis@1/dist/lenis.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
