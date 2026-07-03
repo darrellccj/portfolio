@@ -1,10 +1,8 @@
-import KoiPond from './KoiPond.jsx';
 import { profile } from '../data/content.js';
 
 export default function Hero() {
   return (
     <section className="hero" id="top">
-      <KoiPond />
       <div className="hero__inner">
         <p className="hero__eyebrow">{profile.role}</p>
         <h1 className="hero__name">{profile.name}</h1>
