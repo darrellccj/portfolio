@@ -406,10 +406,10 @@ export default function KoiPondGL() {
         }
 
         const vi = (Math.random() * VARIETIES.length) | 0;
+        // straight alpha blend (no alphaTest) keeps the inked edges smooth
         this.mat = new THREE.MeshBasicMaterial({
           map: koiTextures[vi],
           transparent: true,
-          alphaTest: 0.4,
           depthWrite: false,
           side: THREE.DoubleSide,
         });
@@ -482,20 +482,46 @@ export default function KoiPondGL() {
           const oy = this.baseY[i];
           const u = (ox + this.len / 2) / this.len; // 0 tail … 1 head
           const f = (1 - u) * (N - 1);
-          let i0 = Math.floor(f);
-          if (i0 > N - 2) i0 = N - 2;
-          if (i0 < 0) i0 = 0;
-          const frac = f - i0;
-          const a = s[i0];
-          const b = s[i0 + 1];
-          const cx = a.x + (b.x - a.x) * frac;
-          const cz = a.z + (b.z - a.z) * frac;
-          let tx = a.x - b.x;
-          let tz = a.z - b.z;
+          let i1 = Math.floor(f);
+          if (i1 < 0) i1 = 0;
+          if (i1 > N - 2) i1 = N - 2;
+          const t = f - i1;
+          // Catmull-Rom through the spine points → a smooth body curve
+          const p0 = s[i1 - 1 < 0 ? 0 : i1 - 1];
+          const p1 = s[i1];
+          const p2 = s[i1 + 1];
+          const p3 = s[i1 + 2 > N - 1 ? N - 1 : i1 + 2];
+          const t2 = t * t;
+          const t3 = t2 * t;
+          const cx =
+            0.5 *
+            (2 * p1.x +
+              (-p0.x + p2.x) * t +
+              (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 +
+              (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3);
+          const cz =
+            0.5 *
+            (2 * p1.z +
+              (-p0.z + p2.z) * t +
+              (2 * p0.z - 5 * p1.z + 4 * p2.z - p3.z) * t2 +
+              (-p0.z + 3 * p1.z - 3 * p2.z + p3.z) * t3);
+          // derivative of the spline → tangent (points tail-ward as f grows)
+          const dx =
+            0.5 *
+            (-p0.x + p2.x +
+              2 * (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t +
+              3 * (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t2);
+          const dz =
+            0.5 *
+            (-p0.z + p2.z +
+              2 * (2 * p0.z - 5 * p1.z + 4 * p2.z - p3.z) * t +
+              3 * (-p0.z + 3 * p1.z - 3 * p2.z + p3.z) * t2);
+          // head-ward unit tangent; perpendicular (tz, -tx) faces the camera
+          let tx = -dx;
+          let tz = -dz;
           const tl = Math.hypot(tx, tz) || 1;
           tx /= tl;
           tz /= tl;
-          // perpendicular (tz, -tx) keeps the drawn face toward the camera
           pos.setXYZ(i, cx + tz * oy, this.depthY, cz - tx * oy);
         }
         pos.needsUpdate = true;
@@ -522,7 +548,7 @@ export default function KoiPondGL() {
         const size = rand(9, 15);
         const mesh = new THREE.Mesh(
           new THREE.PlaneGeometry(size, size),
-          new THREE.MeshBasicMaterial({ map: padTex, transparent: true, alphaTest: 0.4, depthWrite: false })
+          new THREE.MeshBasicMaterial({ map: padTex, transparent: true, depthWrite: false })
         );
         mesh.rotation.x = -Math.PI / 2;
         mesh.rotation.z = rand(0, Math.PI * 2);
