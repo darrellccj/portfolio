@@ -436,68 +436,73 @@ export default function KoiPondGL() {
     const shadowTex = new THREE.CanvasTexture(makeShadowCanvas());
 
     // ---- fish ----
-    const fishGeo = new THREE.PlaneGeometry(1, 1, 48, 8);
-
+    // Movement is the follow-the-leader spine from the original 2D pond: the
+    // head wanders (with a gentle sway) and each body segment trails the one
+    // ahead at a fixed distance, so the body genuinely curves along its path.
+    // Each frame the koi mesh is bent to follow that spine.
     class Fish {
       constructor() {
         this.scale = rand(6, 11);
-        this.len = this.scale * 2; // world length
-        this.speed = rand(6, 11) / Math.sqrt(this.scale);
+        this.len = this.scale * 2; // world length (nose → tail-fin tip)
+        this.width = this.len * 0.5;
+        this.segCount = 12;
+        this.seg = this.len / (this.segCount - 1);
+        this.speed = rand(6.5, 10) / Math.sqrt(this.scale / 6);
         this.angle = rand(0, Math.PI * 2);
         this.target = this.angle;
         this.wander = 0;
-        this.phase = rand(0, Math.PI * 2);
+        this.finPhase = rand(0, Math.PI * 2);
         this.depth = rand(0.5, 1);
-        this.x = rand(-extentX / 2, extentX / 2);
-        this.z = rand(-extentZ / 2, extentZ / 2);
+        this.depthY = 0.4 * this.depth;
         this.speedBoost = 0;
 
+        // trailing spine (world XZ), head at index 0
+        const x0 = rand(-extentX / 2, extentX / 2);
+        const z0 = rand(-extentZ / 2, extentZ / 2);
+        this.spine = [];
+        for (let i = 0; i < this.segCount; i++) {
+          this.spine.push({
+            x: x0 - Math.cos(this.angle) * this.seg * i,
+            z: z0 - Math.sin(this.angle) * this.seg * i,
+          });
+        }
+
+        // subdivided plane; we mutate its positions to follow the spine
+        this.geo = new THREE.PlaneGeometry(this.len, this.width, 26, 2);
+        const pos = this.geo.attributes.position;
+        this.baseX = new Float32Array(pos.count);
+        this.baseY = new Float32Array(pos.count);
+        for (let i = 0; i < pos.count; i++) {
+          this.baseX[i] = pos.getX(i);
+          this.baseY[i] = pos.getY(i);
+        }
+        // fish lies flat facing up; pin normals up for even lighting
+        const nrm = this.geo.attributes.normal;
+        for (let i = 0; i < nrm.count; i++) nrm.setXYZ(i, 0, 1, 0);
+        nrm.needsUpdate = true;
+
         const vi = (Math.random() * VARIETIES.length) | 0;
-        const mat = new THREE.MeshStandardMaterial({
+        const metal = VARIETIES[vi].name === 'ogon' || VARIETIES[vi].name === 'platinum';
+        this.mat = new THREE.MeshStandardMaterial({
           map: koiTextures[vi],
           transparent: true,
           alphaTest: 0.02,
           depthWrite: false,
           roughness: 0.55,
-          metalness: VARIETIES[vi].name === 'ogon' || VARIETIES[vi].name === 'platinum' ? 0.45 : 0.12,
+          metalness: metal ? 0.45 : 0.12,
           side: THREE.DoubleSide,
         });
-        // deeper fish sit lower and read cooler/fainter
-        mat.color.setScalar(0.7 + this.depth * 0.3);
-        mat.opacity = 0.55 + this.depth * 0.45;
+        this.mat.color.setScalar(0.7 + this.depth * 0.3);
+        this.mat.opacity = 0.55 + this.depth * 0.45;
 
-        const uLen = { value: this.len };
-        const uPhase = { value: this.phase };
-        this.uPhase = uPhase;
-        mat.onBeforeCompile = (shader) => {
-          shader.uniforms.uTime = uTime;
-          shader.uniforms.uPhase = uPhase;
-          shader.uniforms.uLen = uLen;
-          shader.vertexShader =
-            'uniform float uTime;\nuniform float uPhase;\nuniform float uLen;\n' +
-            shader.vertexShader.replace(
-              '#include <begin_vertex>',
-              `#include <begin_vertex>
-               float u = (position.x + uLen*0.5)/uLen;   // 1 head .. 0 tail
-               float env = smoothstep(0.9, 0.0, u);        // grows toward tail
-               float wave = sin(u*7.0 - uTime*7.0 + uPhase);
-               transformed.y += wave * env * uLen * 0.13;
-               transformed.z += sin(uTime*2.2 + uPhase) * 0.12;`
-            );
-        };
-
-        this.mesh = new THREE.Mesh(fishGeo, mat);
-        this.mesh.scale.set(this.len, this.len * 0.5, 1);
-        this.mesh.rotation.x = -Math.PI / 2;
+        this.mesh = new THREE.Mesh(this.geo, this.mat);
         this.mesh.renderOrder = 2;
-
-        this.group = new THREE.Group();
-        this.group.add(this.mesh);
-        this.group.position.set(this.x, 0.4 * this.depth, this.z);
+        this.mesh.frustumCulled = false; // verts live in world space
+        scene.add(this.mesh);
 
         // soft shadow on the pond floor
-        const shadow = new THREE.Mesh(
-          new THREE.PlaneGeometry(this.len * 1.1, this.len * 0.6),
+        this.shadow = new THREE.Mesh(
+          new THREE.PlaneGeometry(this.len * 1.1, this.width * 1.15),
           new THREE.MeshBasicMaterial({
             map: shadowTex,
             transparent: true,
@@ -505,50 +510,108 @@ export default function KoiPondGL() {
             opacity: 0.5 * this.depth,
           })
         );
-        shadow.rotation.x = -Math.PI / 2;
-        shadow.position.set(2, -0.45, 2);
-        shadow.renderOrder = 1;
-        this.group.add(shadow);
+        this.shadow.rotation.x = -Math.PI / 2;
+        this.shadow.renderOrder = 1;
+        scene.add(this.shadow);
 
-        scene.add(this.group);
+        this.deform();
       }
 
       update(dt, t, pointer) {
+        const head = this.spine[0];
+
         this.wander -= dt;
         if (this.wander <= 0) {
           this.target += rand(-0.9, 0.9);
           this.wander = rand(1.2, 3.2);
         }
         if (pointer.active) {
-          const dx = this.x - pointer.x;
-          const dz = this.z - pointer.z;
+          const dx = head.x - pointer.x;
+          const dz = head.z - pointer.z;
           const d = Math.hypot(dx, dz);
-          if (d < 26) {
+          const R = 24;
+          if (d < R) {
             this.target = Math.atan2(dz, dx);
-            this.speedBoost = (1 - d / 26) * 14;
+            this.speedBoost = (1 - d / R) * this.speed * 2.2;
           }
         }
         const mx = extentX / 2 - 8;
         const mz = extentZ / 2 - 8;
-        if (this.x < -mx) this.target = 0;
-        else if (this.x > mx) this.target = Math.PI;
-        if (this.z < -mz) this.target = Math.PI / 2;
-        else if (this.z > mz) this.target = -Math.PI / 2;
+        if (head.x < -mx) this.target = 0;
+        else if (head.x > mx) this.target = Math.PI;
+        if (head.z < -mz) this.target = Math.PI / 2;
+        else if (head.z > mz) this.target = -Math.PI / 2;
 
         let diff = this.target - this.angle;
         while (diff > Math.PI) diff -= Math.PI * 2;
         while (diff < -Math.PI) diff += Math.PI * 2;
-        this.angle += diff * Math.min(1, dt * 2);
+        this.angle += diff * Math.min(1, dt * 2.2);
 
-        const v = (this.speed + this.speedBoost) * dt;
+        const boost = this.speedBoost;
         this.speedBoost *= 0.9;
-        this.x += Math.cos(this.angle) * v;
-        this.z += Math.sin(this.angle) * v;
+        const v = (this.speed + boost) * dt;
 
-        this.group.position.x = this.x;
-        this.group.position.z = this.z;
-        // head is +X in the texture; rotate so it leads the heading
-        this.group.rotation.y = -this.angle;
+        // gentle side-to-side sway gives the swimming S-curve
+        const sway = Math.sin(t * 3.5 + this.finPhase) * 0.12;
+        const heading = this.angle + sway;
+        head.x += Math.cos(heading) * v;
+        head.z += Math.sin(heading) * v;
+
+        // follow-the-leader: each segment trails the previous at fixed dist
+        for (let i = 1; i < this.spine.length; i++) {
+          const p = this.spine[i - 1];
+          const c = this.spine[i];
+          const a = Math.atan2(c.z - p.z, c.x - p.x);
+          c.x = p.x + Math.cos(a) * this.seg;
+          c.z = p.z + Math.sin(a) * this.seg;
+        }
+
+        this.deform();
+
+        // shadow follows the body centre, offset toward the light
+        const mid = this.spine[(this.segCount / 2) | 0];
+        this.shadow.position.set(mid.x + 2, -0.45, mid.z + 2);
+        this.shadow.rotation.z = 0;
+        this.shadow.rotation.y = -this.angle;
+      }
+
+      // Bend the plane so its length axis follows the spine curve.
+      deform() {
+        const pos = this.geo.attributes.position;
+        const N = this.segCount;
+        const s = this.spine;
+        for (let i = 0; i < pos.count; i++) {
+          const ox = this.baseX[i];
+          const oy = this.baseY[i];
+          const u = (ox + this.len / 2) / this.len; // 0 tail … 1 head
+          const f = (1 - u) * (N - 1); // 0 head … N-1 tail
+          let i0 = Math.floor(f);
+          if (i0 > N - 2) i0 = N - 2;
+          if (i0 < 0) i0 = 0;
+          const frac = f - i0;
+          const a = s[i0];
+          const b = s[i0 + 1];
+          const cx = a.x + (b.x - a.x) * frac;
+          const cz = a.z + (b.z - a.z) * frac;
+          // head-ward tangent, then perpendicular for the across offset
+          let tx = a.x - b.x;
+          let tz = a.z - b.z;
+          const tl = Math.hypot(tx, tz) || 1;
+          tx /= tl;
+          tz /= tl;
+          // perpendicular (tz, -tx) keeps the lit face pointing up at the camera
+          pos.setXYZ(i, cx + tz * oy, this.depthY, cz - tx * oy);
+        }
+        pos.needsUpdate = true;
+      }
+
+      dispose() {
+        scene.remove(this.mesh);
+        scene.remove(this.shadow);
+        this.geo.dispose();
+        this.mat.dispose();
+        this.shadow.geometry.dispose();
+        this.shadow.material.dispose();
       }
     }
 
@@ -575,7 +638,7 @@ export default function KoiPondGL() {
 
     let fish = [];
     function buildFish() {
-      fish.forEach((f) => scene.remove(f.group));
+      fish.forEach((f) => f.dispose());
       const area = extentX * extentZ;
       const count = Math.max(5, Math.min(10, Math.round(area / 1400)));
       fish = Array.from({ length: count }, () => new Fish());
@@ -670,7 +733,7 @@ export default function KoiPondGL() {
       window.removeEventListener('pointerdown', onDown);
       document.removeEventListener('pointerleave', onLeave);
       document.removeEventListener('visibilitychange', onVisibility);
-      fishGeo.dispose();
+      fish.forEach((f) => f.dispose());
       waterMat.dispose();
       koiTextures.forEach((t) => t.dispose());
       padTex.dispose();
