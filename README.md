@@ -5,8 +5,9 @@ aerial view of a cream-toned pond with procedurally animated fish, drifting
 light caustics, floating lily pads, and cursor interaction. Below the hero:
 About, Selected Work, KIV (Keep In View — concepts in progress), and Contact.
 
-Built with **Vite + React**. No UI framework — the styling is hand-written
-CSS and the pond is a single `<canvas>` component.
+Built with **Vite + React**. The styling is hand-written CSS; the pond is a
+**WebGL** scene (three.js) rendered into a single fixed `<canvas>` that sits
+behind every section.
 
 ## Getting started
 
@@ -36,17 +37,26 @@ root for social link previews.
 
 ## The koi pond
 
-`src/components/KoiPond.jsx` is a self-contained canvas animation:
+`src/components/KoiPondGL.jsx` is a self-contained WebGL scene (three.js):
 
-- Fish are drawn as **segmented spines** (follow-the-leader) so their bodies
-  curve naturally as they swim; they wander, avoid the edges, and veer away
-  from the cursor.
-- Clicking the pond sends out a ripple.
-- It **respects `prefers-reduced-motion`** (renders a single static frame)
-  and **pauses when scrolled out of view** to save battery/CPU.
+- Each koi is a **detailed painted texture** (drawn once to an offscreen
+  canvas — body volume shading, organic patches per variety, eyes, barbels,
+  translucent fins) mapped onto a finely subdivided plane.
+- A **traveling-wave vertex shader** flexes that plane so the whole body
+  undulates and the tail swishes as one continuous motion — real swimming,
+  not sprite frames. Fish are lit for a soft wet sheen.
+- Authentic varieties: Kohaku, Sanke, Showa, Ogon, Platinum. Deeper fish sit
+  lower and render fainter/cooler for underwater depth.
+- The water is a **custom fragment shader**: cream base, drifting fbm
+  caustics, and expanding **ripple rings** spawned where you click open water.
+- Fish wander, avoid the edges, and veer away from the cursor; lily pads
+  float above and fish pass beneath them.
+- **Respects `prefers-reduced-motion`** (renders a single static frame),
+  **pauses while the tab is hidden**, and **falls back gracefully** to the
+  plain cream background if WebGL is unavailable.
 
-Fish count and lily-pad count scale with the viewport, so it stays light on
-phones.
+Fish and lily-pad counts scale with the viewport. Note: three.js adds
+~150 KB gzipped to the bundle — the cost of the WebGL fidelity.
 
 ## Structure
 

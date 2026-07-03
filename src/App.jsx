@@ -1,4 +1,4 @@
-import KoiPond from './components/KoiPond.jsx';
+import KoiPond from './components/KoiPondGL.jsx';
 import Nav from './components/Nav.jsx';
 import Hero from './components/Hero.jsx';
 import About from './components/About.jsx';
