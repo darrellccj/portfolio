@@ -1,0 +1,35 @@
+import { useEffect, useState } from 'react';
+import { profile } from '../data/content.js';
+
+const LINKS = [
+  { label: 'About', href: '#about' },
+  { label: 'Work', href: '#work' },
+  { label: 'KIV', href: '#kiv' },
+  { label: 'Contact', href: '#contact' },
+];
+
+export default function Nav() {
+  const [solid, setSolid] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setSolid(window.scrollY > window.innerHeight * 0.6);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return (
+    <header className={`nav ${solid ? 'nav--solid' : ''}`}>
+      <a href="#top" className="nav__brand">
+        {profile.name}
+      </a>
+      <nav className="nav__links" aria-label="Sections">
+        {LINKS.map((l) => (
+          <a key={l.href} href={l.href}>
+            {l.label}
+          </a>
+        ))}
+      </nav>
+    </header>
+  );
+}

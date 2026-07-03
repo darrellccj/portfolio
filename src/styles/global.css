@@ -1,0 +1,532 @@
+/* ─────────────────────────────────────────────────────────────
+   DESIGN TOKENS
+   Cream, warm, calm. Light but never pure white. Koi-orange accent.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --cream: #f4efe6;
+  --cream-deep: #ede5d5;
+  --cream-card: #faf6ee;
+  --ink: #2b2622;
+  --ink-soft: #6f665a;
+  --ink-faint: #a49a89;
+  --accent: #d2662f;
+  --accent-soft: #e08f57;
+  --line: rgba(43, 38, 34, 0.12);
+  --line-soft: rgba(43, 38, 34, 0.07);
+
+  --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --maxw: 1080px;
+  --gutter: clamp(1.4rem, 5vw, 4rem);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 400;
+  line-height: 1.6;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--cream);
+}
+
+/* Visible focus for keyboard users */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   NAV
+   ───────────────────────────────────────────────────────────── */
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem var(--gutter);
+  transition: background 0.4s var(--ease), box-shadow 0.4s var(--ease),
+    padding 0.4s var(--ease);
+}
+.nav--solid {
+  background: rgba(244, 239, 230, 0.82);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 var(--line-soft);
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+}
+.nav__brand {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+.nav__links {
+  display: flex;
+  gap: clamp(1rem, 3vw, 2.2rem);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+.nav__links a {
+  position: relative;
+  transition: color 0.25s var(--ease);
+}
+.nav__links a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s var(--ease);
+}
+.nav__links a:hover {
+  color: var(--ink);
+}
+.nav__links a:hover::after {
+  transform: scaleX(1);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   HERO — the koi pond
+   ───────────────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.koi-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* faint vignette blends the pond into the page below */
+  -webkit-mask-image: radial-gradient(
+    130% 115% at 50% 42%,
+    #000 60%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(130% 115% at 50% 42%, #000 60%, transparent 100%);
+  touch-action: none;
+}
+.hero__inner {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 var(--gutter);
+  pointer-events: none;
+}
+.hero__eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.3rem;
+  animation: rise 1s var(--ease) both;
+}
+.hero__name {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(2.8rem, 10vw, 7rem);
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  animation: rise 1s var(--ease) 0.08s both;
+}
+.hero__tagline {
+  margin: 1.6rem auto 0;
+  max-width: 30ch;
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  color: var(--ink-soft);
+  animation: rise 1s var(--ease) 0.16s both;
+}
+.hero__scroll {
+  position: absolute;
+  bottom: 2.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  animation: rise 1s var(--ease) 0.4s both;
+}
+.hero__scroll svg {
+  animation: bob 2s ease-in-out infinite;
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SECTION SCAFFOLD
+   ───────────────────────────────────────────────────────────── */
+.section {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: clamp(5rem, 12vw, 9rem) var(--gutter);
+}
+.section__label {
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.4rem;
+}
+.section__head {
+  margin-bottom: clamp(2.4rem, 5vw, 3.6rem);
+}
+.section__title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+.section__sub {
+  margin-top: 0.9rem;
+  color: var(--ink-soft);
+  max-width: 42ch;
+  font-size: 0.95rem;
+}
+
+/* Scroll-reveal wrapper */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   ABOUT
+   ───────────────────────────────────────────────────────────── */
+.about__lead {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(1.4rem, 3.4vw, 2.1rem);
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  max-width: 22ch;
+  color: var(--ink);
+}
+.about__lead {
+  max-width: 30ch;
+}
+.about__stack {
+  margin-top: clamp(2.4rem, 5vw, 3.4rem);
+  padding-top: 2rem;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.8rem 2rem;
+}
+.about__stack-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.about__stack ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.4rem;
+}
+.about__stack li {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  position: relative;
+}
+.about__stack li:not(:last-child)::after {
+  content: '·';
+  position: absolute;
+  right: -0.85rem;
+  color: var(--ink-faint);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   WORK
+   ───────────────────────────────────────────────────────────── */
+.work__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.2rem;
+}
+.work-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--cream-card);
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  padding: 1.8rem 1.9rem 1.6rem;
+  transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease),
+    border-color 0.5s var(--ease);
+  /* per-card entrance stagger, tied to reveal */
+  opacity: 0;
+  transform: translateY(22px);
+}
+.reveal.is-in .work-card {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.7s var(--ease) calc(var(--i) * 0.09s),
+    transform 0.7s var(--ease) calc(var(--i) * 0.09s),
+    box-shadow 0.5s var(--ease), border-color 0.5s var(--ease);
+}
+.work-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--line);
+  box-shadow: 0 18px 44px rgba(80, 55, 30, 0.1);
+}
+.work-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.6rem;
+}
+.work-card__tag {
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.work-card__year {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+.work-card__title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  margin-bottom: 0.7rem;
+}
+.work-card__desc {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  margin-bottom: 1.6rem;
+}
+.work-card__cue {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.work-card__cue svg {
+  transition: transform 0.35s var(--ease);
+}
+.work-card:hover .work-card__cue svg {
+  transform: translateX(5px);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   KIV
+   ───────────────────────────────────────────────────────────── */
+.kiv {
+  position: relative;
+}
+.kiv__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1px;
+  background: var(--line-soft);
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.kiv-card {
+  background: var(--cream);
+  padding: 1.7rem 1.6rem;
+  transition: background 0.3s var(--ease);
+  opacity: 0;
+  transform: translateY(16px);
+}
+.reveal.is-in .kiv-card {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.6s var(--ease) calc(var(--i) * 0.08s),
+    transform 0.6s var(--ease) calc(var(--i) * 0.08s), background 0.3s var(--ease);
+}
+.kiv-card:hover {
+  background: var(--cream-card);
+}
+.kiv-card__tag {
+  display: inline-block;
+  font-size: 0.55rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent-soft);
+  margin-bottom: 0.7rem;
+}
+.kiv-card__title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+.kiv-card__desc {
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CONTACT + FOOTER
+   ───────────────────────────────────────────────────────────── */
+.contact {
+  text-align: center;
+  max-width: 720px;
+}
+.contact .section__label {
+  /* keep the number centred here */
+  text-align: center;
+}
+.contact__title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  line-height: 1.05;
+  margin-bottom: 1.2rem;
+}
+.contact__sub {
+  color: var(--ink-soft);
+  max-width: 40ch;
+  margin: 0 auto 2.6rem;
+}
+.contact__email {
+  display: inline-block;
+  font-family: var(--serif);
+  font-size: clamp(1.3rem, 4vw, 2rem);
+  color: var(--accent);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s var(--ease);
+}
+.contact__email:hover {
+  border-color: var(--accent);
+}
+.contact__socials {
+  margin-top: 2.4rem;
+  display: flex;
+  justify-content: center;
+  gap: 1.8rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+.contact__socials a {
+  transition: color 0.25s var(--ease);
+}
+.contact__socials a:hover {
+  color: var(--accent);
+}
+.footer {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 2.4rem var(--gutter);
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .nav__brand {
+    font-size: 0.95rem;
+  }
+  .nav__links {
+    gap: 1rem;
+    font-size: 0.76rem;
+  }
+  .footer {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   REDUCED MOTION — kill entrances + smooth scroll
+   ───────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .reveal,
+  .work-card,
+  .kiv-card {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
