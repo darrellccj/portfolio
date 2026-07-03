@@ -55,13 +55,27 @@ class Koi {
       });
     }
 
-    // body half-width along the spine (head → tail taper)
+    // body half-width along the spine (rounded head → slim caudal peduncle)
     this.widths = this.spine.map((_, i) => {
       const t = i / (this.segCount - 1);
-      // fat near the shoulders (~20%), tapering to the tail
-      const bulge = Math.sin(Math.min(t * 1.35, 1) * Math.PI);
-      return (2 + bulge * 7) * this.scale;
+      let wv;
+      if (t < 0.16) {
+        // rounded nose swelling out to the shoulders
+        wv = 4.2 + Math.sin((t / 0.16) * (Math.PI / 2)) * 4.3;
+      } else {
+        // shoulders tapering to a thin tail base
+        const k = (t - 0.16) / 0.84;
+        wv = 8.5 * Math.pow(1 - k, 1.35) + 0.8;
+      }
+      return wv * this.scale;
     });
+
+    // a few small speckles for finer koi markings (bekko-style flecks)
+    this.speckles = Array.from({ length: 3 }, () => ({
+      seg: 3 + ((Math.random() * (this.segCount - 5)) | 0),
+      off: rand(-0.6, 0.6),
+      r: rand(0.9, 1.8),
+    }));
   }
 
   update(w, h, t, pointer, dt) {
@@ -130,103 +144,184 @@ class Koi {
   draw(ctx, t) {
     const s = this.spine;
     const w = this.widths;
+    const N = s.length;
+    const sc = this.scale;
 
-    // left & right edge points, perpendicular to the local spine dir
-    const left = [];
-    const right = [];
-    for (let i = 0; i < s.length; i++) {
-      const p = s[i];
-      const nxt = s[Math.min(i + 1, s.length - 1)];
+    // per-point spine direction + outward unit normal
+    const dir = [];
+    const nrm = [];
+    for (let i = 0; i < N; i++) {
+      const nxt = s[Math.min(i + 1, N - 1)];
       const prv = s[Math.max(i - 1, 0)];
       const a = Math.atan2(nxt.y - prv.y, nxt.x - prv.x);
-      const nx = Math.cos(a + Math.PI / 2);
-      const ny = Math.sin(a + Math.PI / 2);
-      left.push({ x: p.x + nx * w[i], y: p.y + ny * w[i] });
-      right.push({ x: p.x - nx * w[i], y: p.y - ny * w[i] });
+      dir.push(a);
+      nrm.push({ x: Math.cos(a + Math.PI / 2), y: Math.sin(a + Math.PI / 2) });
     }
+    const left = s.map((p, i) => ({ x: p.x + nrm[i].x * w[i], y: p.y + nrm[i].y * w[i] }));
+    const right = s.map((p, i) => ({ x: p.x - nrm[i].x * w[i], y: p.y - nrm[i].y * w[i] }));
 
     ctx.save();
     ctx.globalAlpha = this.depth;
 
-    // soft shadow on the pond floor (offset down-right)
+    // soft shadow on the pond floor (offset, blurred)
     ctx.save();
-    ctx.translate(6, 8);
-    ctx.fillStyle = 'rgba(60,45,30,0.10)';
-    ctx.filter = 'blur(3px)';
+    ctx.translate(5, 7);
+    ctx.fillStyle = 'rgba(50,38,26,0.12)';
+    ctx.filter = 'blur(4px)';
     this.tracePath(ctx, left, right, s);
     ctx.fill();
     ctx.restore();
 
-    // tail fin — a translucent fan that sways
-    const tail = s[s.length - 1];
-    const tailPrev = s[s.length - 3];
-    const ta = Math.atan2(tail.y - tailPrev.y, tail.x - tailPrev.x);
-    const swish = Math.sin(t * 6 + this.finPhase) * 0.5;
-    ctx.fillStyle = this.variety.fin;
-    ctx.beginPath();
-    ctx.moveTo(tail.x, tail.y);
-    const fl = 16 * this.scale;
-    ctx.lineTo(
-      tail.x + Math.cos(ta + 0.5 + swish) * fl,
-      tail.y + Math.sin(ta + 0.5 + swish) * fl
-    );
-    ctx.quadraticCurveTo(
-      tail.x + Math.cos(ta + swish) * fl * 1.3,
-      tail.y + Math.sin(ta + swish) * fl * 1.3,
-      tail.x + Math.cos(ta - 0.5 + swish) * fl,
-      tail.y + Math.sin(ta - 0.5 + swish) * fl
-    );
-    ctx.closePath();
-    ctx.fill();
+    const finTime = t * 6 + this.finPhase;
 
-    // pectoral fins near the shoulders
-    const sh = s[3];
-    const shDir = Math.atan2(s[2].y - s[4].y, s[2].x - s[4].x);
-    const fw = Math.sin(t * 6 + this.finPhase) * 0.4;
-    for (const side of [1, -1]) {
-      ctx.beginPath();
-      const base = shDir + side * (Math.PI / 2);
-      ctx.moveTo(sh.x, sh.y);
-      const fpl = 13 * this.scale;
-      ctx.quadraticCurveTo(
-        sh.x + Math.cos(base + side * (0.3 + fw)) * fpl,
-        sh.y + Math.sin(base + side * (0.3 + fw)) * fpl,
-        sh.x + Math.cos(base - side * 0.2) * fpl * 0.7,
-        sh.y + Math.sin(base - side * 0.2) * fpl * 0.7
-      );
-      ctx.closePath();
-      ctx.fill();
-    }
+    // fins sit behind the body
+    this.drawTail(ctx, s, dir, finTime, sc);
+    this.drawPectorals(ctx, s, dir, nrm, finTime, sc);
 
     // body
     ctx.fillStyle = this.variety.base;
     this.tracePath(ctx, left, right, s);
     ctx.fill();
 
-    // koi markings — clip to the body, paint blobs along the spine
+    // interior detailing, clipped to the body silhouette
     ctx.save();
     this.tracePath(ctx, left, right, s);
     ctx.clip();
+
+    // large koi markings
     this.variety.patches.forEach((color, k) => {
       ctx.fillStyle = color;
       const idx = 2 + k * 3;
-      const p = s[Math.min(idx, s.length - 2)];
+      const p = s[Math.min(idx, N - 2)];
       if (!p) return;
+      const wi = w[Math.min(idx, w.length - 1)];
       ctx.beginPath();
-      ctx.ellipse(
-        p.x,
-        p.y,
-        w[Math.min(idx, w.length - 1)] * 1.15,
-        w[Math.min(idx, w.length - 1)] * 0.85,
-        this.angle,
-        0,
-        Math.PI * 2
-      );
+      ctx.ellipse(p.x, p.y, wi * 1.25, wi * 0.9, dir[idx], 0, Math.PI * 2);
       ctx.fill();
     });
-    ctx.restore();
+
+    // fine speckles for texture
+    ctx.fillStyle = 'rgba(45,35,26,0.20)';
+    this.speckles.forEach((sp) => {
+      const p = s[Math.min(sp.seg, N - 1)];
+      const wi = w[Math.min(sp.seg, w.length - 1)];
+      const x = p.x + nrm[sp.seg].x * sp.off * wi;
+      const y = p.y + nrm[sp.seg].y * sp.off * wi;
+      ctx.beginPath();
+      ctx.arc(x, y, sp.r * sc, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // dorsal sheen — a lighter ribbon down the spine gives the body roundness
+    const rl = s.map((p, i) => ({ x: p.x + nrm[i].x * w[i] * 0.4, y: p.y + nrm[i].y * w[i] * 0.4 }));
+    const rr = s.map((p, i) => ({ x: p.x - nrm[i].x * w[i] * 0.4, y: p.y - nrm[i].y * w[i] * 0.4 }));
+    ctx.fillStyle = 'rgba(255,255,255,0.16)';
+    this.tracePath(ctx, rl, rr, s);
+    ctx.fill();
+
+    ctx.restore(); // end clip
+
+    // eyes, set just behind the nose on each side of the head
+    const head = s[1];
+    const eo = w[1] * 0.62;
+    for (const side of [1, -1]) {
+      const ex = head.x + nrm[1].x * eo * side;
+      const ey = head.y + nrm[1].y * eo * side;
+      ctx.fillStyle = 'rgba(28,22,16,0.9)';
+      ctx.beginPath();
+      ctx.arc(ex, ey, 1.7 * sc, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.beginPath();
+      ctx.arc(ex - 0.5 * sc, ey - 0.5 * sc, 0.55 * sc, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // faint rim for definition against the water
+    ctx.strokeStyle = 'rgba(55,42,28,0.10)';
+    ctx.lineWidth = 0.8;
+    this.tracePath(ctx, left, right, s);
+    ctx.stroke();
 
     ctx.restore();
+  }
+
+  // Flowing caudal (tail) fin: two soft lobes with a few rays.
+  drawTail(ctx, s, dir, finTime, sc) {
+    const N = s.length;
+    const tail = s[N - 1];
+    const ta = dir[N - 1];
+    const swish = Math.sin(finTime) * 0.4;
+    const len = 20 * sc;
+    const spread = 0.6;
+    const cx = tail.x + Math.cos(ta + swish) * len * 0.6;
+    const cy = tail.y + Math.sin(ta + swish) * len * 0.6;
+
+    ctx.fillStyle = this.variety.fin;
+    ctx.beginPath();
+    ctx.moveTo(tail.x, tail.y);
+    ctx.quadraticCurveTo(
+      cx, cy,
+      tail.x + Math.cos(ta + spread + swish) * len,
+      tail.y + Math.sin(ta + spread + swish) * len
+    );
+    ctx.quadraticCurveTo(
+      tail.x + Math.cos(ta + swish) * len * 0.5,
+      tail.y + Math.sin(ta + swish) * len * 0.5,
+      tail.x + Math.cos(ta - spread + swish) * len,
+      tail.y + Math.sin(ta - spread + swish) * len
+    );
+    ctx.quadraticCurveTo(cx, cy, tail.x, tail.y);
+    ctx.closePath();
+    ctx.fill();
+
+    // fin rays
+    ctx.strokeStyle = this.variety.fin;
+    ctx.lineWidth = 0.7 * sc;
+    for (let i = -2; i <= 2; i++) {
+      const a = ta + (i / 2) * spread + swish;
+      ctx.beginPath();
+      ctx.moveTo(tail.x, tail.y);
+      ctx.lineTo(tail.x + Math.cos(a) * len * 0.92, tail.y + Math.sin(a) * len * 0.92);
+      ctx.stroke();
+    }
+  }
+
+  // Pectoral fins: a translucent petal on each side that gently flaps.
+  drawPectorals(ctx, s, dir, nrm, finTime, sc) {
+    const idx = 3;
+    const base = s[idx];
+    const flap = Math.sin(finTime) * 0.3;
+    const len = 12 * sc;
+    const fx = Math.cos(dir[idx]);
+    const fy = Math.sin(dir[idx]);
+
+    for (const side of [1, -1]) {
+      const ox = nrm[idx].x * side;
+      const oy = nrm[idx].y * side;
+      const tipx = base.x + ox * len * 0.7 - fx * len * (0.7 + flap);
+      const tipy = base.y + oy * len * 0.7 - fy * len * (0.7 + flap);
+
+      ctx.fillStyle = this.variety.fin;
+      ctx.beginPath();
+      ctx.moveTo(base.x, base.y);
+      ctx.quadraticCurveTo(base.x + ox * len, base.y + oy * len, tipx, tipy);
+      ctx.quadraticCurveTo(
+        base.x - fx * len * 0.55 + ox * len * 0.15,
+        base.y - fy * len * 0.55 + oy * len * 0.15,
+        base.x,
+        base.y
+      );
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = this.variety.fin;
+      ctx.lineWidth = 0.6 * sc;
+      ctx.beginPath();
+      ctx.moveTo(base.x, base.y);
+      ctx.lineTo(tipx, tipy);
+      ctx.stroke();
+    }
   }
 
   // build a smooth closed outline down the left edge and up the right
@@ -462,34 +557,34 @@ export default function KoiPond() {
       });
     }
 
+    // The canvas is a fixed, full-viewport backdrop, so its top-left is the
+    // viewport origin — clientX/clientY map straight to canvas coordinates.
     function onMove(e) {
-      const r = canvas.getBoundingClientRect();
-      pointer.x = e.clientX - r.left;
-      pointer.y = e.clientY - r.top;
+      pointer.x = e.clientX;
+      pointer.y = e.clientY;
       pointer.active = true;
     }
     function onLeave() {
       pointer.active = false;
     }
     function onClick(e) {
-      const r = canvas.getBoundingClientRect();
-      ripples.push(new Ripple(e.clientX - r.left, e.clientY - r.top));
+      // Ripple only when tapping open water, not links/buttons/cards.
+      if (e.target.closest('a, button, input, textarea')) return;
+      ripples.push(new Ripple(e.clientX, e.clientY));
     }
 
-    // pause the loop when the hero scrolls out of view
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        visible = entry.isIntersecting;
-      },
-      { threshold: 0 }
-    );
-    io.observe(canvas);
+    // Pause the loop while the tab is hidden to save CPU/battery.
+    function onVisibility() {
+      visible = !document.hidden;
+      last = performance.now();
+    }
+    document.addEventListener('visibilitychange', onVisibility);
 
     resize();
     window.addEventListener('resize', resize);
-    canvas.addEventListener('pointermove', onMove);
-    canvas.addEventListener('pointerleave', onLeave);
-    canvas.addEventListener('pointerdown', onClick);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerdown', onClick);
+    document.addEventListener('pointerleave', onLeave);
 
     if (reduced) {
       // one static frame, no animation
@@ -502,11 +597,11 @@ export default function KoiPond() {
 
     return () => {
       cancelAnimationFrame(raf);
-      io.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('resize', resize);
-      canvas.removeEventListener('pointermove', onMove);
-      canvas.removeEventListener('pointerleave', onLeave);
-      canvas.removeEventListener('pointerdown', onClick);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerdown', onClick);
+      document.removeEventListener('pointerleave', onLeave);
     };
   }, []);
 
