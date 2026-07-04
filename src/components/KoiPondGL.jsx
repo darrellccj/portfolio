@@ -48,9 +48,10 @@ function makeKoiCanvas(v) {
   const MID = 3; // interior line weight
 
   const halfH = (s) => {
-    if (s < 0.72) return 9 + (maxHalf - 9) * Math.pow(Math.sin((s / 0.72) * (Math.PI / 2)), 0.9);
-    const k = (s - 0.72) / 0.28;
-    return maxHalf - (maxHalf - 24) * Math.pow(k, 1.5);
+    if (s < 0.66) return 9 + (maxHalf - 9) * Math.pow(Math.sin((s / 0.66) * (Math.PI / 2)), 0.82);
+    // broad, blunt koi head rather than a pointed snout
+    const k = (s - 0.66) / 0.34;
+    return maxHalf - (maxHalf - 33) * Math.pow(k, 1.8);
   };
   const toS = (x) => (x - tailBaseX) / (noseX - tailBaseX);
 
@@ -80,8 +81,15 @@ function makeKoiCanvas(v) {
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
+    // rays clipped inside the membrane so they read as fin rays, not loose hairs
+    ctx.save();
+    ctx.beginPath();
+    build();
+    ctx.closePath();
+    ctx.clip();
     ctx.lineWidth = RAY;
     rays();
+    ctx.restore();
   };
 
   // caudal (tail) fin — long and flowing with fanned rays
@@ -103,21 +111,23 @@ function makeKoiCanvas(v) {
     }
   );
 
-  // pectoral fins (both sides)
+  // pectoral fins — broad rounded fans just behind the head, swept back
   const pectoral = (dir) => {
-    const px = 440;
-    const py = y0 + dir * (halfH(toS(px)) - 6);
+    const px = 470;
+    const py = y0 + dir * (halfH(toS(px)) - 4);
     finShape(
       () => {
-        ctx.moveTo(px + 8, py - dir * 4);
-        ctx.quadraticCurveTo(px - 34, py + dir * 22, px - 54, py + dir * 50);
-        ctx.quadraticCurveTo(px - 2, py + dir * 34, px - 8, py - dir * 2);
+        ctx.moveTo(px + 14, py - dir * 2);
+        ctx.quadraticCurveTo(px - 18, py + dir * 14, px - 48, py + dir * 34);
+        ctx.quadraticCurveTo(px - 34, py + dir * 47, px - 14, py + dir * 42);
+        ctx.quadraticCurveTo(px - 4, py + dir * 32, px - 4, py + dir * 4);
       },
       () => {
         for (let i = 0; i < 5; i++) {
+          const f = i / 4;
           ctx.beginPath();
-          ctx.moveTo(px - 6, py);
-          ctx.lineTo(px - 46 + i * 8, py + dir * (52 - i * 4));
+          ctx.moveTo(px + 6, py);
+          ctx.lineTo(px - 46 + f * 38, py + dir * (34 + f * 7));
           ctx.stroke();
         }
       }
@@ -125,6 +135,31 @@ function makeKoiCanvas(v) {
   };
   pectoral(1);
   pectoral(-1);
+
+  // pelvic fins — smaller rounded fans toward the belly
+  const pelvic = (dir) => {
+    const px = 330;
+    const py = y0 + dir * (halfH(toS(px)) - 4);
+    finShape(
+      () => {
+        ctx.moveTo(px + 10, py - dir * 2);
+        ctx.quadraticCurveTo(px - 12, py + dir * 12, px - 32, py + dir * 26);
+        ctx.quadraticCurveTo(px - 22, py + dir * 35, px - 8, py + dir * 30);
+        ctx.quadraticCurveTo(px - 2, py + dir * 22, px - 4, py + dir * 4);
+      },
+      () => {
+        for (let i = 0; i < 4; i++) {
+          const f = i / 3;
+          ctx.beginPath();
+          ctx.moveTo(px + 4, py);
+          ctx.lineTo(px - 30 + f * 24, py + dir * (26 + f * 5));
+          ctx.stroke();
+        }
+      }
+    );
+  };
+  pelvic(1);
+  pelvic(-1);
 
   // ---- body ----
   bodyPath();
@@ -187,27 +222,38 @@ function makeKoiCanvas(v) {
   ctx.stroke();
 
   // ---- eyes ----
+  // eyes — set wide on the sides of the head, as seen from above
   for (const dir of [1, -1]) {
-    const ex = 548;
-    const ey = y0 + dir * 26;
+    const ex = 540;
+    const ey = y0 + dir * (halfH(toS(ex)) - 14);
     ctx.strokeStyle = INK;
-    ctx.lineWidth = MID;
+    ctx.lineWidth = MID * 0.8;
     ctx.beginPath();
-    ctx.arc(ex, ey, 8, 0, Math.PI * 2);
+    ctx.arc(ex, ey, 5, 0, Math.PI * 2);
     ctx.stroke();
     ctx.fillStyle = INK;
     ctx.beginPath();
-    ctx.arc(ex, ey, 3.4, 0, Math.PI * 2);
+    ctx.arc(ex, ey, 2.4, 0, Math.PI * 2);
+    ctx.fill();
+    // tiny paper catch-light keeps the eye soft, not a dead void
+    ctx.fillStyle = PAPER;
+    ctx.beginPath();
+    ctx.arc(ex - 1, ey - dir * 1, 0.9, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // ---- barbels (whiskers) ----
+  // ---- mouth + short barbels framing the snout (top view) ----
   ctx.strokeStyle = INK;
   ctx.lineWidth = MID;
+  ctx.beginPath();
+  ctx.moveTo(noseX - 3, y0 - 9);
+  ctx.quadraticCurveTo(noseX + 9, y0, noseX - 3, y0 + 9);
+  ctx.stroke();
+  ctx.lineWidth = MID * 0.8;
   for (const dir of [1, -1]) {
     ctx.beginPath();
-    ctx.moveTo(noseX - 8, y0 + dir * 10);
-    ctx.quadraticCurveTo(noseX + 30, y0 + dir * 16, noseX + 40, y0 + dir * 38);
+    ctx.moveTo(noseX - 2, y0 + dir * 8);
+    ctx.quadraticCurveTo(noseX + 12, y0 + dir * 12, noseX + 16, y0 + dir * 20);
     ctx.stroke();
   }
 
@@ -375,7 +421,7 @@ export default function KoiPondGL() {
         this.scale = rand(6, 11);
         this.len = this.scale * 2;
         this.width = this.len * 0.5;
-        this.segCount = 12;
+        this.segCount = 40;
         this.seg = this.len / (this.segCount - 1);
         this.speed = rand(6.5, 10) / Math.sqrt(this.scale / 6);
         this.angle = rand(0, Math.PI * 2);
@@ -396,7 +442,7 @@ export default function KoiPondGL() {
           });
         }
 
-        this.geo = new THREE.PlaneGeometry(this.len, this.width, 26, 2);
+        this.geo = new THREE.PlaneGeometry(this.len, this.width, 120, 4);
         const pos = this.geo.attributes.position;
         this.baseX = new Float32Array(pos.count);
         this.baseY = new Float32Array(pos.count);
@@ -451,7 +497,7 @@ export default function KoiPondGL() {
         let diff = this.target - this.angle;
         while (diff > Math.PI) diff -= Math.PI * 2;
         while (diff < -Math.PI) diff += Math.PI * 2;
-        this.angle += diff * Math.min(1, dt * 2.2);
+        this.angle += diff * Math.min(1, dt * 3.4);
 
         const boost = this.speedBoost;
         this.speedBoost *= 0.9;
@@ -468,6 +514,20 @@ export default function KoiPondGL() {
           const a = Math.atan2(c.z - p.z, c.x - p.x);
           c.x = p.x + Math.cos(a) * this.seg;
           c.z = p.z + Math.sin(a) * this.seg;
+        }
+
+        // Relax the spine: the rigid follow-the-leader chain kinks at hard
+        // turns, so pull each interior joint toward the midpoint of its
+        // neighbours. A couple of light passes rounds the bends off without
+        // washing out the overall curve (the head is left fixed).
+        for (let pass = 0; pass < 2; pass++) {
+          for (let i = 1; i < this.spine.length - 1; i++) {
+            const a = this.spine[i - 1];
+            const b = this.spine[i];
+            const c = this.spine[i + 1];
+            b.x = b.x * 0.6 + (a.x + c.x) * 0.2;
+            b.z = b.z * 0.6 + (a.z + c.z) * 0.2;
+          }
         }
 
         this.deform();
