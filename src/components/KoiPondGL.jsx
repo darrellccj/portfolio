@@ -15,15 +15,18 @@ const rand = (a, b) => a + Math.random() * (b - a);
 
 const INK = '#1a1712';
 const PAPER = '#fbfaf5';
+const BENI = '#d64f2a'; // koi red-orange (hi) — the Kohaku signal
+const SUMI = '#2a2622'; // soft sumi-black accents (Sanke/Showa)
 
-// Ink patterning variants. `marks` are koi patches placed along the body
-// (s = 0 tail … 1 head); `fill: true` = a solid sumi patch, false = outline.
+// Koi colour varieties. `beni` = red-orange patches, `sumi` = black accents,
+// each placed along the body at s (0 tail … 1 head) with size factor r.
+// Modelled on real koi: mostly Kohaku (red on white), a couple with sumi.
 const VARIETIES = [
-  { marks: [{ s: 0.72, r: 1.1, fill: false }, { s: 0.5, r: 0.9, fill: false }, { s: 0.3, r: 0.8, fill: true }] },
-  { marks: [{ s: 0.66, r: 1.15, fill: true }, { s: 0.4, r: 0.9, fill: false }] },
-  { marks: [{ s: 0.7, r: 1.0, fill: false }, { s: 0.52, r: 0.85, fill: true }, { s: 0.32, r: 0.75, fill: true }] },
-  { marks: [] }, // plain white koi
-  { marks: [{ s: 0.6, r: 1.2, fill: false }, { s: 0.34, r: 0.7, fill: false }] },
+  { beni: [{ s: 0.68, r: 1.05 }, { s: 0.47, r: 0.95 }, { s: 0.3, r: 0.7 }], sumi: [] },
+  { beni: [{ s: 0.6, r: 1.2 }, { s: 0.38, r: 0.85 }], sumi: [] },
+  { beni: [{ s: 0.64, r: 1.0 }, { s: 0.44, r: 0.85 }], sumi: [{ s: 0.55, r: 0.45 }, { s: 0.34, r: 0.4 }] },
+  { beni: [{ s: 0.56, r: 1.3 }], sumi: [] },
+  { beni: [{ s: 0.72, r: 0.85 }, { s: 0.5, r: 0.6 }], sumi: [] },
 ];
 
 // Draw one ink koi to an offscreen canvas, head at the right (+X), straight
@@ -39,31 +42,31 @@ function makeKoiCanvas(v) {
   ctx.lineCap = 'round';
 
   const y0 = H / 2;
-  const noseX = 600;
-  const tailBaseX = 150;
+  const noseX = 602;
+  const tailBaseX = 156;
   const caudalTip = 40;
-  const maxHalf = 70;
-  const OUT = 6; // body outline weight
-  const RAY = 2.4; // fin ray weight
-  const MID = 3; // interior line weight
+  const maxHalf = 66;
+  const OUT = 4.5; // body outline weight
 
+  // Half-width profile: widest across the shoulders (just behind the head),
+  // rounding to a soft snout and tapering to a slim tail base — a koi's plump
+  // fusiform body seen from directly above.
   const halfH = (s) => {
-    if (s < 0.66) return 9 + (maxHalf - 9) * Math.pow(Math.sin((s / 0.66) * (Math.PI / 2)), 0.82);
-    // broad, blunt koi head rather than a pointed snout
-    const k = (s - 0.66) / 0.34;
-    return maxHalf - (maxHalf - 33) * Math.pow(k, 1.8);
+    if (s < 0.6) return 8 + (maxHalf - 8) * Math.pow(Math.sin((s / 0.6) * (Math.PI / 2)), 0.9);
+    const k = (s - 0.6) / 0.4; // shoulder → nose
+    return maxHalf - (maxHalf - 26) * Math.pow(k, 1.6);
   };
   const toS = (x) => (x - tailBaseX) / (noseX - tailBaseX);
 
   const bodyPath = () => {
     ctx.beginPath();
-    const steps = 48;
+    const steps = 60;
     for (let i = 0; i <= steps; i++) {
       const x = tailBaseX + ((noseX - tailBaseX) * i) / steps;
       const yy = y0 - halfH(toS(x));
       i === 0 ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy);
     }
-    ctx.quadraticCurveTo(noseX + 24, y0, noseX, y0 + halfH(1));
+    ctx.quadraticCurveTo(noseX + 20, y0, noseX, y0 + halfH(1));
     for (let i = steps; i >= 0; i--) {
       const x = tailBaseX + ((noseX - tailBaseX) * i) / steps;
       ctx.lineTo(x, y0 + halfH(toS(x)));
@@ -71,63 +74,67 @@ function makeKoiCanvas(v) {
     ctx.closePath();
   };
 
-  // ---- fins (drawn first; the body fill hides their roots) ----
-  const finShape = (build, rays) => {
-    ctx.fillStyle = PAPER;
-    ctx.strokeStyle = INK;
-    ctx.lineWidth = OUT * 0.7;
+  // ---- fins: pale and translucent, so they melt into the water like real
+  // koi fins rather than reading as bold black paddles ----
+  const FIN_FILL = 'rgba(252,251,247,0.58)';
+  const FIN_LINE = 'rgba(38,34,28,0.4)';
+  const FIN_RAY = 'rgba(38,34,28,0.28)';
+  const fin = (build, rays) => {
+    ctx.fillStyle = FIN_FILL;
+    ctx.strokeStyle = FIN_LINE;
+    ctx.lineWidth = 2.2;
     ctx.beginPath();
     build();
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    // rays clipped inside the membrane so they read as fin rays, not loose hairs
     ctx.save();
     ctx.beginPath();
     build();
     ctx.closePath();
     ctx.clip();
-    ctx.lineWidth = RAY;
+    ctx.strokeStyle = FIN_RAY;
+    ctx.lineWidth = 1.5;
     rays();
     ctx.restore();
   };
 
-  // caudal (tail) fin — long and flowing with fanned rays
-  finShape(
+  // caudal (tail) fin — a single flowing translucent fan
+  fin(
     () => {
-      ctx.moveTo(tailBaseX, y0 - 6);
-      ctx.quadraticCurveTo(caudalTip + 28, y0 - 66, caudalTip - 8, y0 - 74);
-      ctx.quadraticCurveTo(caudalTip + 30, y0 - 12, tailBaseX + 6, y0);
-      ctx.quadraticCurveTo(caudalTip + 30, y0 + 12, caudalTip - 8, y0 + 74);
-      ctx.quadraticCurveTo(caudalTip + 28, y0 + 66, tailBaseX, y0 + 6);
+      ctx.moveTo(tailBaseX + 4, y0 - 5);
+      ctx.quadraticCurveTo(caudalTip + 8, y0 - 42, caudalTip - 14, y0 - 60);
+      ctx.quadraticCurveTo(caudalTip + 2, y0 - 26, caudalTip + 2, y0);
+      ctx.quadraticCurveTo(caudalTip + 2, y0 + 26, caudalTip - 14, y0 + 60);
+      ctx.quadraticCurveTo(caudalTip + 8, y0 + 42, tailBaseX + 4, y0 + 5);
     },
     () => {
       for (let i = -3; i <= 3; i++) {
         ctx.beginPath();
-        ctx.moveTo(tailBaseX, y0);
-        ctx.lineTo(caudalTip + 14, y0 + i * 11.5);
+        ctx.moveTo(tailBaseX + 2, y0);
+        ctx.lineTo(caudalTip - 6, y0 + i * 9);
         ctx.stroke();
       }
     }
   );
 
-  // pectoral fins — broad rounded fans just behind the head, swept back
+  // pectoral fins — small rounded translucent paddles at the shoulders
   const pectoral = (dir) => {
-    const px = 470;
+    const px = 452;
     const py = y0 + dir * (halfH(toS(px)) - 4);
-    finShape(
+    fin(
       () => {
-        ctx.moveTo(px + 14, py - dir * 2);
-        ctx.quadraticCurveTo(px - 18, py + dir * 14, px - 48, py + dir * 34);
-        ctx.quadraticCurveTo(px - 34, py + dir * 47, px - 14, py + dir * 42);
-        ctx.quadraticCurveTo(px - 4, py + dir * 32, px - 4, py + dir * 4);
+        ctx.moveTo(px + 12, py - dir * 2);
+        ctx.quadraticCurveTo(px - 6, py + dir * 20, px - 30, py + dir * 34);
+        ctx.quadraticCurveTo(px - 12, py + dir * 40, px + 2, py + dir * 33);
+        ctx.quadraticCurveTo(px + 8, py + dir * 18, px - 2, py + dir * 3);
       },
       () => {
-        for (let i = 0; i < 5; i++) {
-          const f = i / 4;
+        for (let i = 0; i < 4; i++) {
+          const f = i / 3;
           ctx.beginPath();
-          ctx.moveTo(px + 6, py);
-          ctx.lineTo(px - 46 + f * 38, py + dir * (34 + f * 7));
+          ctx.moveTo(px + 4, py);
+          ctx.lineTo(px - 28 + f * 26, py + dir * (32 + f * 4));
           ctx.stroke();
         }
       }
@@ -136,23 +143,23 @@ function makeKoiCanvas(v) {
   pectoral(1);
   pectoral(-1);
 
-  // pelvic fins — smaller rounded fans toward the belly
+  // pelvic fins — tiny translucent paddles toward the belly
   const pelvic = (dir) => {
-    const px = 330;
-    const py = y0 + dir * (halfH(toS(px)) - 4);
-    finShape(
+    const px = 322;
+    const py = y0 + dir * (halfH(toS(px)) - 3);
+    fin(
       () => {
-        ctx.moveTo(px + 10, py - dir * 2);
-        ctx.quadraticCurveTo(px - 12, py + dir * 12, px - 32, py + dir * 26);
-        ctx.quadraticCurveTo(px - 22, py + dir * 35, px - 8, py + dir * 30);
-        ctx.quadraticCurveTo(px - 2, py + dir * 22, px - 4, py + dir * 4);
+        ctx.moveTo(px + 8, py - dir * 2);
+        ctx.quadraticCurveTo(px - 6, py + dir * 14, px - 22, py + dir * 22);
+        ctx.quadraticCurveTo(px - 8, py + dir * 26, px + 2, py + dir * 21);
+        ctx.quadraticCurveTo(px + 6, py + dir * 11, px - 2, py + dir * 2);
       },
       () => {
-        for (let i = 0; i < 4; i++) {
-          const f = i / 3;
+        for (let i = 0; i < 3; i++) {
+          const f = i / 2;
           ctx.beginPath();
-          ctx.moveTo(px + 4, py);
-          ctx.lineTo(px - 30 + f * 24, py + dir * (26 + f * 5));
+          ctx.moveTo(px + 2, py);
+          ctx.lineTo(px - 20 + f * 18, py + dir * (21 + f * 3));
           ctx.stroke();
         }
       }
@@ -166,21 +173,21 @@ function makeKoiCanvas(v) {
   ctx.fillStyle = PAPER;
   ctx.fill();
 
-  // interior detail, clipped to the body
+  // ---- koi markings: soft red-orange (beni) blotches with optional sumi,
+  // clipped to the body — the pattern that actually says "koi" ----
   ctx.save();
   bodyPath();
   ctx.clip();
 
-  // organic koi patches (outlined, some filled sumi-black)
-  const blob = (cx, cy, rr, fill) => {
+  const blob = (cx, cy, rr, color) => {
     ctx.beginPath();
-    const n = 11;
+    const n = 13;
     const radii = [];
-    for (let i = 0; i < n; i++) radii.push(rr * (0.72 + Math.random() * 0.5));
+    for (let i = 0; i < n; i++) radii.push(rr * (0.78 + Math.random() * 0.42));
     const pt = (i) => {
       const a = (i / n) * Math.PI * 2;
       const r = radii[(i + n) % n];
-      return { x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r * 0.82 };
+      return { x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r * 0.88 };
     };
     let a = pt(n - 1);
     let b = pt(0);
@@ -191,69 +198,48 @@ function makeKoiCanvas(v) {
       ctx.quadraticCurveTo(c.x, c.y, (c.x + d.x) / 2, (c.y + d.y) / 2);
     }
     ctx.closePath();
-    if (fill) {
-      ctx.fillStyle = INK;
-      ctx.fill();
-    } else {
-      ctx.strokeStyle = INK;
-      ctx.lineWidth = MID;
-      ctx.stroke();
-    }
+    ctx.fillStyle = color;
+    ctx.fill();
   };
-  v.marks.forEach((m) => {
+  (v.beni || []).forEach((m) => {
     const x = tailBaseX + (noseX - tailBaseX) * m.s;
-    blob(x, y0 + rand(-8, 8), halfH(m.s) * 0.85 * m.r, m.fill);
+    blob(x, y0 + rand(-6, 6), halfH(m.s) * 0.95 * m.r, BENI);
   });
-
-  // dorsal centre line down the spine
-  ctx.strokeStyle = INK;
-  ctx.lineWidth = MID;
-  ctx.beginPath();
-  ctx.moveTo(185, y0 + 2);
-  ctx.quadraticCurveTo(360, y0 - 4, 520, y0 + 1);
-  ctx.stroke();
+  (v.sumi || []).forEach((m) => {
+    const x = tailBaseX + (noseX - tailBaseX) * m.s;
+    blob(x, y0 + rand(-10, 10), halfH(m.s) * 0.95 * m.r, SUMI);
+  });
 
   ctx.restore();
 
-  // ---- body outline on top (bold) ----
+  // ---- body outline on top ----
   bodyPath();
   ctx.strokeStyle = INK;
   ctx.lineWidth = OUT;
   ctx.stroke();
 
-  // ---- eyes ----
-  // eyes — set wide on the sides of the head, as seen from above
+  // ---- eyes: small dots set on the sides of the head, as seen from above ----
   for (const dir of [1, -1]) {
-    const ex = 540;
-    const ey = y0 + dir * (halfH(toS(ex)) - 14);
-    ctx.strokeStyle = INK;
-    ctx.lineWidth = MID * 0.8;
-    ctx.beginPath();
-    ctx.arc(ex, ey, 5, 0, Math.PI * 2);
-    ctx.stroke();
+    const ex = 548;
+    const ey = y0 + dir * (halfH(toS(ex)) - 10);
     ctx.fillStyle = INK;
     ctx.beginPath();
-    ctx.arc(ex, ey, 2.4, 0, Math.PI * 2);
-    ctx.fill();
-    // tiny paper catch-light keeps the eye soft, not a dead void
-    ctx.fillStyle = PAPER;
-    ctx.beginPath();
-    ctx.arc(ex - 1, ey - dir * 1, 0.9, 0, Math.PI * 2);
+    ctx.arc(ex, ey, 3, 0, Math.PI * 2);
     ctx.fill();
   }
 
   // ---- mouth + short barbels framing the snout (top view) ----
   ctx.strokeStyle = INK;
-  ctx.lineWidth = MID;
+  ctx.lineWidth = 2.2;
   ctx.beginPath();
-  ctx.moveTo(noseX - 3, y0 - 9);
-  ctx.quadraticCurveTo(noseX + 9, y0, noseX - 3, y0 + 9);
+  ctx.moveTo(noseX - 2, y0 - 7);
+  ctx.quadraticCurveTo(noseX + 8, y0, noseX - 2, y0 + 7);
   ctx.stroke();
-  ctx.lineWidth = MID * 0.8;
+  ctx.lineWidth = 1.7;
   for (const dir of [1, -1]) {
     ctx.beginPath();
-    ctx.moveTo(noseX - 2, y0 + dir * 8);
-    ctx.quadraticCurveTo(noseX + 12, y0 + dir * 12, noseX + 16, y0 + dir * 20);
+    ctx.moveTo(noseX - 1, y0 + dir * 6);
+    ctx.quadraticCurveTo(noseX + 10, y0 + dir * 9, noseX + 13, y0 + dir * 16);
     ctx.stroke();
   }
 
