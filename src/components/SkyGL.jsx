@@ -160,9 +160,9 @@ const fragmentShader = /* glsl */ `
     // re-ink it on a two-colour ramp — deep navy ink to sky-blue paper.
     // The site owns exactly these two colours; the sky must too.
     float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
-    float tone = pow(smoothstep(0.16, 0.98, lum), 1.6);
-    vec3 ink = vec3(0.043, 0.153, 0.259);   // #0b2742
-    vec3 paper = vec3(0.647, 0.804, 0.922); // #a5cdeb
+    float tone = pow(smoothstep(0.13, 0.97, lum), 1.35);
+    vec3 ink = vec3(0.051, 0.200, 0.447);   // #0d3372
+    vec3 paper = vec3(0.624, 0.831, 0.969); // #9fd4f7
     col = mix(ink, paper, tone);
 
     // Ordered grain kills gradient banding in the big two-tone field.

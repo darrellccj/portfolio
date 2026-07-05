@@ -5,19 +5,19 @@
    Flat surfaces, hairline rules, zero radius, zero shadows.
    ───────────────────────────────────────────────────────────── */
 :root {
-  --paper: #a5cdeb;
-  --ink: #0b2742;
+  --paper: #9fd4f7;
+  --ink: #0d3372;
 
   /* ink tints — on paper */
-  --ink-soft: rgba(11, 39, 66, 0.74);
-  --ink-faint: rgba(11, 39, 66, 0.52);
-  --line: rgba(11, 39, 66, 0.32);
-  --line-soft: rgba(11, 39, 66, 0.18);
+  --ink-soft: rgba(13, 51, 114, 0.78);
+  --ink-faint: rgba(13, 51, 114, 0.58);
+  --line: rgba(13, 51, 114, 0.34);
+  --line-soft: rgba(13, 51, 114, 0.2);
 
   /* paper tints — on ink (inverted blocks) */
-  --paper-soft: rgba(165, 205, 235, 0.78);
-  --paper-faint: rgba(165, 205, 235, 0.55);
-  --line-paper: rgba(165, 205, 235, 0.28);
+  --paper-soft: rgba(159, 212, 247, 0.8);
+  --paper-faint: rgba(159, 212, 247, 0.58);
+  --line-paper: rgba(159, 212, 247, 0.3);
 
   --serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
   --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
@@ -161,8 +161,8 @@ button:focus-visible {
   pointer-events: none;
   background: radial-gradient(
     ellipse 78% 62% at 50% 42%,
-    rgba(11, 39, 66, 0.5),
-    rgba(11, 39, 66, 0) 72%
+    rgba(13, 51, 114, 0.48),
+    rgba(13, 51, 114, 0) 72%
   );
 }
 main {
@@ -445,7 +445,7 @@ main {
     background 0.2s var(--ease);
 }
 .kiv-row:hover {
-  background: rgba(11, 39, 66, 0.07);
+  background: rgba(13, 51, 114, 0.08);
 }
 .kiv-row__index {
   font-size: 0.66rem;
