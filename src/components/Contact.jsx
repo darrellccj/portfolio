@@ -5,9 +5,9 @@ export default function Contact() {
   const ref = useReveal({ threshold: 0.2 });
 
   return (
-    <section className="section contact" id="contact">
-      <div className="reveal" ref={ref}>
-        <p className="section__label">04 — Contact</p>
+    <section className="contact" id="contact">
+      <div className="contact__inner reveal" ref={ref}>
+        <p className="section__label">04 / Contact</p>
         <h2 className="contact__title">Let&rsquo;s make something.</h2>
         <p className="contact__sub">
           Open to selected projects and collaborations. I reply to every

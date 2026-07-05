@@ -2,14 +2,16 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 // ─────────────────────────────────────────────────────────────
-//  SKY — WebGL (three.js), photoreal daytime sky
+//  SKY — WebGL (three.js), duotone daytime sky
 //  A single full-screen fragment shader raycasts from a ground
-//  camera into a Rayleigh-style blue gradient, then composites
-//  three cloud decks (near cumulus, far cumulus, high cirrus)
-//  projected onto altitude planes. Cloud bodies are domain-warped
-//  fbm with sun-offset self-shadowing, grey undersides at the
-//  cores and silver linings toward the sun, all drifting on
-//  independent winds so the sky visibly moves and slowly morphs.
+//  camera into a Rayleigh-style gradient, then composites three
+//  cloud decks (near cumulus, far cumulus, high cirrus) projected
+//  onto altitude planes: domain-warped fbm with sun-offset
+//  self-shadowing, drifting on independent winds so the sky
+//  visibly moves and slowly morphs. The photoreal render is then
+//  pressed to luminance and re-inked on the site's two-colour
+//  ramp — navy ink to sky-blue paper — so the sky never leaves
+//  the palette.
 // ─────────────────────────────────────────────────────────────
 
 const vertexShader = /* glsl */ `
@@ -154,7 +156,16 @@ const fragmentShader = /* glsl */ `
     vec4 near = cumulus(ro, rd, sd, t, 80.0, 0.0105, vec2(0.016, 0.006), 0.50, 0.22, mu);
     col = mix(col, near.rgb, near.a);
 
-    // Ordered grain kills gradient banding in the big blue field.
+    // Duotone press: collapse the photoreal render to luminance, then
+    // re-ink it on a two-colour ramp — deep navy ink to sky-blue paper.
+    // The site owns exactly these two colours; the sky must too.
+    float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
+    float tone = pow(smoothstep(0.16, 0.98, lum), 1.6);
+    vec3 ink = vec3(0.043, 0.153, 0.259);   // #0b2742
+    vec3 paper = vec3(0.647, 0.804, 0.922); // #a5cdeb
+    col = mix(ink, paper, tone);
+
+    // Ordered grain kills gradient banding in the big two-tone field.
     col += (hash12(gl_FragCoord.xy + fract(t) * 61.7) - 0.5) * (2.0 / 255.0);
 
     gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);

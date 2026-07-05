@@ -8,37 +8,31 @@ export default function Work() {
     <section className="section work" id="work">
       <div className="reveal" ref={ref}>
         <div className="section__head">
-          <p className="section__label">02 — Selected Work</p>
-          <h2 className="section__title">Things I've built</h2>
+          <p className="section__label">02 / Selected work</p>
+          <h2 className="section__title">Things I&rsquo;ve built</h2>
         </div>
 
-        <div className="work__grid">
+        <div className="work__list">
           {projects.map((p, i) => (
             <a
               key={p.title}
-              className="work-card"
+              className="work-row"
               href={p.href}
               style={{ '--i': i }}
               target={p.href.startsWith('http') ? '_blank' : undefined}
               rel={p.href.startsWith('http') ? 'noreferrer' : undefined}
             >
-              <div className="work-card__top">
-                <span className="work-card__tag">{p.tag}</span>
-                <span className="work-card__year">{p.year}</span>
-              </div>
-              <h3 className="work-card__title">{p.title}</h3>
-              <p className="work-card__desc">{p.desc}</p>
-              <span className="work-card__cue" aria-hidden="true">
-                View
-                <svg width="20" height="8" viewBox="0 0 20 8" fill="none">
-                  <path
-                    d="M0 4h18M15 1l3 3-3 3"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+              <span className="work-row__index">{String(i + 1).padStart(3, '0')}</span>
+              <span className="work-row__body">
+                <span className="work-row__title">{p.title}</span>
+                <span className="work-row__desc">{p.desc}</span>
+              </span>
+              <span className="work-row__meta">
+                <span className="work-row__tag">{p.tag}</span>
+                <span className="work-row__year">{p.year}</span>
+              </span>
+              <span className="work-row__arrow" aria-hidden="true">
+                →
               </span>
             </a>
           ))}

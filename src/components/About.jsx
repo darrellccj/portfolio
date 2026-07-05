@@ -7,7 +7,7 @@ export default function About() {
   return (
     <section className="section about" id="about">
       <div className="reveal" ref={ref}>
-        <p className="section__label">01 — About</p>
+        <p className="section__label">01 / About</p>
         <p className="about__lead">{profile.about}</p>
 
         <div className="about__stack">
