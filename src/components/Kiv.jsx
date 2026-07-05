@@ -9,7 +9,7 @@ export default function Kiv() {
       <div className="reveal" ref={ref}>
         <div className="section__head">
           <p className="section__label">03 / KIV</p>
-          <h2 className="section__title">Keep in view</h2>
+          <h2 className="section__title">Keep in vault</h2>
           <p className="section__sub">Concepts in progress — ideas parked where I can see them.</p>
         </div>
 
