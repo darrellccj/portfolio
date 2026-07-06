@@ -7,13 +7,13 @@
 
 export const profile = {
   name: 'Darrell',
-  role: 'Product Engineer',
+  role: 'Independent Technologist',
   // Short hero line — keep it to one calm sentence.
   tagline:
-    "I build fast, with AI doing the heavy lifting — the job left to me is making sure it's worth using.",
+    "I build the software an institution didn't know it needed, a niche market is missing, or my own life could use — usually solo, always fast.",
   // Longer about paragraph.
   about:
-    "I'm interested in making life easier — a travel app that remembers your packing list, a tool that ranks fencers so a federation doesn't have to do it by hand, a screener that watches the market so I don't have to stare at charts all day. I care less about the language a project is written in than whether it works the way a person actually expects: functional, well thought out, obvious to use. Most of what I ship is AI-assisted — I build in Claude Code, shipping to React/Next.js on Cloudflare Workers and D1 — but the judgment on what's worth building, and whether it's actually good, is still mine.",
+    "I go wherever there's a real, messy problem — inside an institution without a tech team of its own, in a niche nobody's built well for yet, or in my own life. Fencing Singapore didn't have an engineering department, so I became one: public rankings on one side, the finance and competition backend on the other. Website Factory runs the same pattern for property agents — package an AI pipeline once, ship a bespoke site to each. And plenty of what I build exists because it made my own life easier first: a trip planner, a trading log, a meal-decision engine. Most of it is AI-assisted — I build in Claude Code, ship to React/Next.js on Cloudflare Workers and D1 — but the judgment on what's worth building, and whether it's good, stays mine.",
   email: 'darrellchuacj@gmail.com',
   location: 'Singapore',
   socials: [
