@@ -6,30 +6,30 @@
 // ─────────────────────────────────────────────────────────────
 
 export const profile = {
-  name: '[NAME]',
-  role: 'Designer & Developer',
+  name: 'Darrell',
+  role: 'Product Engineer',
   // Short hero line — keep it to one calm sentence.
-  tagline: 'Designer, developer, and builder of thoughtful digital products.',
+  tagline:
+    "I build fast, with AI doing the heavy lifting — the job left to me is making sure it's worth using.",
   // Longer about paragraph.
   about:
-    'I build at the intersection of design and engineering — where restraint is a feature, not a limitation. Every element earns its place. I care about the quiet details: the kerning, the easing curve, the moment a thing feels effortless.',
-  email: 'hello@[EMAIL].com',
+    "I'm interested in making life easier — a travel app that remembers your packing list, a tool that ranks fencers so a federation doesn't have to do it by hand, a screener that watches the market so I don't have to stare at charts all day. I care less about the language a project is written in than whether it works the way a person actually expects: functional, well thought out, obvious to use. Most of what I ship is AI-assisted — I build in Claude Code, shipping to React/Next.js on Cloudflare Workers and D1 — but the judgment on what's worth building, and whether it's actually good, is still mine.",
+  email: 'darrellchuacj@gmail.com',
   location: 'Singapore',
   socials: [
-    { label: 'GitHub', href: 'https://github.com/[USERNAME]' },
-    { label: 'LinkedIn', href: 'https://linkedin.com/in/[USERNAME]' },
-    { label: 'Email', href: 'mailto:hello@[EMAIL].com' },
+    { label: 'GitHub', href: 'https://github.com/darrellccj' },
+    { label: 'LinkedIn', href: 'https://linkedin.com/in/darrellchua' },
+    { label: 'Email', href: 'mailto:darrellchuacj@gmail.com' },
   ],
 };
 
 // The tools you reach for. Shown as a quiet list under About.
 export const stack = [
+  'Claude Code',
   'React',
-  'Node.js',
-  'Python',
-  'Vite',
-  'Power Automate',
-  'Solidity',
+  'Next.js',
+  'Cloudflare Workers',
+  'D1',
 ];
 
 // ── SELECTED WORK ────────────────────────────────────────────
@@ -56,6 +56,27 @@ export const projects = [
     year: '2024',
     href: '#',
   },
+  {
+    tag: 'Travel',
+    title: 'Touching Earth',
+    desc: 'An all-in-one trip companion — itinerary, bookings, packing lists, expense splitting, and the logistics that usually live in five different apps, in one.',
+    year: '2025',
+    href: '#', // ← link to live demo / repo / case study
+  },
+  {
+    tag: 'Sports',
+    title: 'Fencing Ranking',
+    desc: 'The official rankings platform for Fencing Singapore — a public leaderboard on one side, and on the other, the admin backbone running competitions, points configuration, high-performance tracking, and finance.',
+    year: '2025',
+    href: '#',
+  },
+  {
+    tag: 'Fintech',
+    title: 'Macro',
+    desc: 'A personal trading system — screens for swing setups against a rule-based strategy and logs every trade to prove out whether it actually works, plus a macro calendar, research feed, and a retirement calculator to chart the way out.',
+    year: '2025',
+    href: '#',
+  },
 ];
 
 // ── KIV — KEEP IN VIEW ───────────────────────────────────────
@@ -75,5 +96,10 @@ export const kiv = [
     tag: 'Watches',
     title: 'Seiko Catalogue',
     desc: 'A dark, luxury editorial catalogue app. A proof of concept for curated watch discovery.',
+  },
+  {
+    tag: 'Food',
+    title: 'What to Eat',
+    desc: 'A decision engine for your next meal — factoring in as much personal data as it can, so the suggestion sounds like it came from you, not a random wheel.',
   },
 ];
