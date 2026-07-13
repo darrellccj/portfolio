@@ -165,6 +165,20 @@ button:focus-visible {
     rgba(13, 51, 114, 0) 72%
   );
 }
+/* Page-frame rules: thin margin lines at the hero's left/right edges,
+   printed-sheet framing borrowed from spec-drawing layouts. */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(var(--line-paper), var(--line-paper)),
+    linear-gradient(var(--line-paper), var(--line-paper));
+  background-repeat: no-repeat;
+  background-position: 14px 0, calc(100% - 14px) 0;
+  background-size: 1px 100%, 1px 100%;
+}
 main {
   position: relative;
 }
@@ -212,16 +226,61 @@ main {
   gap: 1rem;
   padding: 0.85rem var(--gutter);
   background: var(--paper);
-  border-top: 1px solid var(--line);
   font-size: 0.62rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--ink-faint);
   animation: rise 1s var(--ease) 0.3s both;
 }
+/* Dot-terminated rule: the strip's top edge reads as a measured span
+   between two points rather than a plain hairline. */
+.hero__rule {
+  position: absolute;
+  inset: 0 var(--gutter) auto var(--gutter);
+  height: 1px;
+  background: var(--line);
+  pointer-events: none;
+}
+.hero__rule::before,
+.hero__rule::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  transform: translate(-50%, -50%);
+}
+.hero__rule::before {
+  left: 0;
+}
+.hero__rule::after {
+  left: 100%;
+}
 .hero__scroll {
+  position: relative;
+  display: inline-block;
+  padding: 0.4em 0.7em;
   color: var(--ink);
   letter-spacing: 0.2em;
+}
+/* Reticle corners: viewfinder-style brackets around the one live
+   control in the spec strip. */
+.hero__scroll::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  --corner: 7px;
+  background: linear-gradient(currentColor, currentColor) top left / var(--corner) 1px no-repeat,
+    linear-gradient(currentColor, currentColor) top left / 1px var(--corner) no-repeat,
+    linear-gradient(currentColor, currentColor) top right / var(--corner) 1px no-repeat,
+    linear-gradient(currentColor, currentColor) top right / 1px var(--corner) no-repeat,
+    linear-gradient(currentColor, currentColor) bottom left / var(--corner) 1px no-repeat,
+    linear-gradient(currentColor, currentColor) bottom left / 1px var(--corner) no-repeat,
+    linear-gradient(currentColor, currentColor) bottom right / var(--corner) 1px no-repeat,
+    linear-gradient(currentColor, currentColor) bottom right / 1px var(--corner) no-repeat;
 }
 @keyframes rise {
   from { opacity: 0; transform: translateY(14px); }
@@ -579,7 +638,7 @@ main {
     gap: 0.9rem;
     font-size: 0.66rem;
   }
-  .hero__meta span:nth-child(2) {
+  .hero__meta-fig {
     display: none;
   }
   .footer {
