@@ -609,6 +609,10 @@ main {
   }
 }
 @media (max-width: 640px) {
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
   .nav__links {
     gap: 0.9rem;
     font-size: 0.66rem;
