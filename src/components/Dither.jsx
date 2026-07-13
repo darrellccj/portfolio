@@ -204,19 +204,21 @@ export default function Dither() {
     };
   }, []);
 
-  // Plays through every technique, one per tick, landing back on the
-  // technique it started from — a single click runs the whole loop.
+  // Plays through every technique, one per tick, for two full laps —
+  // still lands back on the technique it started from either way,
+  // since 2x the loop length is still a multiple of it.
   function playCycle() {
     if (animatingRef.current) return;
     animatingRef.current = true;
     frameRef.current?.classList.add('is-cycling');
 
-    const total = TECHNIQUES.length;
+    const laps = 2;
+    const total = TECHNIQUES.length * laps;
     let step = 0;
 
     const advance = () => {
       step += 1;
-      techniqueIndexRef.current = step % total;
+      techniqueIndexRef.current = step % TECHNIQUES.length;
       renderRef.current();
 
       if (step < total) {
