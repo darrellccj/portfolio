@@ -18,7 +18,7 @@ export const profile = {
   location: 'Singapore',
   socials: [
     { label: 'GitHub', href: 'https://github.com/darrellccj' },
-    { label: 'LinkedIn', href: 'https://linkedin.com/in/darrellchua' },
+    { label: 'LinkedIn', href: 'https://linkedin.com/in/darrellchua-' },
     { label: 'Email', href: 'mailto:darrellchuacj@gmail.com' },
   ],
 };
