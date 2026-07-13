@@ -79,6 +79,20 @@ export const projects = [
   },
 ];
 
+// ── DITHER STUDY ─────────────────────────────────────────────
+// A single framed plate — canvas-rendered ordered dither, no build step.
+export const dither = {
+  label: '04 / Study',
+  title: 'Ordered dither',
+  sub: 'A canvas experiment — a Renaissance fresco, halftoned live in the browser with an 8×8 Bayer matrix threshold.',
+  figure: 'Fig. 02 — Fresco',
+  method: 'Ordered dither',
+  methodSub: '8×8 Bayer matrix',
+  work: 'The Last Supper',
+  credit: 'Leonardo da Vinci — c. 1495–1498',
+  note: 'Rendered client-side on load, no pre-processed images',
+};
+
 // ── KIV — KEEP IN VIEW ───────────────────────────────────────
 // Concepts in progress. Ideas parked where you can see them.
 export const kiv = [
