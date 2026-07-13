@@ -522,6 +522,9 @@ main {
 .dither__frame:hover {
   border-color: var(--ink-soft);
 }
+.dither__frame.is-cycling {
+  cursor: progress;
+}
 .dither__canvas {
   position: absolute;
   inset: 0;

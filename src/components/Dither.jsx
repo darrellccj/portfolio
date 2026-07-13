@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import useReveal from '../hooks/useReveal.js';
 import { dither as ditherCopy } from '../data/content.js';
 import lastSupperSrc from '../assets/last-supper.jpg';
@@ -27,6 +27,7 @@ const BG = [13, 51, 114]; // --ink
 const FG = [159, 212, 247]; // --paper
 const CONTRAST = 1.55;
 const BRIGHTNESS = 0.04;
+const STEP_MS = 140;
 
 function dotSizeFor(width) {
   if (width < 480) return 1.3;
@@ -137,12 +138,8 @@ export default function Dither() {
   const canvasRef = useRef(null);
   const techniqueIndexRef = useRef(0);
   const renderRef = useRef(() => {});
-  const [techniqueIndex, setTechniqueIndex] = useState(0);
-
-  useEffect(() => {
-    techniqueIndexRef.current = techniqueIndex;
-    renderRef.current();
-  }, [techniqueIndex]);
+  const timerRef = useRef(null);
+  const animatingRef = useRef(false);
 
   useEffect(() => {
     const frame = frameRef.current;
@@ -201,11 +198,36 @@ export default function Dither() {
     const ro = new ResizeObserver(() => render());
     ro.observe(frame);
 
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+      clearTimeout(timerRef.current);
+    };
   }, []);
 
-  function cycleTechnique() {
-    setTechniqueIndex((i) => (i + 1) % TECHNIQUES.length);
+  // Plays through every technique, one per tick, landing back on the
+  // technique it started from — a single click runs the whole loop.
+  function playCycle() {
+    if (animatingRef.current) return;
+    animatingRef.current = true;
+    frameRef.current?.classList.add('is-cycling');
+
+    const total = TECHNIQUES.length;
+    let step = 0;
+
+    const advance = () => {
+      step += 1;
+      techniqueIndexRef.current = step % total;
+      renderRef.current();
+
+      if (step < total) {
+        timerRef.current = setTimeout(advance, STEP_MS);
+      } else {
+        animatingRef.current = false;
+        frameRef.current?.classList.remove('is-cycling');
+      }
+    };
+
+    timerRef.current = setTimeout(advance, STEP_MS);
   }
 
   return (
@@ -217,8 +239,8 @@ export default function Dither() {
           reveal.current = el;
           frameRef.current = el;
         }}
-        onClick={cycleTechnique}
-        aria-label={`Ordered-dither rendering of ${ditherCopy.work}, ${ditherCopy.credit}. Click to cycle the dithering technique.`}
+        onClick={playCycle}
+        aria-label={`Ordered-dither rendering of ${ditherCopy.work}, ${ditherCopy.credit}. Click to play through the dithering techniques.`}
       >
         <canvas ref={canvasRef} className="dither__canvas" aria-hidden="true" />
       </button>
