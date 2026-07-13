@@ -226,37 +226,12 @@ main {
   gap: 1rem;
   padding: 0.85rem var(--gutter);
   background: var(--paper);
+  border-top: 1px solid var(--line);
   font-size: 0.62rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--ink-faint);
   animation: rise 1s var(--ease) 0.3s both;
-}
-/* Dot-terminated rule: the strip's top edge reads as a measured span
-   between two points rather than a plain hairline. */
-.hero__rule {
-  position: absolute;
-  inset: 0 var(--gutter) auto var(--gutter);
-  height: 1px;
-  background: var(--line);
-  pointer-events: none;
-}
-.hero__rule::before,
-.hero__rule::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--ink-faint);
-  transform: translate(-50%, -50%);
-}
-.hero__rule::before {
-  left: 0;
-}
-.hero__rule::after {
-  left: 100%;
 }
 .hero__scroll {
   position: relative;

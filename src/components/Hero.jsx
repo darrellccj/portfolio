@@ -15,7 +15,6 @@ export default function Hero() {
 
       {/* Spec strip: the hero's baseline reads like a title block. */}
       <div className="hero__meta" aria-hidden="true">
-        <span className="hero__rule" aria-hidden="true" />
         <span>LOC — {profile.location.toUpperCase()}</span>
         <span className="hero__meta-fig">FIG. 01 — SKY, DUOTONE</span>
         <a href="#about" className="hero__scroll" aria-hidden="false" aria-label="Scroll to content">

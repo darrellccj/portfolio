@@ -118,28 +118,10 @@ const fragmentShader = /* glsl */ `
     return vec4(col, den * fade);
   }
 
-  // Halftone dot: screen-space grid of circles whose radius follows the
-  // duotone press's own tone value, so pale sky presses to small ink dots
-  // on paper and deep zenith presses to fat dots crowding toward solid
-  // ink — a print-shop reading of the same two-colour ramp. A slow
-  // per-cell wobble keeps the grid visibly alive rather than a static tile.
-  const mat2 SCREEN_ANGLE = mat2(0.7071, -0.7071, 0.7071, 0.7071); // 45°, print-shop style
-
-  float halftone(vec2 px, float tone, float t) {
-    vec2 rp = SCREEN_ANGLE * px;
-    float cell = 9.0;
-    vec2 c = mod(rp, cell) - cell * 0.5;
-    float d = length(c) / (cell * 0.5);
-    float wobble = 0.05 * sin(t * 0.35 + rp.x * 0.021 + rp.y * 0.017);
-    float radius = clamp(mix(0.92, 0.08, tone) + wobble, 0.0, 1.0);
-    return 1.0 - smoothstep(radius - 0.14, radius, d);
-  }
-
   void main() {
     float aspect = uRes.x / max(uRes.y, 1.0);
     vec2 uv = vUv;
     float t = uTime;
-    vec2 px = (vUv * 0.5 + 0.5) * uRes;
 
     // Ground-level camera, horizon sitting near the bottom of the frame.
     vec3 ro = vec3(0.0, 1.2, 0.0);
@@ -173,10 +155,6 @@ const fragmentShader = /* glsl */ `
 
     vec4 near = cumulus(ro, rd, sd, t, 80.0, 0.0105, vec2(0.016, 0.006), 0.50, 0.22, mu);
     col = mix(col, near.rgb, near.a);
-    // Sharpen the soft cumulus alpha into a near-binary mask: any
-    // recognisable cloud body presses smooth, and only genuinely open
-    // sky is left for the dot field to claim.
-    float cloudCoverage = smoothstep(0.09, 0.4, clamp(far.a * 0.78 + near.a, 0.0, 1.0));
 
     // Duotone press: collapse the photoreal render to luminance, then
     // re-ink it on a two-colour ramp — deep navy ink to sky-blue paper.
@@ -185,13 +163,7 @@ const fragmentShader = /* glsl */ `
     float tone = pow(smoothstep(0.13, 0.97, lum), 1.35);
     vec3 ink = vec3(0.051, 0.200, 0.447);   // #0d3372
     vec3 paper = vec3(0.624, 0.831, 0.969); // #9fd4f7
-    vec3 smoothCol = mix(ink, paper, tone);
-
-    // Where no cloud covers the sky, press the gap to a halftone dot
-    // field instead of a flat gradient — realism in the cumulus decks,
-    // a digital screenprint texture in the open sky between them.
-    vec3 dotsCol = mix(paper, ink, halftone(px, tone, t));
-    col = mix(dotsCol, smoothCol, cloudCoverage);
+    col = mix(ink, paper, tone);
 
     // Ordered grain kills gradient banding in the big two-tone field.
     col += (hash12(gl_FragCoord.xy + fract(t) * 61.7) - 0.5) * (2.0 / 255.0);
