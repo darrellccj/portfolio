@@ -1,9 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useReveal from '../hooks/useReveal.js';
 import { dither as ditherCopy } from '../data/content.js';
 import lastSupperSrc from '../assets/last-supper.jpg';
 
-// Standard 8x8 ordered (Bayer) dither matrix, row-major, values 0-63.
+// Ordered (Bayer) dither matrices, row-major.
 const BAYER8 = [
    0, 32,  8, 40,  2, 34, 10, 42,
   48, 16, 56, 24, 50, 18, 58, 26,
@@ -14,6 +14,13 @@ const BAYER8 = [
   15, 47,  7, 39, 13, 45,  5, 37,
   63, 31, 55, 23, 61, 29, 53, 21,
 ];
+const BAYER4 = [
+   0,  8,  2, 10,
+  12,  4, 14,  6,
+   3, 11,  1,  9,
+  15,  7, 13,  5,
+];
+const BAYER2 = [0, 2, 3, 1];
 
 // The site's two inks — deep navy dots on a paper-sky ground.
 const BG = [13, 51, 114]; // --ink
@@ -27,10 +34,13 @@ function dotSizeFor(width) {
   return 1.8;
 }
 
-function ditherFrame(imageData) {
+// Shared prep: perceptual luminance, stretched to the frame's own
+// range, then pushed through the site's contrast curve. Every
+// technique below thresholds this same buffer differently.
+function preparedLuminance(imageData) {
   const { data, width, height } = imageData;
   const count = width * height;
-  const lum = new Float32Array(count);
+  const buf = new Float32Array(count);
   let min = 1;
   let max = 0;
 
@@ -39,40 +49,100 @@ function ditherFrame(imageData) {
     const g = data[i + 1] / 255;
     const b = data[i + 2] / 255;
     const l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    lum[p] = l;
+    buf[p] = l;
     if (l < min) min = l;
     if (l > max) max = l;
   }
 
   const range = Math.max(max - min, 0.0001);
+  for (let p = 0; p < count; p++) {
+    let v = (buf[p] - min) / range;
+    v = (v - 0.5) * CONTRAST + 0.5 + BRIGHTNESS;
+    buf[p] = v < 0 ? 0 : v > 1 ? 1 : v;
+  }
+  return buf;
+}
+
+function paint(data, pi, on) {
+  const idx = pi * 4;
+  const c = on ? FG : BG;
+  data[idx] = c[0];
+  data[idx + 1] = c[1];
+  data[idx + 2] = c[2];
+  data[idx + 3] = 255;
+}
+
+function orderedDither(imageData, matrix, size) {
+  const { data, width, height } = imageData;
+  const buf = preparedLuminance(imageData);
+  const cells = size * size;
 
   for (let y = 0; y < height; y++) {
     const rowOffset = y * width;
-    const bayerRow = (y & 7) * 8;
+    const matrixRow = (y % size) * size;
     for (let x = 0; x < width; x++) {
       const pi = rowOffset + x;
-      let v = (lum[pi] - min) / range;
-      v = (v - 0.5) * CONTRAST + 0.5 + BRIGHTNESS;
-      if (v < 0) v = 0;
-      if (v > 1) v = 1;
-
-      const threshold = (BAYER8[bayerRow + (x & 7)] + 0.5) / 64;
-      const on = v > threshold;
-      const idx = pi * 4;
-      const c = on ? FG : BG;
-
-      data[idx] = c[0];
-      data[idx + 1] = c[1];
-      data[idx + 2] = c[2];
-      data[idx + 3] = 255;
+      const threshold = (matrix[matrixRow + (x % size)] + 0.5) / cells;
+      paint(data, pi, buf[pi] > threshold);
     }
   }
 }
+
+function floydSteinbergDither(imageData) {
+  const { data, width, height } = imageData;
+  const buf = preparedLuminance(imageData);
+
+  for (let y = 0; y < height; y++) {
+    const rowOffset = y * width;
+    for (let x = 0; x < width; x++) {
+      const pi = rowOffset + x;
+      const old = buf[pi];
+      const on = old > 0.5;
+      const err = old - (on ? 1 : 0);
+
+      if (x + 1 < width) buf[pi + 1] += err * (7 / 16);
+      if (y + 1 < height) {
+        if (x > 0) buf[pi + width - 1] += err * (3 / 16);
+        buf[pi + width] += err * (5 / 16);
+        if (x + 1 < width) buf[pi + width + 1] += err * (1 / 16);
+      }
+
+      paint(data, pi, on);
+    }
+  }
+}
+
+function randomDither(imageData) {
+  const { data, width, height } = imageData;
+  const buf = preparedLuminance(imageData);
+  const count = width * height;
+
+  for (let p = 0; p < count; p++) {
+    paint(data, p, buf[p] > Math.random());
+  }
+}
+
+// Ordered → coarser ordered → diffusion → noise → back to the start.
+const TECHNIQUES = [
+  (d) => orderedDither(d, BAYER8, 8),
+  (d) => orderedDither(d, BAYER4, 4),
+  (d) => orderedDither(d, BAYER2, 2),
+  floydSteinbergDither,
+  randomDither,
+];
 
 export default function Dither() {
   const reveal = useReveal({ threshold: 0.1 });
   const frameRef = useRef(null);
   const canvasRef = useRef(null);
+  const techniqueIndexRef = useRef(0);
+  const renderRef = useRef(() => {});
+  const [techniqueIndex, setTechniqueIndex] = useState(0);
+
+  useEffect(() => {
+    techniqueIndexRef.current = techniqueIndex;
+    renderRef.current();
+  }, [techniqueIndex]);
 
   useEffect(() => {
     const frame = frameRef.current;
@@ -116,9 +186,11 @@ export default function Dither() {
 
       ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
       const frameData = ctx.getImageData(0, 0, w, h);
-      ditherFrame(frameData);
+      TECHNIQUES[techniqueIndexRef.current](frameData);
       ctx.putImageData(frameData, 0, 0);
     }
+
+    renderRef.current = render;
 
     img.onload = () => {
       ready = true;
@@ -132,16 +204,24 @@ export default function Dither() {
     return () => ro.disconnect();
   }, []);
 
+  function cycleTechnique() {
+    setTechniqueIndex((i) => (i + 1) % TECHNIQUES.length);
+  }
+
   return (
     <section className="section dither" id="dither">
-      <div className="reveal dither__frame" ref={(el) => { reveal.current = el; frameRef.current = el; }}>
-        <canvas
-          ref={canvasRef}
-          className="dither__canvas"
-          role="img"
-          aria-label={`Ordered-dither rendering of ${ditherCopy.work}, ${ditherCopy.credit}`}
-        />
-      </div>
+      <button
+        type="button"
+        className="reveal dither__frame"
+        ref={(el) => {
+          reveal.current = el;
+          frameRef.current = el;
+        }}
+        onClick={cycleTechnique}
+        aria-label={`Ordered-dither rendering of ${ditherCopy.work}, ${ditherCopy.credit}. Click to cycle the dithering technique.`}
+      >
+        <canvas ref={canvasRef} className="dither__canvas" aria-hidden="true" />
+      </button>
     </section>
   );
 }
