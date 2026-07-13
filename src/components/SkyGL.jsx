@@ -123,11 +123,14 @@ const fragmentShader = /* glsl */ `
   // on paper and deep zenith presses to fat dots crowding toward solid
   // ink — a print-shop reading of the same two-colour ramp. A slow
   // per-cell wobble keeps the grid visibly alive rather than a static tile.
+  const mat2 SCREEN_ANGLE = mat2(0.7071, -0.7071, 0.7071, 0.7071); // 45°, print-shop style
+
   float halftone(vec2 px, float tone, float t) {
+    vec2 rp = SCREEN_ANGLE * px;
     float cell = 9.0;
-    vec2 c = mod(px, cell) - cell * 0.5;
+    vec2 c = mod(rp, cell) - cell * 0.5;
     float d = length(c) / (cell * 0.5);
-    float wobble = 0.05 * sin(t * 0.35 + px.x * 0.021 + px.y * 0.017);
+    float wobble = 0.05 * sin(t * 0.35 + rp.x * 0.021 + rp.y * 0.017);
     float radius = clamp(mix(0.92, 0.08, tone) + wobble, 0.0, 1.0);
     return 1.0 - smoothstep(radius - 0.14, radius, d);
   }
