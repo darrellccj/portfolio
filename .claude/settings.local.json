@@ -28,7 +28,9 @@
       "Bash('/c/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --no-sandbox --screenshot=C:/Users/darre/AppData/Local/Temp/claude/c--Users-darre-OneDrive-Desktop-portfolio/d6d0225f-1266-4390-a0c0-0d70e71e7ee8/scratchpad/koi_side.png --window-size=700,1780 --hide-scrollbars file:///C:/Users/darre/AppData/Local/Temp/claude/c--Users-darre-OneDrive-Desktop-portfolio/d6d0225f-1266-4390-a0c0-0d70e71e7ee8/scratchpad/koi_side.html)",
       "Bash(npm install *)",
       "Bash('/c/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --no-sandbox --enable-unsafe-swiftshader --use-gl=angle --use-angle=swiftshader --hide-scrollbars --window-size=1280,800 --virtual-time-budget=2500 --screenshot=C:/Users/darre/AppData/Local/Temp/claude/c--Users-darre-OneDrive-Desktop-portfolio/d6d0225f-1266-4390-a0c0-0d70e71e7ee8/scratchpad/scene1.png http://localhost:5174/)",
-      "Bash('/c/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --no-sandbox --enable-unsafe-swiftshader --hide-scrollbars --window-size=1280,800 --virtual-time-budget=3000 --screenshot=C:/Users/darre/AppData/Local/Temp/claude/c--Users-darre-OneDrive-Desktop-portfolio/d6d0225f-1266-4390-a0c0-0d70e71e7ee8/scratchpad/scene1.png http://localhost:5174/)"
+      "Bash('/c/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --no-sandbox --enable-unsafe-swiftshader --hide-scrollbars --window-size=1280,800 --virtual-time-budget=3000 --screenshot=C:/Users/darre/AppData/Local/Temp/claude/c--Users-darre-OneDrive-Desktop-portfolio/d6d0225f-1266-4390-a0c0-0d70e71e7ee8/scratchpad/scene1.png http://localhost:5174/)",
+      "Bash(mkdir -p src/assets)",
+      "Bash(cp \"/root/.claude/uploads/15a443c5-976c-5345-9519-a507980cbea2/23659589-IMG_8594.jpeg\" src/assets/last-supper.jpg)"
     ]
   }
 }

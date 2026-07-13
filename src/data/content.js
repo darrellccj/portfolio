@@ -79,6 +79,14 @@ export const projects = [
   },
 ];
 
+// ── DITHER STUDY ─────────────────────────────────────────────
+// A single framed plate — canvas-rendered ordered dither, no text on
+// the page itself. Fields below only back the canvas's aria-label.
+export const dither = {
+  work: 'The Last Supper',
+  credit: 'Leonardo da Vinci — c. 1495–1498',
+};
+
 // ── KIV — KEEP IN VIEW ───────────────────────────────────────
 // Concepts in progress. Ideas parked where you can see them.
 export const kiv = [
