@@ -368,90 +368,139 @@ main {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   WORK — index rows; hover inverts the whole row to ink
+   WORK — pinned horizontal card scroll
+   The section locks to the viewport (position: sticky) while
+   vertical scroll drives the card track sideways; the centred card
+   inverts to ink, echoing the row-hover motif used elsewhere. Once
+   the track finishes travelling the section releases into KIV.
    ───────────────────────────────────────────────────────────── */
-.work__list {
-  border-top: 1px solid var(--line);
+.work__head {
+  padding-bottom: clamp(2rem, 5vw, 3rem);
 }
-.work-row {
-  display: grid;
-  grid-template-columns: 3.6rem minmax(0, 1fr) auto 2.4rem;
-  gap: clamp(1rem, 3vw, 2.2rem);
-  align-items: baseline;
-  padding: 1.7rem 0.9rem;
-  border-bottom: 1px solid var(--line);
-  transition: background 0.22s var(--ease), color 0.22s var(--ease);
-  /* per-row entrance stagger, tied to reveal */
-  opacity: 0;
-  transform: translateY(16px);
+.work__pin {
+  position: relative;
 }
-.reveal.is-in .work-row {
-  opacity: 1;
-  transform: none;
-  transition: opacity 0.6s var(--ease) calc(var(--i) * 0.09s),
-    transform 0.6s var(--ease) calc(var(--i) * 0.09s),
-    background 0.22s var(--ease), color 0.22s var(--ease);
+.work__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 480px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
 }
-.work-row__index {
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  color: var(--ink-faint);
+.work__track {
+  display: flex;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  padding: 0 var(--gutter);
+  will-change: transform;
 }
-.work-row__title {
-  display: block;
-  font-family: var(--serif);
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  line-height: 1.1;
-  margin-bottom: 0.55rem;
-}
-.work-row__desc {
-  display: block;
-  font-size: 0.8rem;
-  line-height: 1.7;
-  color: var(--ink-soft);
-  max-width: 58ch;
-  transition: color 0.22s var(--ease);
-}
-.work-row__meta {
+.work-card {
+  flex: 0 0 min(78vw, 380px);
+  min-height: min(60vh, 440px);
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 0.4rem;
-  text-align: right;
+  justify-content: space-between;
+  padding: clamp(1.4rem, 3vw, 1.9rem);
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+  opacity: 0.45;
+  transform: scale(0.94);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease),
+    background 0.3s var(--ease), color 0.3s var(--ease), border-color 0.3s var(--ease);
 }
-.work-row__tag {
-  font-size: 0.6rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-}
-.work-row__year {
-  font-size: 0.68rem;
-  color: var(--ink-faint);
-  transition: color 0.22s var(--ease);
-}
-.work-row__arrow {
-  justify-self: end;
-  font-size: 0.95rem;
-  transition: transform 0.3s var(--ease);
-}
-.work-row:hover,
-.work-row:focus-visible {
+.work-card.is-active {
+  opacity: 1;
+  transform: none;
   background: var(--ink);
   color: var(--paper);
   border-color: var(--ink);
 }
-.work-row:hover .work-row__desc,
-.work-row:focus-visible .work-row__desc {
-  color: var(--paper-soft);
+.work-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-.work-row:hover .work-row__index,
-.work-row:hover .work-row__year,
-.work-row:focus-visible .work-row__index,
-.work-row:focus-visible .work-row__year {
+.work-card__index {
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  transition: color 0.3s var(--ease);
+}
+.work-card__tag {
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  transition: color 0.3s var(--ease);
+}
+.work-card__title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(1.4rem, 3vw, 1.85rem);
+  line-height: 1.12;
+  margin: 1.2rem 0 0.7rem;
+}
+.work-card__desc {
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  transition: color 0.3s var(--ease);
+}
+.work-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.4rem;
+  font-size: 0.68rem;
+  color: var(--ink-faint);
+}
+.work-card__arrow {
+  font-size: 0.95rem;
+  transition: transform 0.3s var(--ease), color 0.3s var(--ease);
+}
+.work-card.is-active .work-card__index,
+.work-card.is-active .work-card__foot {
   color: var(--paper-faint);
 }
-.work-row:hover .work-row__arrow {
-  transform: translateX(6px);
+.work-card.is-active .work-card__tag {
+  color: var(--paper-soft);
+}
+.work-card.is-active .work-card__desc {
+  color: var(--paper-soft);
+}
+.work-card.is-active .work-card__arrow {
+  transform: translateX(4px);
+}
+.work__meta {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: clamp(1.5rem, 4vh, 3rem);
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+.work__counter {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+.work__counter b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.work__progress {
+  flex: 1;
+  height: 1px;
+  background: var(--line-soft);
+}
+.work__progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--ink);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -611,20 +660,6 @@ main {
    RESPONSIVE
    ───────────────────────────────────────────────────────────── */
 @media (max-width: 720px) {
-  .work-row {
-    grid-template-columns: minmax(0, 1fr) 2rem;
-    row-gap: 0.8rem;
-  }
-  .work-row__index {
-    grid-column: 1 / -1;
-  }
-  .work-row__meta {
-    grid-column: 1 / -1;
-    flex-direction: row;
-    align-items: baseline;
-    gap: 1.2rem;
-    text-align: left;
-  }
   .kiv-row {
     grid-template-columns: 3.2rem minmax(0, 1fr);
     row-gap: 0.35rem;
@@ -674,9 +709,30 @@ main {
     transition-duration: 0.001ms !important;
   }
   .reveal,
-  .work-row,
   .kiv-row {
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  /* Pinned card-scroll degrades to a plain scroll-snap row: no
+     scroll-jacking, no scroll-linked transform. */
+  .work__pin {
+    height: auto !important;
+  }
+  .work__sticky {
+    position: static;
+    height: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    padding: 1rem 0 2rem;
+  }
+  .work-card {
+    scroll-snap-align: start;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .work__meta {
+    display: none;
   }
 }
