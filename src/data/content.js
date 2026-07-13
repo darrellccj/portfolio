@@ -84,13 +84,21 @@ export const projects = [
 export const dither = {
   label: '04 / Study',
   title: 'Ordered dither',
-  sub: 'A canvas experiment — a Renaissance fresco, halftoned live in the browser with an 8×8 Bayer matrix threshold.',
+  sub: "A canvas experiment, not a shipped product — proof that a 500-year-old fresco can be re-rendered entirely in the browser. The source photo is decoded, stretched for contrast, then every pixel is thresholded against a tiled 8×8 Bayer matrix instead of a single global cutoff, which is what keeps gradients readable as fields of dots instead of collapsing into flat black and white.",
   figure: 'Fig. 02 — Fresco',
   method: 'Ordered dither',
   methodSub: '8×8 Bayer matrix',
   work: 'The Last Supper',
   credit: 'Leonardo da Vinci — c. 1495–1498',
   note: 'Rendered client-side on load, no pre-processed images',
+  specs: [
+    { label: 'Technique', value: 'Ordered dither, tiled 8×8 Bayer matrix' },
+    { label: 'Palette', value: '2 inks — hard threshold, no greys' },
+    { label: 'Processing', value: 'Luminance stretch + contrast curve before threshold' },
+    { label: 'Resolution', value: 'Adaptive dot pitch, recalculated on resize' },
+    { label: 'Runtime', value: 'Canvas 2D, client-side, on page load' },
+    { label: 'Dependencies', value: 'None — vanilla JS, no libraries' },
+  ],
 };
 
 // ── KIV — KEEP IN VIEW ───────────────────────────────────────

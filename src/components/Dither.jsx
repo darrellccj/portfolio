@@ -22,9 +22,9 @@ const CONTRAST = 1.55;
 const BRIGHTNESS = 0.04;
 
 function dotSizeFor(width) {
-  if (width < 480) return 2.5;
-  if (width < 900) return 3.5;
-  return 4.5;
+  if (width < 480) return 1.8;
+  if (width < 900) return 2.2;
+  return 2.6;
 }
 
 function ditherFrame(imageData) {
@@ -162,6 +162,15 @@ export default function Dither() {
           </span>
           <span>{ditherCopy.note}</span>
         </div>
+
+        <dl className="dither__specs">
+          {ditherCopy.specs.map((s) => (
+            <div key={s.label}>
+              <dt>{s.label}</dt>
+              <dd>{s.value}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );
