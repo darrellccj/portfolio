@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Selected Work — pinned card scroll</title>
+<meta name="description" content="A pinned horizontal card-scroll section: vertical scroll drives a row of project cards sideways, then releases into the next section. Vanilla HTML/CSS/JS, no build step, no libraries." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
+  rel="stylesheet"
+/>
+
+<style>
+  :root {
+    --paper: #9fd4f7;
+    --ink: #0d3372;
+    --ink-soft: rgba(13, 51, 114, 0.78);
+    --ink-faint: rgba(13, 51, 114, 0.58);
+    --paper-soft: rgba(159, 212, 247, 0.8);
+    --paper-faint: rgba(159, 212, 247, 0.58);
+    --serif: "Instrument Serif", Georgia, serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--mono);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--paper); color: var(--ink); }
+
+  a { color: inherit; }
+
+  /* ── generic page chrome (before/after the pinned section) ── */
+
+  .intro,
+  .outro {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 8vh 8vw;
+  }
+
+  .eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--paper-faint);
+    margin: 0 0 1.25rem;
+  }
+
+  .intro h1,
+  .outro h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(2.4rem, 7vw, 5rem);
+    line-height: 1.05;
+    margin: 0 0 1.25rem;
+    max-width: 16ch;
+  }
+
+  .intro p,
+  .outro p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--paper-soft);
+    max-width: 46ch;
+    margin: 0;
+  }
+
+  .scroll-cue {
+    margin-top: 3rem;
+    font-size: 0.75rem;
+    color: var(--paper-faint);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .scroll-cue::after {
+    content: "";
+    width: 1px;
+    height: 2.25rem;
+    background: linear-gradient(var(--paper-faint), transparent);
+    animation: cue 1.8s ease-in-out infinite;
+  }
+
+  @keyframes cue {
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(6px); opacity: 0.4; }
+  }
+
+  .outro .btn {
+    margin-top: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.5rem;
+    border: 1px solid var(--paper-faint);
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .outro .btn:hover {
+    background: var(--paper);
+    color: var(--ink);
+    border-color: var(--paper);
+  }
+
+  /* ── the pinned horizontal-scroll section ── */
+
+  .pin-section {
+    position: relative;
+    /* height is set programmatically in JS to equal the scroll
+       distance needed to fully traverse the card track */
+  }
+
+  .pin-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .pin-head {
+    position: absolute;
+    top: 8vh;
+    left: 8vw;
+    right: 8vw;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    pointer-events: none;
+  }
+
+  .pin-head h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+    margin: 0;
+  }
+
+  .pin-counter {
+    font-size: 0.8rem;
+    color: var(--paper-faint);
+    white-space: nowrap;
+  }
+
+  .pin-counter b { color: var(--paper); font-weight: 500; }
+
+  .track {
+    display: flex;
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    padding: 0 8vw;
+    will-change: transform;
+  }
+
+  .card {
+    flex: 0 0 min(80vw, 400px);
+    aspect-ratio: 3 / 4;
+    border: 1px solid var(--paper-faint);
+    border-radius: 18px;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-decoration: none;
+    color: inherit;
+    background: linear-gradient(160deg, rgba(159, 212, 247, 0.06), transparent 60%);
+    transform: scale(0.92);
+    opacity: 0.45;
+    transition: transform 0.25s ease, opacity 0.25s ease, border-color 0.25s ease;
+  }
+
+  .card.is-active {
+    transform: scale(1);
+    opacity: 1;
+    border-color: var(--paper);
+  }
+
+  .card__index {
+    font-size: 0.75rem;
+    color: var(--paper-faint);
+  }
+
+  .card__tag {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--paper);
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+  }
+
+  .card__title {
+    font-family: var(--serif);
+    font-size: clamp(1.4rem, 3vw, 1.85rem);
+    line-height: 1.15;
+    margin: 0.85rem 0 0.6rem;
+  }
+
+  .card__desc {
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--paper-soft);
+    margin: 0;
+  }
+
+  .card__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--paper-faint);
+  }
+
+  .card__arrow {
+    font-size: 1rem;
+    transition: transform 0.2s ease;
+  }
+
+  .card:hover .card__arrow { transform: translateX(4px); }
+
+  .pin-progress {
+    position: absolute;
+    left: 8vw;
+    right: 8vw;
+    bottom: 6vh;
+    height: 2px;
+    background: rgba(159, 212, 247, 0.18);
+    border-radius: 2px;
+  }
+
+  .pin-progress__fill {
+    height: 100%;
+    width: 0%;
+    background: var(--paper);
+    border-radius: 2px;
+  }
+
+  /* ── reduced motion / no-JS fallback: a plain snap-scroll row ── */
+
+  @media (prefers-reduced-motion: reduce) {
+    .pin-section { height: auto !important; }
+    .pin-sticky {
+      position: static;
+      height: auto;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x proximity;
+      padding: 10vh 0;
+    }
+    .pin-head { position: static; margin: 0 8vw 2rem; }
+    .track { transform: none !important; }
+    .card { scroll-snap-align: start; transform: none; opacity: 1; }
+    .pin-progress { display: none; }
+  }
+
+  .no-js .pin-sticky {
+    position: static;
+    height: auto;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding: 10vh 0;
+  }
+  .no-js .pin-head { position: static; margin: 0 8vw 2rem; }
+  .no-js .card { scroll-snap-align: start; transform: none; opacity: 1; }
+  .no-js .pin-progress { display: none; }
+</style>
+</head>
+<body class="no-js">
+<script>document.body.classList.remove('no-js');</script>
+
+<header class="intro">
+  <p class="eyebrow">01 / Start</p>
+  <h1>Scroll down.<br />The next section pins.</h1>
+  <p>Vertical scroll gets translated into horizontal motion across a row of project
+    cards, then hands you back to the normal page flow. No scroll-jacking library,
+    just <code>position: sticky</code> and a scroll listener.</p>
+  <div class="scroll-cue">Keep scrolling</div>
+</header>
+
+<section class="pin-section" id="pinSection">
+  <div class="pin-sticky">
+    <div class="pin-head">
+      <h2>Selected work</h2>
+      <p class="pin-counter"><b id="cardCurrent">01</b> / <span id="cardTotal">06</span></p>
+    </div>
+
+    <div class="track" id="track">
+      <a class="card" href="#" data-index="0">
+        <span class="card__index">001</span>
+        <div>
+          <span class="card__tag">Fintech</span>
+          <h3 class="card__title">Bloomberger Terminal</h3>
+          <p class="card__desc">A Bloomberg-inspired web app powered by free and low-cost market APIs. React + Vite, with a dark editorial aesthetic that makes dense data feel calm.</p>
+        </div>
+        <div class="card__foot"><span>2025</span><span class="card__arrow">→</span></div>
+      </a>
+
+      <a class="card" href="#" data-index="1">
+        <span class="card__index">002</span>
+        <div>
+          <span class="card__tag">AI · Proptech</span>
+          <h3 class="card__title">Website Factory</h3>
+          <p class="card__desc">A multi-agent pipeline that generates bespoke websites for Singapore property agents. Fast, elevated, and entirely their own.</p>
+        </div>
+        <div class="card__foot"><span>2025</span><span class="card__arrow">→</span></div>
+      </a>
+
+      <a class="card" href="#" data-index="2">
+        <span class="card__index">003</span>
+        <div>
+          <span class="card__tag">Social</span>
+          <h3 class="card__title">Ember</h3>
+          <p class="card__desc">A hobby-discovery app — private by design, real-world by intention. A warm "today's spark" home screen that nudges you offline.</p>
+        </div>
+        <div class="card__foot"><span>2024</span><span class="card__arrow">→</span></div>
+      </a>
+
+      <a class="card" href="#" data-index="3">
+        <span class="card__index">004</span>
+        <div>
+          <span class="card__tag">Travel</span>
+          <h3 class="card__title">Touching Earth</h3>
+          <p class="card__desc">An all-in-one trip companion — itinerary, bookings, packing lists, and expense splitting, in one place instead of five apps.</p>
+        </div>
+        <div class="card__foot"><span>2025</span><span class="card__arrow">→</span></div>
+      </a>
+
+      <a class="card" href="#" data-index="4">
+        <span class="card__index">005</span>
+        <div>
+          <span class="card__tag">Sports</span>
+          <h3 class="card__title">Fencing Ranking</h3>
+          <p class="card__desc">The official rankings platform for Fencing Singapore — a public leaderboard plus the admin backbone for competitions and finance.</p>
+        </div>
+        <div class="card__foot"><span>2025</span><span class="card__arrow">→</span></div>
+      </a>
+
+      <a class="card" href="#" data-index="5">
+        <span class="card__index">006</span>
+        <div>
+          <span class="card__tag">Fintech</span>
+          <h3 class="card__title">Macro</h3>
+          <p class="card__desc">A personal trading system — screens swing setups against a rule-based strategy and logs every trade to prove out whether it works.</p>
+        </div>
+        <div class="card__foot"><span>2025</span><span class="card__arrow">→</span></div>
+      </a>
+    </div>
+
+    <div class="pin-progress"><div class="pin-progress__fill" id="progressFill"></div></div>
+  </div>
+</section>
+
+<footer class="outro">
+  <p class="eyebrow">03 / Released</p>
+  <h2>Back to normal scrolling.</h2>
+  <p>The pinned section let go once the track finished travelling. Everything below
+    scrolls the ordinary way again.</p>
+  <a class="btn" href="mailto:darrellchuacj@gmail.com">Say hello ↗</a>
+</footer>
+
+<script>
+(function () {
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var section = document.getElementById('pinSection');
+  var sticky = section.querySelector('.pin-sticky');
+  var track = document.getElementById('track');
+  var cards = Array.prototype.slice.call(track.children);
+  var progressFill = document.getElementById('progressFill');
+  var cardCurrent = document.getElementById('cardCurrent');
+  var cardTotal = document.getElementById('cardTotal');
+
+  cardTotal.textContent = String(cards.length).padStart(2, '0');
+
+  if (reduceMotion) return; // native scroll-snap fallback handles this case via CSS
+
+  var maxTranslate = 0;
+  var sectionHeight = 0;
+  var ticking = false;
+  var inView = false;
+
+  function measure() {
+    var viewportW = window.innerWidth;
+    maxTranslate = Math.max(0, track.scrollWidth - viewportW);
+    sectionHeight = window.innerHeight + maxTranslate;
+    section.style.height = sectionHeight + 'px';
+    update();
+  }
+
+  function update() {
+    var rect = section.getBoundingClientRect();
+    var scrollableDistance = sectionHeight - window.innerHeight;
+    var progress = scrollableDistance > 0
+      ? clamp(-rect.top / scrollableDistance, 0, 1)
+      : 0;
+
+    track.style.transform = 'translate3d(' + (-progress * maxTranslate) + 'px,0,0)';
+    progressFill.style.width = (progress * 100) + '%';
+
+    var activeIndex = clamp(
+      Math.round(progress * (cards.length - 1)),
+      0,
+      cards.length - 1
+    );
+    cardCurrent.textContent = String(activeIndex + 1).padStart(2, '0');
+
+    var viewportCenter = window.innerWidth / 2;
+    cards.forEach(function (card, i) {
+      var cardRect = card.getBoundingClientRect();
+      var cardCenter = cardRect.left + cardRect.width / 2;
+      var isNear = Math.abs(cardCenter - viewportCenter) < cardRect.width * 0.65;
+      card.classList.toggle('is-active', isNear);
+    });
+
+    ticking = false;
+  }
+
+  function onScroll() {
+    if (!inView || ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }
+
+  function clamp(n, min, max) {
+    return Math.max(min, Math.min(max, n));
+  }
+
+  var io = new IntersectionObserver(
+    function (entries) {
+      inView = entries[0].isIntersecting;
+      if (inView) update();
+    },
+    { threshold: 0 }
+  );
+  io.observe(section);
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', debounce(measure, 150));
+
+  function debounce(fn, ms) {
+    var t;
+    return function () {
+      clearTimeout(t);
+      t = setTimeout(fn, ms);
+    };
+  }
+
+  measure();
+})();
+</script>
+</body>
+</html>
