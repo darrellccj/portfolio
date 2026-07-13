@@ -22,9 +22,9 @@ const CONTRAST = 1.55;
 const BRIGHTNESS = 0.04;
 
 function dotSizeFor(width) {
-  if (width < 480) return 1.8;
-  if (width < 900) return 2.2;
-  return 2.6;
+  if (width < 480) return 1.3;
+  if (width < 900) return 1.6;
+  return 1.8;
 }
 
 function ditherFrame(imageData) {
@@ -94,6 +94,8 @@ export default function Dither() {
 
       canvas.width = w;
       canvas.height = h;
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
 
       // Cover-fit crop of the source image into the processing-resolution canvas.
       const imgRatio = img.naturalWidth / img.naturalHeight;
@@ -132,45 +134,13 @@ export default function Dither() {
 
   return (
     <section className="section dither" id="dither">
-      <div className="reveal" ref={reveal}>
-        <div className="section__head">
-          <p className="section__label">{ditherCopy.label}</p>
-          <h2 className="section__title">{ditherCopy.title}</h2>
-          <p className="section__sub">{ditherCopy.sub}</p>
-        </div>
-
-        <div className="dither__frame" ref={frameRef}>
-          <canvas
-            ref={canvasRef}
-            className="dither__canvas"
-            role="img"
-            aria-label={`Ordered-dither rendering of ${ditherCopy.work}, ${ditherCopy.credit}`}
-          />
-          <div className="dither__tag" aria-hidden="true">
-            <span>{ditherCopy.figure}</span>
-            <span className="dither__tag-right">
-              {ditherCopy.method}
-              <br />
-              {ditherCopy.methodSub}
-            </span>
-          </div>
-        </div>
-
-        <div className="dither__caption">
-          <span>
-            <strong>{ditherCopy.work}</strong> — {ditherCopy.credit}
-          </span>
-          <span>{ditherCopy.note}</span>
-        </div>
-
-        <dl className="dither__specs">
-          {ditherCopy.specs.map((s) => (
-            <div key={s.label}>
-              <dt>{s.label}</dt>
-              <dd>{s.value}</dd>
-            </div>
-          ))}
-        </dl>
+      <div className="reveal dither__frame" ref={(el) => { reveal.current = el; frameRef.current = el; }}>
+        <canvas
+          ref={canvasRef}
+          className="dither__canvas"
+          role="img"
+          aria-label={`Ordered-dither rendering of ${ditherCopy.work}, ${ditherCopy.credit}`}
+        />
       </div>
     </section>
   );
