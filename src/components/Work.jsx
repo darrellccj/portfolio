@@ -1,7 +1,8 @@
-import usePinnedScroll from '../hooks/usePinnedScroll.js';
-import { projects } from '../data/content.js';
+'use client';
 
-export default function Work() {
+import usePinnedScroll from '../hooks/usePinnedScroll.js';
+
+export default function Work({ projects }) {
   const { sectionRef, trackRef, progressRef, counterRef } = usePinnedScroll();
 
   return (
@@ -14,30 +15,34 @@ export default function Work() {
       <div className="work__pin" ref={sectionRef}>
         <div className="work__sticky">
           <div className="work__track" ref={trackRef}>
-            {projects.map((p, i) => (
-              <a
-                key={p.title}
-                className="work-card"
-                href={p.href}
-                target={p.href.startsWith('http') ? '_blank' : undefined}
-                rel={p.href.startsWith('http') ? 'noreferrer' : undefined}
-              >
-                <div className="work-card__top">
-                  <span className="work-card__index">{String(i + 1).padStart(3, '0')}</span>
-                  <span className="work-card__tag">{p.tag}</span>
-                </div>
-                <div>
-                  <h3 className="work-card__title">{p.title}</h3>
-                  <p className="work-card__desc">{p.desc}</p>
-                </div>
-                <div className="work-card__foot">
-                  <span className="work-card__year">{p.year}</span>
-                  <span className="work-card__arrow" aria-hidden="true">
-                    →
-                  </span>
-                </div>
-              </a>
-            ))}
+            {projects.map((p, i) => {
+              const href = p.href || '#';
+              const external = href.startsWith('http');
+              return (
+                <a
+                  key={p._id || p.title}
+                  className="work-card"
+                  href={href}
+                  target={external ? '_blank' : undefined}
+                  rel={external ? 'noreferrer' : undefined}
+                >
+                  <div className="work-card__top">
+                    <span className="work-card__index">{String(i + 1).padStart(3, '0')}</span>
+                    <span className="work-card__tag">{p.tag}</span>
+                  </div>
+                  <div>
+                    <h3 className="work-card__title">{p.title}</h3>
+                    <p className="work-card__desc">{p.desc}</p>
+                  </div>
+                  <div className="work-card__foot">
+                    <span className="work-card__year">{p.year}</span>
+                    <span className="work-card__arrow" aria-hidden="true">
+                      →
+                    </span>
+                  </div>
+                </a>
+              );
+            })}
           </div>
 
           <div className="work__meta">

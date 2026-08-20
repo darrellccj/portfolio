@@ -1,7 +1,8 @@
-import useReveal from '../hooks/useReveal.js';
-import { profile } from '../data/content.js';
+'use client';
 
-export default function Contact() {
+import useReveal from '../hooks/useReveal.js';
+
+export default function Contact({ profile }) {
   const ref = useReveal({ threshold: 0.2 });
 
   return (
@@ -19,7 +20,7 @@ export default function Contact() {
         </a>
 
         <div className="contact__socials">
-          {profile.socials.map((s) => (
+          {(profile.socials || []).map((s) => (
             <a
               key={s.label}
               href={s.href}

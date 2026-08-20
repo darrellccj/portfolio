@@ -1,7 +1,7 @@
 import SkyGL from './SkyGL.jsx';
-import { profile } from '../data/content.js';
 
-export default function Hero() {
+// Server component — the only client work here is the sky canvas.
+export default function Hero({ profile }) {
   return (
     <section className="hero" id="top">
       {/* Duotone sky — rendered in the site's two inks only. */}
@@ -15,7 +15,7 @@ export default function Hero() {
 
       {/* Spec strip: the hero's baseline reads like a title block. */}
       <div className="hero__meta" aria-hidden="true">
-        <span>LOC — {profile.location.toUpperCase()}</span>
+        <span>LOC — {(profile.location || '').toUpperCase()}</span>
         <span className="hero__meta-fig">FIG. 01 — SKY, DUOTONE</span>
         <a href="#about" className="hero__scroll" aria-hidden="false" aria-label="Scroll to content">
           SCROLL ↓

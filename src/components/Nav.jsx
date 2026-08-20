@@ -1,5 +1,6 @@
+'use client';
+
 import { useEffect, useState } from 'react';
-import { profile } from '../data/content.js';
 
 const LINKS = [
   { label: 'About', href: '#about' },
@@ -9,7 +10,7 @@ const LINKS = [
   { label: 'Contact', href: '#contact' },
 ];
 
-export default function Nav() {
+export default function Nav({ name }) {
   const [solid, setSolid] = useState(false);
 
   useEffect(() => {
@@ -22,7 +23,7 @@ export default function Nav() {
   return (
     <header className={`nav ${solid ? 'nav--solid' : ''}`}>
       <a href="#top" className="nav__brand">
-        {profile.name}
+        {name}
       </a>
       <nav className="nav__links" aria-label="Sections">
         {LINKS.map((l) => (

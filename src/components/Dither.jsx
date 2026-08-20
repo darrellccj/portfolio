@@ -1,6 +1,7 @@
+'use client';
+
 import { useEffect, useRef } from 'react';
 import useReveal from '../hooks/useReveal.js';
-import { dither as ditherCopy } from '../data/content.js';
 import lastSupperSrc from '../assets/last-supper.jpg';
 
 // Ordered (Bayer) dither matrices, row-major.
@@ -132,7 +133,8 @@ const TECHNIQUES = [
   randomDither,
 ];
 
-export default function Dither() {
+export default function Dither({ copy }) {
+  const ditherCopy = copy;
   const reveal = useReveal({ threshold: 0.1 });
   const frameRef = useRef(null);
   const canvasRef = useRef(null);
@@ -193,7 +195,9 @@ export default function Dither() {
       ready = true;
       render();
     };
-    img.src = lastSupperSrc;
+    const remote = ditherCopy?.imageUrl;
+    if (remote) img.crossOrigin = 'anonymous';
+    img.src = remote || lastSupperSrc.src;
 
     const ro = new ResizeObserver(() => render());
     ro.observe(frame);

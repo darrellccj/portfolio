@@ -1,7 +1,8 @@
-import useReveal from '../hooks/useReveal.js';
-import { kiv } from '../data/content.js';
+'use client';
 
-export default function Kiv() {
+import useReveal from '../hooks/useReveal.js';
+
+export default function Kiv({ items }) {
   const ref = useReveal({ threshold: 0.1 });
 
   return (
@@ -14,8 +15,8 @@ export default function Kiv() {
         </div>
 
         <div className="kiv__table" role="list">
-          {kiv.map((k, i) => (
-            <div className="kiv-row" role="listitem" key={k.title} style={{ '--i': i }}>
+          {items.map((k, i) => (
+            <div className="kiv-row" role="listitem" key={k._id || k.title} style={{ '--i': i }}>
               <span className="kiv-row__index">K{String(i + 1).padStart(2, '0')}</span>
               <span className="kiv-row__tag">{k.tag}</span>
               <span className="kiv-row__title">{k.title}</span>

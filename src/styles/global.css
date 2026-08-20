@@ -19,8 +19,8 @@
   --paper-faint: rgba(159, 212, 247, 0.58);
   --line-paper: rgba(159, 212, 247, 0.3);
 
-  --serif: var(--font-serif), Georgia, 'Times New Roman', serif;
-  --mono: var(--font-mono), 'SFMono-Regular', Consolas, monospace;
+  --serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
 
   --maxw: 1120px;
   --gutter: clamp(1.4rem, 5vw, 4rem);

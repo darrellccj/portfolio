@@ -1,81 +1,120 @@
 # Portfolio
 
-A one-page personal portfolio built around a live **koi pond** hero — an
-aerial view of a cream-toned pond with procedurally animated fish, drifting
-light caustics, floating lily pads, and cursor interaction. Below the hero:
-About, Selected Work, KIV (Keep In View — concepts in progress), and Contact.
+A one-page personal portfolio in two inks — sky `#9fd4f7` on ultramarine
+`#0d3372`. A WebGL **duotone sky** backs the hero; below it sit About,
+Selected Work (a pinned horizontal card-scroll), KIV (Keep In Vault —
+concepts in progress), a canvas **ordered-dither** study, and Contact.
 
-Built with **Vite + React**. The styling is hand-written CSS; the pond is a
-**WebGL** scene (three.js) rendered into a single fixed `<canvas>` that sits
-behind every section.
+Built with **Next.js (App Router)**, hand-written CSS, and **three.js** for
+the sky. Content is managed in **Sanity**, with the Studio living in the
+sibling `studio-portfolio/` folder.
+
+## Layout
+
+This app is one half of a workspace:
+
+```
+portfolio-workspace/
+├── portfolio/          # this Next.js app        → localhost:3000
+└── studio-portfolio/   # standalone Sanity Studio → localhost:3333
+```
+
+The Studio is deliberately **standalone**, not embedded in Next.js: it builds
+on Vite (far faster), receives Sanity auto-updates without a redeploy, and
+supports TypeGen watch mode.
 
 ## Getting started
 
+Run the two apps side by side, in separate terminals:
+
 ```bash
-npm install
-npm run dev      # local dev server with hot reload
-npm run build    # production build → dist/
-npm run preview  # preview the production build
+# terminal 1 — the site
+cd portfolio && npm install && npm run dev
+
+# terminal 2 — the Studio
+cd studio-portfolio && npm install && npm run dev
 ```
 
-## Editing your content
+### Environment
 
-All copy and data live in one file: **`src/data/content.js`**.
+`.env.local` holds the Sanity connection (already filled in except the token):
 
-- `profile` — your name, role, tagline, about paragraph, email, socials.
-  Replace the `[NAME]`, `[EMAIL]`, and `[USERNAME]` placeholders.
-- `stack` — the tools listed under About.
-- `projects` — the "Selected Work" cards (add a real `href` per project).
-- `kiv` — the "Keep In View" concept cards.
+| Variable | Purpose |
+| --- | --- |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID` | Sanity project (`2i3f87ic`) |
+| `NEXT_PUBLIC_SANITY_DATASET` | `production` |
+| `NEXT_PUBLIC_SANITY_API_VERSION` | API date pin |
+| `NEXT_PUBLIC_SANITY_STUDIO_URL` | Studio origin, for Visual Editing links |
+| `NEXT_PUBLIC_SITE_URL` | Absolute base for OG/metadata URLs |
+| `SANITY_API_READ_TOKEN` | **Server-only.** Viewer token for Draft Mode |
 
-Move an item between Work and KIV simply by cutting it from one array and
-pasting it into the other — the UI is fully data-driven.
+Create the read token under *Manage → API → Tokens* with **Viewer** rights.
+Without it the site still renders published content — only draft previewing
+is unavailable.
 
-Also update the placeholders in **`index.html`** (`<title>`, meta
-description, and Open Graph tags) and drop an `og-image.png` in the project
-root for social link previews.
+## Editing content
 
-## The koi pond
+Content lives in Sanity. In the Studio:
 
-`src/components/KoiPondGL.jsx` is a self-contained WebGL scene (three.js):
+- **Profile** (singleton) — name, role, tagline, about, email, location,
+  stack, socials.
+- **Projects** — the Selected Work cards. `order` controls sequence.
+- **KIV** — concept cards. `order` controls sequence.
+- **Dither study** (singleton) — the artwork title, credit, and source plate.
 
-- Each koi is a **detailed painted texture** (drawn once to an offscreen
-  canvas — body volume shading, organic patches per variety, eyes, barbels,
-  translucent fins) mapped onto a finely subdivided plane.
-- A **traveling-wave vertex shader** flexes that plane so the whole body
-  undulates and the tail swishes as one continuous motion — real swimming,
-  not sprite frames. Fish are lit for a soft wet sheen.
-- Authentic varieties: Kohaku, Sanke, Showa, Ogon, Platinum. Deeper fish sit
-  lower and render fainter/cooler for underwater depth.
-- The water is a **custom fragment shader**: cream base, drifting fbm
-  caustics, and expanding **ripple rings** spawned where you click open water.
-- Fish wander, avoid the edges, and veer away from the cursor; lily pads
-  float above and fish pass beneath them.
-- **Respects `prefers-reduced-motion`** (renders a single static frame),
-  **pauses while the tab is hidden**, and **falls back gracefully** to the
-  plain cream background if WebGL is unavailable.
+`src/data/content.js` is retained as a **fallback**: any field or list that is
+empty in Sanity falls back to the committed values, so an empty dataset never
+ships a blank page. Once Sanity holds the real content, that file can go.
 
-Fish and lily-pad counts scale with the viewport. Note: three.js adds
-~150 KB gzipped to the bundle — the cost of the WebGL fidelity.
+## Data flow
+
+Queries are defined with `defineQuery` in `src/sanity/queries.ts` and fetched
+server-side through the **Live Content API** (`sanityFetch` from
+`src/sanity/lib/live.ts`), so published edits appear without a redeploy.
+`<SanityLive />` in the root layout drives that; `VisualEditing` mounts only
+when Draft Mode is on.
+
+Regenerate query result types after editing a query or the schema:
+
+```bash
+cd ../studio-portfolio && npm run typegen   # → portfolio/src/sanity/types.ts
+```
 
 ## Structure
 
 ```
-index.html              # meta, fonts, favicon
 src/
-  main.jsx              # React entry
-  App.jsx               # page composition
-  data/content.js       # ← edit your content here
-  hooks/useReveal.js    # scroll-in reveal via IntersectionObserver
+  app/
+    layout.tsx            # fonts, metadata, SanityLive, VisualEditing
+    page.tsx              # server component — fetches Sanity, renders sections
+    globals.css           # design tokens + all styling
+    api/draft-mode/enable # Draft Mode entry point for Visual Editing
+  sanity/
+    env.ts  lib/client.ts  lib/live.ts  lib/image.ts
+    queries.ts            # GROQ, via defineQuery
+    types.ts              # generated — do not edit by hand
   components/
-    KoiPond.jsx         # the animated canvas hero
-    Nav.jsx  Hero.jsx  About.jsx  Work.jsx  Kiv.jsx  Contact.jsx
-  styles/global.css     # design tokens + all styling
+    SkyGL.jsx             # WebGL duotone sky (three.js)
+    Dither.jsx            # canvas ordered-dither study
+    Nav  Hero  About  Work  Kiv  Contact
+  hooks/
+    useReveal.js          # scroll-in reveal via IntersectionObserver
+    usePinnedScroll.js    # pinned horizontal card-scroll
+  data/content.js         # fallback content
 ```
+
+Components that touch `window`, canvas, or three.js are client components;
+everything else renders on the server.
 
 ## Deploying
 
-The build is fully static. `vite.config.js` uses `base: './'` so the
-contents of `dist/` work both at a root domain and in a GitHub Pages project
-subpath. Any static host (GitHub Pages, Netlify, Vercel, Cloudflare Pages)
-serves it directly.
+The app is a standard Next.js deployment (Vercel, Cloudflare, Netlify, or a
+Node host). Remember to:
+
+1. Set the same environment variables in the host, with `NEXT_PUBLIC_SITE_URL`
+   pointing at the production domain.
+2. Add the production URL as a **CORS origin** on the Sanity project:
+   `npx sanity cors add https://your-domain --credentials`.
+3. Deploy the Studio separately with `cd studio-portfolio && npx sanity deploy`.
+
+Note: three.js adds roughly 150 KB gzipped — the cost of the WebGL sky.
