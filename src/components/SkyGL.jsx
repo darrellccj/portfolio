@@ -218,20 +218,63 @@ export default function SkyGL() {
     window.addEventListener('resize', resize);
 
     let raf = 0;
+    let io = null;
+    let onVisibility = null;
+
     if (reduced) {
       renderer.render(scene, camera); // one static sky, no motion
     } else {
-      const start = performance.now();
+      // The clock only advances while we are actually drawing, so pausing
+      // and resuming never jumps the cloudscape forward by the gap.
+      let clock = T0;
+      let last = 0;
+
       const loop = (now) => {
-        uniforms.uTime.value = T0 + (now - start) / 1000;
+        if (last) clock += (now - last) / 1000;
+        last = now;
+        uniforms.uTime.value = clock;
         renderer.render(scene, camera);
         raf = requestAnimationFrame(loop);
       };
-      raf = requestAnimationFrame(loop);
+
+      const play = () => {
+        if (raf) return;
+        last = 0; // resume without swallowing the paused interval
+        raf = requestAnimationFrame(loop);
+      };
+      const pause = () => {
+        if (!raf) return;
+        cancelAnimationFrame(raf);
+        raf = 0;
+      };
+
+      // The hero is `overflow: hidden` and one viewport tall, so once you
+      // scroll past it this canvas is entirely off-screen — and a ~200-octave
+      // fragment shader has no business burning the GPU for nobody. Gate the
+      // loop on the canvas being in view and the tab being frontmost.
+      let onScreen = true;
+      let tabVisible = !document.hidden;
+      const sync = () => (onScreen && tabVisible ? play() : pause());
+
+      io = new IntersectionObserver(([entry]) => {
+        onScreen = entry.isIntersecting;
+        sync();
+      });
+      io.observe(canvas);
+
+      onVisibility = () => {
+        tabVisible = !document.hidden;
+        sync();
+      };
+      document.addEventListener('visibilitychange', onVisibility);
+
+      play();
     }
 
     return () => {
       cancelAnimationFrame(raf);
+      if (io) io.disconnect();
+      if (onVisibility) document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('resize', resize);
       quad.geometry.dispose();
       material.dispose();
