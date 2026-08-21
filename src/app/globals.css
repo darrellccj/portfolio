@@ -25,6 +25,11 @@
   --maxw: 1120px;
   --gutter: clamp(1.4rem, 5vw, 4rem);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Studio Mode chrome. Deliberately off-palette: edit affordances have to
+     read as a layer on top of the page, not as part of it, and everything
+     else here is one blue. */
+  --studio-accent: #f03e2f;
 }
 
 *,
@@ -771,12 +776,81 @@ main {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.studio-panel__frame {
+.studio-panel__field {
+  display: block;
+  padding: 0.8rem;
+}
+.studio-panel__field-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.studio-panel__input {
   display: block;
   width: 100%;
-  height: min(60vh, 480px);
-  border: 0;
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ink);
   background: var(--paper);
+  border: 1px solid var(--line);
+  resize: vertical;
+}
+.studio-panel__input:focus {
+  outline: none;
+  border-color: var(--studio-accent);
+}
+.studio-panel__input:disabled {
+  opacity: 0.5;
+}
+
+/* Overlay drawn over each editable field. Visual Editing positions and
+   sizes the box; these rules only fill and decorate it. */
+.studio-field {
+  position: absolute;
+  inset: -3px;
+  border-radius: 2px;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--studio-accent) 35%, transparent);
+  transition: box-shadow 0.12s var(--ease), background 0.12s var(--ease);
+}
+.studio-field:hover,
+.studio-field.is-active {
+  background: color-mix(in srgb, var(--studio-accent) 12%, transparent);
+  box-shadow: inset 0 0 0 2px var(--studio-accent);
+}
+.studio-field__label {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: 2px;
+  display: none;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.25em 0.5em;
+  border-radius: 2px;
+  background: var(--studio-accent);
+  color: var(--paper);
+  font-size: 0.58rem;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.studio-field__label.is-below {
+  bottom: auto;
+  top: 100%;
+  margin-bottom: 0;
+  margin-top: 2px;
+}
+.studio-field:hover .studio-field__label,
+.studio-field.is-active .studio-field__label {
+  display: inline-flex;
 }
 
 /* ─────────────────────────────────────────────────────────────

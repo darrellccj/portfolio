@@ -1,48 +1,96 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { VisualEditing } from 'next-sanity/visual-editing';
-import { useStudioMode } from './StudioModeContext';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {useRouter} from 'next/navigation';
+import {VisualEditing} from 'next-sanity/visual-editing';
+import {projectId} from '@/sanity/env';
+import {useStudioMode} from './StudioModeContext';
 import StudioOverlayField from './StudioOverlayField';
 
-const SAVE_STATUS_TEXT = {
+const STATUS_TEXT = {
   saving: 'Publishing…',
   saved: 'Published',
   empty: 'Nothing to publish',
   error: 'Publish failed',
+  patching: 'Saving…',
+  patched: 'Saved',
+  patchError: 'Could not save',
 };
 
-// A single component instance always returns the same overlay for every
-// field — kept stable across renders so VisualEditing doesn't re-mount.
+// Studio persists its session here once you have signed in at /studio.
+// Same origin as the site, so the site can read it. Value shape: {token}.
+const AUTH_KEY = `__studio_auth_token_${projectId}`;
+
+function readStudioToken() {
+  try {
+    return JSON.parse(window.localStorage.getItem(AUTH_KEY) || '{}').token || null;
+  } catch {
+    return null;
+  }
+}
+
+// One stable resolver for every field, so VisualEditing doesn't re-mount
+// overlays on each render.
 function resolveOverlayComponents() {
   return StudioOverlayField;
 }
 
 export default function StudioModePanel() {
-  const { open, close, selection, clearSelection, isDraftMode } = useStudioMode();
+  const {
+    open,
+    close,
+    selection,
+    clearSelection,
+    isDraftMode,
+    markTouched,
+    drainTouched,
+    forgetTouched,
+  } = useStudioMode();
   const router = useRouter();
 
   const [needsAuth, setNeedsAuth] = useState(false);
-  const [saveStatus, setSaveStatus] = useState(null);
+  const [status, setStatus] = useState(null);
+  const [draft, setDraft] = useState('');
+  // Only plain strings are editable here. Anything else — Portable Text,
+  // images, arrays, references — would be flattened to a string by the
+  // textarea, so those fields are shown read-only rather than destroyed.
+  const [editable, setEditable] = useState(true);
+  const [loadingField, setLoadingField] = useState(false);
   const [dragPos, setDragPos] = useState(null);
   const panelRef = useRef(null);
+  const patchTimer = useRef(null);
 
-  // Bootstrap Draft Mode the moment the panel opens, via a hidden iframe
-  // that triggers Presentation Tool's own preview-secret exchange in the
-  // background. The user never sees Presentation's UI — just its side
-  // effect, the Draft Mode cookie, which SiteLayout reads server-side and
-  // feeds back in as the isDraftMode prop on the next refresh.
+  // Enable Draft Mode by handing our own Sanity session to the server,
+  // which verifies it against the project before flipping the cookie.
+  // No Studio boot, so this settles in one round trip.
   useEffect(() => {
     if (!open || isDraftMode) return;
+
+    const token = readStudioToken();
+    if (!token) {
+      setNeedsAuth(true);
+      return;
+    }
+
+    let cancelled = false;
     setNeedsAuth(false);
 
-    const retry = setTimeout(() => router.refresh(), 1800);
-    const giveUp = setTimeout(() => setNeedsAuth(true), 4500);
+    fetch('/api/studio/enable', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({token}),
+    })
+      .then((res) => {
+        if (cancelled) return;
+        if (res.ok) router.refresh();
+        else setNeedsAuth(true);
+      })
+      .catch(() => {
+        if (!cancelled) setNeedsAuth(true);
+      });
 
     return () => {
-      clearTimeout(retry);
-      clearTimeout(giveUp);
+      cancelled = true;
     };
   }, [open, isDraftMode, router]);
 
@@ -50,25 +98,101 @@ export default function StudioModePanel() {
     if (isDraftMode) setNeedsAuth(false);
   }, [isDraftMode]);
 
+  // Pull the field's current value whenever a new one is selected.
+  useEffect(() => {
+    if (!selection?.id || !selection?.path) {
+      setDraft('');
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingField(true);
+
+    const params = new URLSearchParams({id: selection.id, path: selection.path});
+    fetch(`/api/studio/field?${params}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        const isString = typeof data.value === 'string';
+        setEditable(isString);
+        setDraft(isString ? data.value : '');
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoadingField(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selection?.id, selection?.path]);
+
+  // Debounced write to the draft document. SanityLive pushes the change
+  // back into the page, so the edit shows up in place without a refresh.
+  const queuePatch = useCallback(
+    (value) => {
+      if (!selection?.id || !selection?.path) return;
+      clearTimeout(patchTimer.current);
+
+      patchTimer.current = setTimeout(async () => {
+        setStatus('patching');
+        try {
+          const res = await fetch('/api/studio/field', {
+            method: 'PATCH',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({id: selection.id, path: selection.path, value}),
+          });
+          if (!res.ok) throw new Error('patch failed');
+          markTouched(selection.id);
+          setStatus('patched');
+        } catch {
+          setStatus('patchError');
+        } finally {
+          setTimeout(() => setStatus(null), 1800);
+        }
+      }, 400);
+    },
+    [selection?.id, selection?.path, markTouched]
+  );
+
+  useEffect(() => () => clearTimeout(patchTimer.current), []);
+
   const handleSave = useCallback(async () => {
-    setSaveStatus('saving');
+    setStatus('saving');
     try {
-      const res = await fetch('/api/studio/publish', { method: 'POST' });
+      const res = await fetch('/api/studio/publish', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ids: drainTouched()}),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Publish failed');
-      setSaveStatus(data.published.length ? 'saved' : 'empty');
+      forgetTouched();
+      setStatus(data.published.length ? 'saved' : 'empty');
       router.refresh();
     } catch {
-      setSaveStatus('error');
+      setStatus('error');
     } finally {
-      setTimeout(() => setSaveStatus(null), 2500);
+      setTimeout(() => setStatus(null), 2500);
     }
-  }, [router]);
+  }, [router, drainTouched, forgetTouched]);
 
   const handleClose = useCallback(() => {
     close();
-    fetch('/api/draft-mode/disable', { redirect: 'manual' }).finally(() => router.refresh());
+    fetch('/api/draft-mode/disable', {redirect: 'manual'}).finally(() => router.refresh());
   }, [close, router]);
+
+  // Escape steps back out: the open field first, then the panel itself.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      if (selection) clearSelection();
+      else handleClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, selection, clearSelection, handleClose]);
 
   const onDragStart = useCallback((e) => {
     if (e.button !== undefined && e.button !== 0) return;
@@ -80,7 +204,10 @@ export default function StudioModePanel() {
     const originTop = rect.top;
 
     const onMove = (ev) => {
-      setDragPos({ left: originLeft + (ev.clientX - startX), top: originTop + (ev.clientY - startY) });
+      setDragPos({
+        left: originLeft + (ev.clientX - startX),
+        top: originTop + (ev.clientY - startY),
+      });
     };
     const onUp = () => {
       window.removeEventListener('pointermove', onMove);
@@ -92,22 +219,10 @@ export default function StudioModePanel() {
 
   if (!open) return null;
 
-  const intentUrl = selection
-    ? `/studio/intent/edit/id=${selection.id};type=${selection.type}${selection.path ? `;path=${selection.path}` : ''}/`
-    : null;
+  const fieldLabel = selection?.path?.split('.').pop() ?? 'field';
 
   return (
     <>
-      {!isDraftMode && (
-        <iframe
-          src="/studio/presentation"
-          title="Studio Draft Mode bootstrap (hidden)"
-          aria-hidden="true"
-          tabIndex={-1}
-          style={{ position: 'fixed', width: 1, height: 1, left: -9999, top: -9999, border: 0 }}
-        />
-      )}
-
       {isDraftMode && <VisualEditing components={resolveOverlayComponents} />}
 
       <div
@@ -116,12 +231,14 @@ export default function StudioModePanel() {
         className="studio-panel"
         role="dialog"
         aria-label="Studio Mode"
-        style={dragPos ? { left: dragPos.left, top: dragPos.top, right: 'auto', bottom: 'auto' } : undefined}
+        style={
+          dragPos ? {left: dragPos.left, top: dragPos.top, right: 'auto', bottom: 'auto'} : undefined
+        }
       >
         <div className="studio-panel__bar" onPointerDown={onDragStart}>
           <span className="studio-panel__label">Studio Mode</span>
           <div className="studio-panel__actions">
-            {saveStatus && <span className="studio-panel__status">{SAVE_STATUS_TEXT[saveStatus]}</span>}
+            {status && <span className="studio-panel__status">{STATUS_TEXT[status]}</span>}
             {selection && (
               <button type="button" className="studio-panel__back" onClick={clearSelection}>
                 ‹ Back
@@ -131,7 +248,7 @@ export default function StudioModePanel() {
               type="button"
               className="studio-panel__save"
               onClick={handleSave}
-              disabled={saveStatus === 'saving'}
+              disabled={status === 'saving'}
             >
               Save
             </button>
@@ -142,20 +259,45 @@ export default function StudioModePanel() {
         </div>
 
         <div className="studio-panel__body">
-          {selection ? (
-            <iframe className="studio-panel__frame" src={intentUrl} title="Edit field" />
+          {!isDraftMode ? (
+            <p className="studio-panel__hint">
+              {needsAuth ? (
+                <>
+                  Sign in first — <a href="/studio" target="_blank" rel="noopener">open Studio</a>,
+                  then reopen Studio Mode.
+                </>
+              ) : (
+                'Waking up Studio…'
+              )}
+            </p>
+          ) : selection ? (
+            editable ? (
+              <label className="studio-panel__field">
+                <span className="studio-panel__field-label">{fieldLabel}</span>
+                <textarea
+                  className="studio-panel__input"
+                  value={draft}
+                  disabled={loadingField}
+                  autoFocus
+                  rows={4}
+                  onChange={(e) => {
+                    setDraft(e.target.value);
+                    queuePatch(e.target.value);
+                  }}
+                />
+              </label>
+            ) : (
+              <p className="studio-panel__hint">
+                <strong>{fieldLabel}</strong> isn&rsquo;t a plain text field.{' '}
+                <a href={`/studio/intent/edit/id=${selection.id};type=${selection.type}/`} target="_blank" rel="noopener">
+                  Edit it in Studio
+                </a>
+                .
+              </p>
+            )
           ) : (
             <p className="studio-panel__hint">
-              {!isDraftMode
-                ? needsAuth
-                  ? (
-                    <>
-                      Sign in first — <a href="/studio" target="_blank" rel="noopener">open Studio</a>, then
-                      reopen Studio Mode.
-                    </>
-                  )
-                  : 'Waking up Studio…'
-                : 'Hover the page and click a highlighted field to edit it here.'}
+              Hover the page and click a highlighted field to edit it here.
             </p>
           )}
         </div>
