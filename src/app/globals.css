@@ -808,15 +808,30 @@ main {
   opacity: 0.5;
 }
 
-/* Overlay drawn over each editable field. Visual Editing positions and
-   sizes the box; these rules only fill and decorate it. */
+/* Field overlay. The container spans the viewport and stays click-through;
+   only the field boxes inside it take pointer events. Boxes are positioned
+   from getBoundingClientRect, so they are viewport coordinates. */
+.studio-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+}
 .studio-field {
   position: absolute;
-  inset: -3px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
   border-radius: 2px;
   cursor: pointer;
+  pointer-events: auto;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--studio-accent) 35%, transparent);
   transition: box-shadow 0.12s var(--ease), background 0.12s var(--ease);
+}
+.studio-field:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--studio-accent);
 }
 .studio-field:hover,
 .studio-field.is-active {

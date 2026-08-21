@@ -2,10 +2,9 @@
 
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {useRouter} from 'next/navigation';
-import {VisualEditing} from 'next-sanity/visual-editing';
 import {projectId} from '@/sanity/env';
 import {useStudioMode} from './StudioModeContext';
-import StudioOverlayField from './StudioOverlayField';
+import StudioFieldOverlay from './StudioFieldOverlay';
 
 const STATUS_TEXT = {
   saving: 'Publishing…',
@@ -27,12 +26,6 @@ function readStudioToken() {
   } catch {
     return null;
   }
-}
-
-// One stable resolver for every field, so VisualEditing doesn't re-mount
-// overlays on each render.
-function resolveOverlayComponents() {
-  return StudioOverlayField;
 }
 
 export default function StudioModePanel() {
@@ -223,7 +216,7 @@ export default function StudioModePanel() {
 
   return (
     <>
-      {isDraftMode && <VisualEditing components={resolveOverlayComponents} />}
+      {isDraftMode && <StudioFieldOverlay />}
 
       <div
         ref={panelRef}
