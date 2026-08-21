@@ -95,6 +95,15 @@ export default function StudioMode() {
               <span className="studio-modal__label">Studio — Draft Mode</span>
               <div className="studio-modal__actions">
                 {status && <span className="studio-modal__status">{STATUS_TEXT[status]}</span>}
+                <a
+                  className="studio-modal__link"
+                  href="/studio/presentation"
+                  target="_blank"
+                  rel="noopener"
+                  title="Google blocks its sign-in page from loading inside an iframe — open here the first time to log in, then Studio Mode will work embedded"
+                >
+                  Open in New Tab ↗
+                </a>
                 <button
                   type="button"
                   className="studio-modal__save"
@@ -108,6 +117,10 @@ export default function StudioMode() {
                 </button>
               </div>
             </div>
+            <p className="studio-modal__hint">
+              Not loading? Sign in via &ldquo;Open in New Tab&rdquo; first — Google blocks its
+              own sign-in page from appearing inside an iframe like this one.
+            </p>
             <iframe
               ref={iframeRef}
               className="studio-modal__frame"

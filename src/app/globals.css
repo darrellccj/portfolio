@@ -760,6 +760,24 @@ main {
 .studio-modal__close:hover {
   border-color: var(--ink);
 }
+.studio-modal__link {
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s var(--ease);
+}
+.studio-modal__link:hover {
+  color: var(--ink);
+}
+.studio-modal__hint {
+  padding: 0.55rem 1.1rem;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 0.68rem;
+  line-height: 1.5;
+  color: var(--ink-faint);
+  text-transform: none;
+  letter-spacing: normal;
+}
 .studio-modal__frame {
   flex: 1;
   width: 100%;
