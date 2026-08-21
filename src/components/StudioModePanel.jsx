@@ -61,7 +61,11 @@ export default function StudioModePanel() {
 
     const token = readStudioToken();
     if (!token) {
-      setNeedsAuth(true);
+      // Nothing under __studio_auth_token_<projectId>. Either this browser
+      // has never signed in at /studio, or Studio signed in with cookie
+      // auth, which leaves nothing readable here. Both look the same from
+      // the site; both are fixed by signing in at /studio.
+      setNeedsAuth('no-session');
       return;
     }
 
@@ -75,11 +79,15 @@ export default function StudioModePanel() {
     })
       .then((res) => {
         if (cancelled) return;
+        // A session was found but the server would not take it — expired,
+        // revoked, or minted for a different project. Worth saying so
+        // rather than repeating "sign in", which sounds like nothing
+        // happened.
         if (res.ok) router.refresh();
-        else setNeedsAuth(true);
+        else setNeedsAuth('rejected');
       })
       .catch(() => {
-        if (!cancelled) setNeedsAuth(true);
+        if (!cancelled) setNeedsAuth('unreachable');
       });
 
     return () => {
@@ -254,14 +262,26 @@ export default function StudioModePanel() {
         <div className="studio-panel__body">
           {!isDraftMode ? (
             <p className="studio-panel__hint">
-              {needsAuth ? (
+              {needsAuth === 'no-session' && (
                 <>
-                  Sign in first — <a href="/studio" target="_blank" rel="noopener">open Studio</a>,
-                  then reopen Studio Mode.
+                  <strong>Not signed in.</strong> Studio Mode needs your Sanity session, and this
+                  browser has none. <a href="/studio" target="_blank" rel="noopener">Open Studio</a>,
+                  sign in, then reopen Studio Mode here.
                 </>
-              ) : (
-                'Waking up Studio…'
               )}
+              {needsAuth === 'rejected' && (
+                <>
+                  <strong>Session rejected.</strong> Found a Sanity session but the server would not
+                  accept it — usually expired, or for another project.{' '}
+                  <a href="/studio" target="_blank" rel="noopener">Sign in again</a>.
+                </>
+              )}
+              {needsAuth === 'unreachable' && (
+                <>
+                  <strong>Could not reach the server.</strong> /api/studio/enable did not respond.
+                </>
+              )}
+              {!needsAuth && 'Waking up Studio…'}
             </p>
           ) : selection ? (
             editable ? (

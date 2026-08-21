@@ -826,7 +826,10 @@ main {
   border-radius: 2px;
   cursor: pointer;
   pointer-events: auto;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--studio-accent) 35%, transparent);
+  /* The resting ring sits on top of a very pale hero, so 35% read as almost
+     nothing there. Enough to find at a glance, still quiet enough to leave
+     the page legible underneath. */
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--studio-accent) 60%, transparent);
   transition: box-shadow 0.12s var(--ease), background 0.12s var(--ease);
 }
 .studio-field:focus-visible {
