@@ -43,27 +43,40 @@ Studio Mode still opens and edits, but its Save button fails.
 
 ## Editing content
 
-The **Studio Mode** toggle (top right of the nav) opens the Studio's
-Presentation tool in a floating modal, in Draft Mode, over the page you're
-looking at. Presentation's own overlays highlight editable content as you
-hover; clicking one slides in the editor for that field, right there in the
-same modal. Its **Save** button publishes every pending draft in the
-dataset; **Close** turns Draft Mode back off. It's a shortcut over
-`/studio` — nothing it does isn't already possible there.
+The **Studio Mode** toggle sits in the footer. Clicking it does two things:
+it puts the live page itself into click-to-edit mode (via Sanity Visual
+Editing), and it opens a small floating panel, bottom-right, that you can
+drag anywhere. The panel shows nothing until you hover and click a
+highlighted field on the actual page — then it loads just that field's
+Studio edit form, deep-linked via `/studio/intent/edit/id=…;type=…;path=…/`
+with Studio's outer chrome hidden (`src/sanity/EmbeddedNavbar.tsx`, which
+detects the iframe via `window.self !== window.top`). **Back** returns the
+panel to its idle state; **Save** publishes every pending draft in the
+dataset; **Close** turns Draft Mode back off.
 
-Studio's outer chrome (workspace name, tool tabs, user menu) is hidden when
-it's loaded this way — `src/sanity/EmbeddedNavbar.tsx` detects the iframe via
-`window.self !== window.top` and skips rendering it — so Studio Mode reads
-as "the site, now editable" rather than Sanity's app shell in a box. Visit
-`/studio` directly instead of through the toggle to get the full chrome
-back, e.g. to reach Structure or Vision.
+Under the hood, Draft Mode gets enabled the moment the panel opens, via a
+hidden 1×1 iframe that briefly loads Presentation Tool purely to trigger its
+preview-secret exchange — you never see Presentation's UI, just its side
+effect (the cookie). The panel shows "Waking up Studio…" until that lands;
+if it's still not enabled after a few seconds, it shows a sign-in prompt
+instead (see below).
 
-The first time you use it in a given browser, sign in via the modal's
-**Open in New Tab** link rather than inside the iframe: Google (and most
-identity providers) refuses to render its own sign-in page inside an
-iframe, so an unauthenticated Studio embedded this way shows a blank panel
-or a 403 instead of a login form. Once you're signed in to Studio in that
-browser, Studio Mode loads normally embedded.
+The overlay/panel wiring (`src/components/StudioOverlayField.jsx`,
+`StudioModePanel.jsx`) is built on `next-sanity/visual-editing`'s
+`components` prop — an **alpha, undocumented-beyond-its-types** API for
+supplying a custom overlay component per field. It was verified by reading
+the installed package's source and TypeScript types rather than trying it
+in a browser: this sandbox has no network access to Sanity's API at all, so
+none of it has actually been seen working end to end. Check it for real on
+your first deploy — the failure mode if the alpha API changes shape is
+overlays not appearing or not being clickable, not a crash.
+
+The first time you use Studio Mode in a given browser, sign in to Studio
+first: Google (and most identity providers) refuses to render its own
+sign-in page inside an iframe, so the hidden bootstrap iframe can't
+authenticate you — it'll just silently fail and the panel will prompt you
+to open Studio in a new tab. Once you're signed in there, Studio Mode works
+normally.
 
 Content lives in Sanity. In the Studio:
 
