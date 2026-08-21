@@ -43,11 +43,18 @@ Studio Mode still opens and edits, but its Save button fails.
 
 ## Editing content
 
-The **Studio Mode** toggle (bottom-right of the live site) opens the Studio's
-Presentation tool in a modal, in Draft Mode, over the page you're looking at.
-Its **Save** button publishes every pending draft in the dataset; **Close**
-turns Draft Mode back off. It's a shortcut over `/studio` — nothing it does
-isn't already possible there.
+The **Studio Mode** toggle (top right of the nav) opens the Studio's
+Presentation tool in a floating modal, in Draft Mode, over the page you're
+looking at. Its **Save** button publishes every pending draft in the
+dataset; **Close** turns Draft Mode back off. It's a shortcut over
+`/studio` — nothing it does isn't already possible there.
+
+The first time you use it in a given browser, sign in via the modal's
+**Open in New Tab** link rather than inside the iframe: Google (and most
+identity providers) refuses to render its own sign-in page inside an
+iframe, so an unauthenticated Studio embedded this way shows a blank panel
+or a 403 instead of a login form. Once you're signed in to Studio in that
+browser, Studio Mode loads normally embedded.
 
 Content lives in Sanity. In the Studio:
 
