@@ -59,10 +59,14 @@ function collectFields() {
     const field = decodeField(node.nodeValue);
     if (!field) continue;
 
-    // One box per field, even when a value is split across several text
-    // nodes — the first (innermost) element wins.
-    const key = `${field.id}:${field.path}`;
-    if (!seen.has(key)) seen.set(key, {...field, key, element});
+    // Keyed by element, not by field: the same value often renders in
+    // several places (name is in the nav, the hero and the footer) and all
+    // of them should be clickable. Keying by field would box only the
+    // first. A value split across several text nodes inside one element
+    // still gets a single box.
+    if (!seen.has(element)) {
+      seen.set(element, {...field, key: `${field.id}:${field.path}:${seen.size}`, element});
+    }
   }
 
   return Array.from(seen.values());
@@ -143,7 +147,15 @@ export default function StudioFieldOverlay() {
       ro.disconnect();
       window.removeEventListener('scroll', measure, {capture: true});
       window.removeEventListener('resize', measure);
-      if (frame.current) cancelAnimationFrame(frame.current);
+      // Clearing the id matters as much as cancelling the frame: measure()
+      // bails while one is pending, so leaving a stale id here wedges it
+      // shut and nothing is ever measured again. The effect re-runs on
+      // every `fields` change (and twice on mount under StrictMode), so
+      // this cleanup lands mid-flight all the time.
+      if (frame.current) {
+        cancelAnimationFrame(frame.current);
+        frame.current = 0;
+      }
     };
   }, [fields, measure]);
 
