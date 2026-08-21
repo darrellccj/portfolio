@@ -1,12 +1,22 @@
 'use client';
 
-import {defineConfig} from 'sanity';
+import {buildLegacyTheme, defineConfig} from 'sanity';
 import {structureTool} from 'sanity/structure';
 import {presentationTool} from 'sanity/presentation';
 import {visionTool} from '@sanity/vision';
 import {schemaTypes} from './src/sanity/schemaTypes';
 import {structure} from './src/sanity/structure';
 import {apiVersion, dataset, projectId} from './src/sanity/env';
+import {EmbeddedNavbar} from './src/sanity/EmbeddedNavbar';
+
+// A light pass so Studio's accent color reads as this site's ink rather
+// than Sanity's default indigo — not a full reskin, just enough that
+// Studio Mode doesn't feel like a foreign app dropped on the page.
+const theme = buildLegacyTheme({
+  '--brand-primary': '#0d3372',
+  '--focus-color': '#0d3372',
+  '--default-button-primary-color': '#0d3372',
+});
 
 // Singletons are created and edited through Structure only — keep them
 // out of the global "create new" menu.
@@ -21,6 +31,13 @@ export default defineConfig({
 
   projectId,
   dataset,
+  theme,
+
+  studio: {
+    components: {
+      navbar: EmbeddedNavbar,
+    },
+  },
 
   plugins: [
     structureTool({structure}),

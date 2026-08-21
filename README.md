@@ -45,9 +45,18 @@ Studio Mode still opens and edits, but its Save button fails.
 
 The **Studio Mode** toggle (top right of the nav) opens the Studio's
 Presentation tool in a floating modal, in Draft Mode, over the page you're
-looking at. Its **Save** button publishes every pending draft in the
+looking at. Presentation's own overlays highlight editable content as you
+hover; clicking one slides in the editor for that field, right there in the
+same modal. Its **Save** button publishes every pending draft in the
 dataset; **Close** turns Draft Mode back off. It's a shortcut over
 `/studio` — nothing it does isn't already possible there.
+
+Studio's outer chrome (workspace name, tool tabs, user menu) is hidden when
+it's loaded this way — `src/sanity/EmbeddedNavbar.tsx` detects the iframe via
+`window.self !== window.top` and skips rendering it — so Studio Mode reads
+as "the site, now editable" rather than Sanity's app shell in a box. Visit
+`/studio` directly instead of through the toggle to get the full chrome
+back, e.g. to reach Structure or Vision.
 
 The first time you use it in a given browser, sign in via the modal's
 **Open in New Tab** link rather than inside the iframe: Google (and most
