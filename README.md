@@ -34,12 +34,20 @@ you can edit drafts beside a live preview of the site.
 | `NEXT_PUBLIC_SANITY_STUDIO_URL` | Studio path (`/studio`), for Visual Editing links |
 | `NEXT_PUBLIC_SITE_URL` | Absolute base for OG/metadata URLs |
 | `SANITY_API_READ_TOKEN` | **Server-only.** Viewer token for Draft Mode |
+| `SANITY_API_WRITE_TOKEN` | **Server-only.** Editor token Studio Mode's Save button uses to publish drafts |
 
 Create the read token under *Manage → API → Tokens* with **Viewer** rights.
 Without it the site still renders published content — only draft previewing
-is unavailable.
+is unavailable. Create the write token with **Editor** rights; without it
+Studio Mode still opens and edits, but its Save button fails.
 
 ## Editing content
+
+The **Studio Mode** toggle (bottom-right of the live site) opens the Studio's
+Presentation tool in a modal, in Draft Mode, over the page you're looking at.
+Its **Save** button publishes every pending draft in the dataset; **Close**
+turns Draft Mode back off. It's a shortcut over `/studio` — nothing it does
+isn't already possible there.
 
 Content lives in Sanity. In the Studio:
 

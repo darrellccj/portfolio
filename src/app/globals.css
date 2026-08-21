@@ -720,6 +720,15 @@ main {
   text-transform: uppercase;
   color: var(--ink-soft);
 }
+.studio-modal__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.studio-modal__status {
+  color: var(--ink-faint);
+}
+.studio-modal__save,
 .studio-modal__close {
   background: none;
   border: 1px solid var(--line);
@@ -729,7 +738,20 @@ main {
   text-transform: inherit;
   padding: 0.4em 0.8em;
   cursor: pointer;
-  transition: border-color 0.2s var(--ease), color 0.2s var(--ease);
+  transition: border-color 0.2s var(--ease), color 0.2s var(--ease),
+    background 0.2s var(--ease), opacity 0.2s var(--ease);
+}
+.studio-modal__save {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.studio-modal__save:hover {
+  opacity: 0.85;
+}
+.studio-modal__save:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 .studio-modal__close:hover {
   border-color: var(--ink);
