@@ -1,7 +1,6 @@
 'use client';
 
 import useReveal from '../hooks/useReveal.js';
-import StudioMode from './StudioMode';
 
 export default function Contact({ profile }) {
   const ref = useReveal({ threshold: 0.2 });
@@ -38,7 +37,6 @@ export default function Contact({ profile }) {
         <span>
           {profile.name} · {profile.location}
         </span>
-        <StudioMode />
         <span>© {new Date().getFullYear()}</span>
       </footer>
     </section>

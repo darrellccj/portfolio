@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import StudioMode from './StudioMode';
 
 const LINKS = [
   { label: 'About', href: '#about' },
@@ -25,13 +26,16 @@ export default function Nav({ name }) {
       <a href="#top" className="nav__brand">
         {name}
       </a>
-      <nav className="nav__links" aria-label="Sections">
-        {LINKS.map((l) => (
-          <a key={l.href} href={l.href}>
-            {l.label}
-          </a>
-        ))}
-      </nav>
+      <div className="nav__right">
+        <nav className="nav__links" aria-label="Sections">
+          {LINKS.map((l) => (
+            <a key={l.href} href={l.href}>
+              {l.label}
+            </a>
+          ))}
+        </nav>
+        <StudioMode />
+      </div>
     </header>
   );
 }

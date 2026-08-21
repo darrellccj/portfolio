@@ -99,6 +99,11 @@ button:focus-visible {
 .nav__brand {
   font-weight: 500;
 }
+.nav__right {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2.4rem);
+}
 .nav__links {
   display: flex;
   gap: clamp(1rem, 3vw, 2.4rem);
@@ -659,33 +664,34 @@ main {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   STUDIO MODE — footer toggle + floating editing modal
-   Opens /studio/presentation (same-origin, Sanity-authenticated) in
-   a floating panel so content edits happen without leaving the page.
+   STUDIO MODE — nav toggle + floating editing modal
+   Sits as the rightmost item in the nav, inheriting its light/dark
+   flip on scroll. Opens /studio/presentation (same-origin, Sanity-
+   authenticated) in a floating panel over the page.
    ───────────────────────────────────────────────────────────── */
 .studio-toggle {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5em 0.9em;
   background: none;
-  color: var(--paper-soft);
-  border: 1px solid var(--line-paper);
-  font-family: var(--mono);
-  font-size: inherit;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
   letter-spacing: inherit;
   text-transform: inherit;
+  opacity: 0.75;
   cursor: pointer;
-  transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+  transition: opacity 0.25s var(--ease);
 }
 .studio-toggle:hover {
-  color: var(--paper);
-  border-color: var(--paper);
+  opacity: 1;
 }
 .studio-toggle__dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   flex: none;
+  border-radius: 50%;
   background: currentColor;
 }
 .studio-modal {
