@@ -75,6 +75,44 @@ button:focus-visible {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   LOADING SCREEN — signature draw-on, then pushed off the top
+   Full-viewport paper overlay. Each stroke of the signature draws
+   itself in via stroke-dashoffset (timing computed from the actual
+   path lengths in LoadingScreen.jsx); once the last stroke lands,
+   the whole sheet slides up and out, revealing the page beneath.
+   ───────────────────────────────────────────────────────────── */
+.loading {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);
+  transform: translateY(0);
+  transition: transform 0.9s var(--ease);
+  will-change: transform;
+}
+.loading--exiting {
+  transform: translateY(-100%);
+}
+.loading__sig {
+  width: min(60vw, 420px);
+  height: auto;
+  overflow: visible;
+}
+.loading__sig path {
+  opacity: 0;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 46;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition-property: stroke-dashoffset;
+  transition-timing-function: var(--ease);
+}
+
+/* ─────────────────────────────────────────────────────────────
    NAV — centred glass pill
    A 30%-width floating capsule. The one place the flat/zero-radius
    rule is broken on purpose: it has to read as a lens sitting ON
