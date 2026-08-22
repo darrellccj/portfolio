@@ -39,7 +39,7 @@ function valueAtPath(doc: Record<string, unknown> | null, path: string): unknown
   return current;
 }
 
-function writeClient(token: string) {
+function clientWith(token: string) {
   return createClient({
     projectId,
     dataset,
@@ -53,24 +53,29 @@ function writeClient(token: string) {
 // Draft Mode is only ever switched on by api/studio/enable, which verifies
 // the caller's Sanity session against the project. Checking the cookie here
 // rather than re-verifying the token keeps a second auth path from existing.
-async function guard() {
+async function guard(need: 'read' | 'write') {
   if (!(await draftMode()).isEnabled) {
     return NextResponse.json(
       {error: 'Draft Mode is off — open Studio Mode first.'},
       {status: 401}
     );
   }
-  if (!process.env.SANITY_API_WRITE_TOKEN) {
+
+  // Reading a field only ever reads, so it runs on the Viewer token. Only
+  // PATCH needs write access. Splitting them means a server without a write
+  // token still shows values instead of failing every click.
+  const name = need === 'write' ? 'SANITY_API_WRITE_TOKEN' : 'SANITY_API_READ_TOKEN';
+  if (!process.env[name]) {
     return NextResponse.json(
-      {error: 'SANITY_API_WRITE_TOKEN is not configured.'},
-      {status: 500}
+      {code: 'no-token', error: `${name} is not configured on this server.`},
+      {status: 503}
     );
   }
   return null;
 }
 
 export async function GET(request: Request) {
-  const denied = await guard();
+  const denied = await guard('read');
   if (denied) return denied;
 
   const {searchParams} = new URL(request.url);
@@ -81,7 +86,7 @@ export async function GET(request: Request) {
     return NextResponse.json({error: 'Expected `id` and `path`.'}, {status: 400});
   }
 
-  const client = writeClient(process.env.SANITY_API_WRITE_TOKEN!);
+  const client = clientWith(process.env.SANITY_API_READ_TOKEN!);
   // Prefer the draft — that is what Studio Mode is editing — and fall back
   // to the published document for a field not yet touched in this session.
   const [draft, published] = await Promise.all([
@@ -96,7 +101,7 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const denied = await guard();
+  const denied = await guard('write');
   if (denied) return denied;
 
   let body: {id?: string; path?: string; value?: unknown};
@@ -111,7 +116,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({error: 'Expected `id` and `path`.'}, {status: 400});
   }
 
-  const client = writeClient(process.env.SANITY_API_WRITE_TOKEN!);
+  const client = clientWith(process.env.SANITY_API_WRITE_TOKEN!);
   const target = draftId(id);
   const source = await client.getDocument(publishedId(id));
 

@@ -49,6 +49,11 @@ export default function StudioModePanel() {
   // images, arrays, references — would be flattened to a string by the
   // textarea, so those fields are shown read-only rather than destroyed.
   const [editable, setEditable] = useState(true);
+  // Two different failures. fieldError means the value could not be loaded,
+  // so there is nothing to edit and the editor is replaced. saveError means
+  // a write failed while you were typing — the textarea has to stay put.
+  const [fieldError, setFieldError] = useState(null);
+  const [saveError, setSaveError] = useState(null);
   const [loadingField, setLoadingField] = useState(false);
   const [dragPos, setDragPos] = useState(null);
   const panelRef = useRef(null);
@@ -115,15 +120,31 @@ export default function StudioModePanel() {
     setLoadingField(true);
 
     const params = new URLSearchParams({id: selection.id, path: selection.path});
+    setFieldError(null);
+    setSaveError(null);
+
     fetch(`/api/studio/field?${params}`)
-      .then((res) => res.json())
-      .then((data) => {
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
         if (cancelled) return;
+
+        // A failed request is not the same thing as a non-text field, and
+        // conflating them sent every server error out as "isn't a plain
+        // text field" — which is a lie that points at the content instead
+        // of at the server.
+        if (!res.ok) {
+          setFieldError(data.error || `Request failed (${res.status}).`);
+          setEditable(false);
+          return;
+        }
+
         const isString = typeof data.value === 'string';
         setEditable(isString);
         setDraft(isString ? data.value : '');
       })
-      .catch(() => {})
+      .catch(() => {
+        if (!cancelled) setFieldError('Could not reach the server.');
+      })
       .finally(() => {
         if (!cancelled) setLoadingField(false);
       });
@@ -148,10 +169,17 @@ export default function StudioModePanel() {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({id: selection.id, path: selection.path, value}),
           });
-          if (!res.ok) throw new Error('patch failed');
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            throw new Error(body.error || `Request failed (${res.status}).`);
+          }
+          setSaveError(null);
           markTouched(selection.id);
           setStatus('patched');
-        } catch {
+        } catch (err) {
+          // Say what the server said. "Could not save" alone sends you
+          // looking at the content when the cause is usually configuration.
+          setSaveError(err.message);
           setStatus('patchError');
         } finally {
           setTimeout(() => setStatus(null), 1800);
@@ -296,7 +324,11 @@ export default function StudioModePanel() {
               {!needsAuth && 'Waking up Studio…'}
             </p>
           ) : selection ? (
-            editable ? (
+            fieldError ? (
+              <p className="studio-panel__hint">
+                <strong>Could not load {fieldLabel}.</strong> {fieldError}
+              </p>
+            ) : editable ? (
               <label className="studio-panel__field">
                 <span className="studio-panel__field-label">{fieldLabel}</span>
                 <textarea
@@ -310,6 +342,7 @@ export default function StudioModePanel() {
                     queuePatch(e.target.value);
                   }}
                 />
+                {saveError && <span className="studio-panel__error">{saveError}</span>}
               </label>
             ) : (
               <p className="studio-panel__hint">
