@@ -1,9 +1,9 @@
 import type {Metadata, Viewport} from 'next';
-import {Instrument_Serif, IBM_Plex_Mono} from 'next/font/google';
+import {Inter, IBM_Plex_Mono} from 'next/font/google';
 
-const serif = Instrument_Serif({
+const serif = Inter({
   subsets: ['latin'],
-  weight: '400',
+  weight: ['400', '600'],
   style: ['normal', 'italic'],
   variable: '--font-serif',
   display: 'swap',
