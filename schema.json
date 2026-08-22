@@ -408,6 +408,16 @@
         },
         "optional": true
       },
+      "roles": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "string"
+          }
+        },
+        "optional": true
+      },
       "tagline": {
         "type": "objectAttribute",
         "value": {

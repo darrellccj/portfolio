@@ -89,6 +89,7 @@ export type Profile = {
   _rev: string;
   name?: string;
   role?: string;
+  roles?: Array<string>;
   tagline?: string;
   about?: string;
   email?: string;
@@ -224,10 +225,11 @@ export type AllSanitySchemaTypes =
 
 // Source: src/sanity/queries.ts
 // Variable: PROFILE_QUERY
-// Query: *[_type == "profile"][0]{    name, role, tagline, about, email, location,    socials[]{ label, href },    stack  }
+// Query: *[_type == "profile"][0]{    name, role, roles, tagline, about, email, location,    socials[]{ label, href },    stack  }
 export type PROFILE_QUERY_RESULT = {
   name: string | null;
   role: string | null;
+  roles: Array<string> | null;
   tagline: string | null;
   about: string | null;
   email: string | null;
@@ -274,7 +276,7 @@ export type DITHER_QUERY_RESULT = {
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '\n  *[_type == "profile"][0]{\n    name, role, tagline, about, email, location,\n    socials[]{ label, href },\n    stack\n  }\n': PROFILE_QUERY_RESULT;
+    '\n  *[_type == "profile"][0]{\n    name, role, roles, tagline, about, email, location,\n    socials[]{ label, href },\n    stack\n  }\n': PROFILE_QUERY_RESULT;
     '\n  *[_type == "project"] | order(order asc, year desc){\n    _id, tag, title, desc, year, href\n  }\n': PROJECTS_QUERY_RESULT;
     '\n  *[_type == "kivItem"] | order(order asc){\n    _id, tag, title, desc\n  }\n': KIV_QUERY_RESULT;
     '\n  *[_type == "ditherStudy"][0]{\n    work, credit, "imageUrl": image.asset->url\n  }\n': DITHER_QUERY_RESULT;

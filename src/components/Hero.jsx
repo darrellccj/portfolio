@@ -1,6 +1,10 @@
 import SkyGL from './SkyGL.jsx';
+import TypedRole from './TypedRole.jsx';
 
-// Server component — the only client work here is the sky canvas.
+const roleWords = (profile) => (profile.roles?.length ? profile.roles : [profile.role]);
+
+// Server component — the sky canvas and the typewriter eyebrow are
+// the only client work; everything else renders on the server.
 export default function Hero({ profile }) {
   return (
     <section className="hero" id="top">
@@ -8,18 +12,26 @@ export default function Hero({ profile }) {
       <SkyGL />
 
       <div className="hero__inner">
-        <p className="hero__eyebrow">{profile.role}</p>
+        <p className="hero__eyebrow">
+          <TypedRole words={roleWords(profile)} />
+        </p>
         <h1 className="hero__name">{profile.name}</h1>
-        <p className="hero__tagline">{profile.tagline}</p>
       </div>
 
-      {/* Spec strip: the hero's baseline reads like a title block. */}
-      <div className="hero__meta" aria-hidden="true">
-        <span>LOC — {(profile.location || '').toUpperCase()}</span>
-        <span className="hero__meta-fig">FIG. 01 — SKY, DUOTONE</span>
-        <a href="#about" className="hero__scroll" aria-hidden="false" aria-label="Scroll to content">
-          SCROLL ↓
-        </a>
+      {/* Bottom strip: a running tagline ticker over the spec title block. */}
+      <div className="hero__strip">
+        <div className="hero__ticker">
+          <div className="hero__ticker-track">
+            <span>{profile.tagline}</span>
+            <span aria-hidden="true">{profile.tagline}</span>
+          </div>
+        </div>
+        <div className="hero__meta" aria-hidden="true">
+          <span>LOC — {(profile.location || '').toUpperCase()}</span>
+          <a href="#about" className="hero__scroll" aria-hidden="false" aria-label="Scroll to content">
+            SCROLL ↓
+          </a>
+        </div>
       </div>
     </section>
   );

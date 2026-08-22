@@ -6,7 +6,7 @@ import { defineQuery } from 'next-sanity';
 
 export const PROFILE_QUERY = defineQuery(`
   *[_type == "profile"][0]{
-    name, role, tagline, about, email, location,
+    name, role, roles, tagline, about, email, location,
     socials[]{ label, href },
     stack
   }
