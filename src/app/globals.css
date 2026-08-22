@@ -80,6 +80,11 @@ button:focus-visible {
    itself in via stroke-dashoffset (timing computed from the actual
    path lengths in LoadingScreen.jsx); once the last stroke lands,
    the whole sheet slides up and out, revealing the page beneath.
+   Both the draw and the slide are driven frame-by-frame from JS
+   rather than CSS transitions — see the comment on `makeEasing` in
+   LoadingScreen.jsx for why — so this file only sets the resting
+   appearance; LoadingScreen.jsx writes `transform`/`stroke-dashoffset`
+   directly on these elements as it animates.
    ───────────────────────────────────────────────────────────── */
 .loading {
   position: fixed;
@@ -89,12 +94,7 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
   background: var(--paper);
-  transform: translateY(0);
-  transition: transform 0.9s var(--ease);
   will-change: transform;
-}
-.loading--exiting {
-  transform: translateY(-100%);
 }
 .loading__sig {
   width: min(60vw, 420px);
@@ -108,8 +108,6 @@ button:focus-visible {
   stroke-width: 46;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition-property: stroke-dashoffset;
-  transition-timing-function: var(--ease);
 }
 
 /* ─────────────────────────────────────────────────────────────
