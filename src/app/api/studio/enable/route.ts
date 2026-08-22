@@ -31,6 +31,22 @@ export async function POST(request: Request) {
     return NextResponse.json({error: 'No Studio session found.'}, {status: 401});
   }
 
+  // Refuse to switch Draft Mode on when the server cannot actually serve
+  // drafts. defineLive only encodes stega — the source data every editable
+  // field is found through — when it has a serverToken, so without this the
+  // cookie flips, the page keeps rendering published content, and Studio
+  // Mode opens onto a page with nothing to click. Failing here says why.
+  if (!process.env.SANITY_API_READ_TOKEN) {
+    return NextResponse.json(
+      {
+        code: 'no-read-token',
+        error:
+          'SANITY_API_READ_TOKEN is not set on this server, so drafts and field source data cannot be fetched.',
+      },
+      {status: 503}
+    );
+  }
+
   // useProjectHostname (the default) sends this to <projectId>.api.sanity.io,
   // so a valid token that has no access to *this* project still 401s.
   const client = createClient({

@@ -78,14 +78,18 @@ export default function StudioModePanel() {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({token}),
     })
-      .then((res) => {
+      .then(async (res) => {
         if (cancelled) return;
+        if (res.ok) {
+          router.refresh();
+          return;
+        }
         // A session was found but the server would not take it — expired,
         // revoked, or minted for a different project. Worth saying so
         // rather than repeating "sign in", which sounds like nothing
-        // happened.
-        if (res.ok) router.refresh();
-        else setNeedsAuth('rejected');
+        // happened. The server also reports its own misconfiguration here.
+        const body = await res.json().catch(() => ({}));
+        setNeedsAuth(body.code === 'no-read-token' ? 'no-read-token' : 'rejected');
       })
       .catch(() => {
         if (!cancelled) setNeedsAuth('unreachable');
@@ -275,6 +279,13 @@ export default function StudioModePanel() {
                   <strong>Session rejected.</strong> Found a Sanity session but the server would not
                   accept it — usually expired, or for another project.{' '}
                   <a href="/studio" target="_blank" rel="noopener">Sign in again</a>.
+                </>
+              )}
+              {needsAuth === 'no-read-token' && (
+                <>
+                  <strong>Server is missing SANITY_API_READ_TOKEN.</strong> Without it drafts and
+                  field source data cannot be fetched, so there would be nothing to edit. Set it in
+                  the environment this site is running from, then restart.
                 </>
               )}
               {needsAuth === 'unreachable' && (
