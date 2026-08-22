@@ -1099,15 +1099,17 @@ main {
     gap: 1.1rem;
     padding: 1.3rem 1.2rem;
     border-radius: 1.4rem;
-    background: inherit;
-    border: inherit;
-    box-shadow: inherit;
-    -webkit-backdrop-filter: inherit;
-    backdrop-filter: inherit;
+    background: var(--ink);
+    border: 1px solid rgba(159, 212, 247, 0.28);
+    box-shadow: 0 10px 34px rgba(13, 51, 114, 0.32);
     opacity: 0;
     transform: translateY(-8px);
     pointer-events: none;
     transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+  }
+  .nav--solid .nav__links {
+    background: var(--paper);
+    border-color: rgba(13, 51, 114, 0.18);
   }
   .nav--open .nav__links {
     opacity: 1;
