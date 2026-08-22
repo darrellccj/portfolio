@@ -9,6 +9,14 @@ export const profile = defineType({
     defineField({name: 'name', type: 'string', validation: (r) => r.required()}),
     defineField({name: 'role', type: 'string', validation: (r) => r.required()}),
     defineField({
+      name: 'roles',
+      title: 'Roles (typewriter)',
+      type: 'array',
+      of: [{type: 'string'}],
+      description:
+        'Optional — short phrases the hero eyebrow cycles through. Falls back to Role above if empty.',
+    }),
+    defineField({
       name: 'tagline',
       type: 'text',
       rows: 3,

@@ -348,6 +348,19 @@ main {
   margin-bottom: 1.4rem;
   animation: rise 1s var(--ease) both;
 }
+.hero__cursor {
+  display: inline-block;
+  width: 1px;
+  height: 0.8em;
+  margin-left: 3px;
+  background: currentColor;
+  vertical-align: -0.05em;
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
 .hero__name {
   font-family: var(--serif);
   font-weight: 400;
@@ -356,20 +369,41 @@ main {
   letter-spacing: -0.01em;
   animation: rise 1s var(--ease) 0.08s both;
 }
-.hero__tagline {
-  margin: 1.7rem auto 0;
-  max-width: 42ch;
-  font-size: clamp(0.78rem, 1.6vw, 0.88rem);
-  letter-spacing: 0.04em;
-  color: var(--paper-soft);
-  animation: rise 1s var(--ease) 0.16s both;
-}
-/* Spec strip: the hero's title block. Solid paper, hairline top —
-   the hard edge where the sky ends and the document begins. */
-.hero__meta {
+/* Bottom strip: two stacked bands — a running tagline ticker over the
+   spec title block. Solid paper, hairline top — the hard edge where
+   the sky ends and the document begins. */
+.hero__strip {
   position: absolute;
   inset: auto 0 0 0;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  animation: rise 1s var(--ease) 0.3s both;
+}
+.hero__ticker {
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(--paper);
+  padding: 0.6rem 0;
+}
+.hero__ticker-track {
+  display: inline-flex;
+  width: max-content;
+  animation: marquee 26s linear infinite;
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.hero__ticker-track span {
+  padding: 0 2.4rem;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(0.82rem, 1.6vw, 1rem);
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+.hero__meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -381,7 +415,6 @@ main {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--ink-faint);
-  animation: rise 1s var(--ease) 0.3s both;
 }
 .hero__scroll {
   position: relative;
@@ -1154,6 +1187,9 @@ main {
   }
   .hero__meta-fig {
     display: none;
+  }
+  .hero__ticker-track span {
+    padding: 0 1.4rem;
   }
   .footer {
     flex-direction: column;
