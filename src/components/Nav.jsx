@@ -22,16 +22,18 @@ export default function Nav({ name }) {
 
   return (
     <header className={`nav ${solid ? 'nav--solid' : ''}`}>
-      <a href="#top" className="nav__brand">
-        {name}
-      </a>
-      <nav className="nav__links" aria-label="Sections">
-        {LINKS.map((l) => (
-          <a key={l.href} href={l.href}>
-            {l.label}
-          </a>
-        ))}
-      </nav>
+      <div className="nav__pill">
+        <a href="#top" className="nav__brand">
+          {name}
+        </a>
+        <nav className="nav__links" aria-label="Sections">
+          {LINKS.map((l) => (
+            <a key={l.href} href={l.href}>
+              {l.label}
+            </a>
+          ))}
+        </nav>
+      </div>
     </header>
   );
 }

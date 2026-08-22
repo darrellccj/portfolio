@@ -75,41 +75,135 @@ button:focus-visible {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   NAV — mono manifest bar
-   Light type while floating over the dark zenith; flips to ink on
-   paper once it goes solid past the hero.
+   NAV — centred glass pill
+   A 30%-width floating capsule. The one place the flat/zero-radius
+   rule is broken on purpose: it has to read as a lens sitting ON
+   the page, not as part of it. Still two inks only — the "glass"
+   is paper-alpha over whatever it happens to be refracting.
    ───────────────────────────────────────────────────────────── */
 .nav {
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 20;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.1rem var(--gutter);
-  font-size: 0.72rem;
+  justify-content: center;
+  padding: 1rem var(--gutter) 0;
+  pointer-events: none;
+  font-size: clamp(0.58rem, 0.72vw, 0.72rem);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--paper);
-  transition: background 0.35s var(--ease), color 0.35s var(--ease),
-    padding 0.35s var(--ease), box-shadow 0.35s var(--ease);
+  transition: color 0.35s var(--ease), padding 0.35s var(--ease);
 }
+
+.nav__pill {
+  position: relative;
+  pointer-events: auto;
+  width: 30vw;
+  min-width: 25rem;
+  max-width: 40rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  padding: 0.72rem 1.35rem;
+  border-radius: 999px;
+  isolation: isolate;
+
+  /* the glass body */
+  background: linear-gradient(
+    160deg,
+    rgba(13, 51, 114, 0.32) 0%,
+    rgba(13, 51, 114, 0.2) 48%,
+    rgba(13, 51, 114, 0.3) 100%
+  );
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(159, 212, 247, 0.28);
+
+  /* lift + the edge specular that sells the thickness */
+  box-shadow: 0 10px 34px rgba(13, 51, 114, 0.22),
+    inset 0 1px 0 rgba(159, 212, 247, 0.5),
+    inset 0 -1px 0 rgba(13, 51, 114, 0.16),
+    inset 0 0 22px rgba(159, 212, 247, 0.08);
+
+  transition: background 0.45s var(--ease), border-color 0.45s var(--ease),
+    box-shadow 0.45s var(--ease), transform 0.45s var(--ease);
+}
+
+/* Top gloss — the light catching the upper curve of the capsule. */
+.nav__pill::before {
+  content: '';
+  position: absolute;
+  inset: 1px 1px auto;
+  height: 46%;
+  border-radius: 999px 999px 40% 40% / 999px 999px 100% 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(159, 212, 247, 0.26),
+    rgba(159, 212, 247, 0)
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Off-centre specular hotspot — keeps the surface from reading flat. */
+.nav__pill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    120% 180% at 18% -40%,
+    rgba(159, 212, 247, 0.3),
+    rgba(159, 212, 247, 0) 60%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+.nav__pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 40px rgba(13, 51, 114, 0.26),
+    inset 0 1px 0 rgba(159, 212, 247, 0.6),
+    inset 0 -1px 0 rgba(13, 51, 114, 0.16),
+    inset 0 0 22px rgba(159, 212, 247, 0.1);
+}
+
+/* Past the hero the pill sits on paper, so the tint flips to ink. */
 .nav--solid {
-  background: var(--paper);
   color: var(--ink);
-  box-shadow: 0 1px 0 var(--line);
-  padding-top: 0.8rem;
-  padding-bottom: 0.8rem;
 }
+.nav--solid .nav__pill {
+  background: linear-gradient(
+    160deg,
+    rgba(159, 212, 247, 0.66) 0%,
+    rgba(159, 212, 247, 0.42) 55%,
+    rgba(13, 51, 114, 0.06) 100%
+  );
+  border-color: rgba(13, 51, 114, 0.18);
+  box-shadow: 0 10px 30px rgba(13, 51, 114, 0.14),
+    inset 0 1px 0 rgba(159, 212, 247, 0.85),
+    inset 0 -1px 0 rgba(13, 51, 114, 0.1);
+}
+.nav--solid .nav__pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 36px rgba(13, 51, 114, 0.18),
+    inset 0 1px 0 rgba(159, 212, 247, 0.9),
+    inset 0 -1px 0 rgba(13, 51, 114, 0.1);
+}
+
 .nav__brand {
   font-weight: 500;
+  white-space: nowrap;
 }
 .nav__links {
   display: flex;
-  gap: clamp(1rem, 3vw, 2.4rem);
+  gap: clamp(0.7rem, 1.4vw, 1.3rem);
 }
 .nav__links a {
   position: relative;
+  white-space: nowrap;
   opacity: 0.75;
   transition: opacity 0.25s var(--ease);
 }
@@ -130,6 +224,17 @@ button:focus-visible {
 }
 .nav__links a:hover::after {
   transform: scaleX(1);
+}
+
+/* No backdrop-filter (older Firefox / Safari fallbacks): go opaque
+   enough that the type stays legible instead of shipping a ghost. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .nav__pill {
+    background: rgba(13, 51, 114, 0.55);
+  }
+  .nav--solid .nav__pill {
+    background: rgba(159, 212, 247, 0.92);
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -911,14 +1016,40 @@ main {
     grid-column: 2;
   }
 }
+/* Below ~1280px the 30% target would starve the type, so the pill
+   stops tracking the viewport and just sits at its natural width. */
+@media (max-width: 900px) {
+  .nav {
+    padding: 0.75rem 1rem 0;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+  }
+  .nav__pill {
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+    gap: 0.9rem;
+    padding: 0.6rem 1.1rem;
+  }
+}
+
 @media (max-width: 640px) {
   html,
   body {
     overscroll-behavior-y: none;
   }
+  .nav {
+    font-size: 0.56rem;
+    letter-spacing: 0.06em;
+  }
+  .nav__pill {
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.55rem 1rem;
+    border-radius: 1.6rem;
+  }
   .nav__links {
-    gap: 0.9rem;
-    font-size: 0.66rem;
+    gap: 0.75rem;
   }
   .hero__meta-fig {
     display: none;
