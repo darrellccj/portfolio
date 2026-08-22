@@ -199,6 +199,7 @@ button:focus-visible {
 }
 .nav__toggle {
   display: none;
+  color: inherit;
 }
 .nav__links {
   display: flex;
