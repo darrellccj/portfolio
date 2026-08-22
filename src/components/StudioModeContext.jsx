@@ -10,6 +10,10 @@ const StudioModeContext = createContext(null);
 export function StudioModeProvider({isDraftMode, children}) {
   const [open, setOpen] = useState(false);
   const [selection, setSelection] = useState(null);
+  // How many editable fields the overlay actually found. Reported back so
+  // the panel can tell "nothing to hover yet" apart from "hover something",
+  // which otherwise look identical and read as the feature being broken.
+  const [fieldCount, setFieldCount] = useState(null);
   // Every document Studio Mode has patched this session, so Save publishes
   // exactly those rather than every draft in the dataset.
   const touched = useRef(new Set());
@@ -41,6 +45,8 @@ export function StudioModeProvider({isDraftMode, children}) {
       select,
       clearSelection,
       isDraftMode,
+      fieldCount,
+      setFieldCount,
       markTouched,
       drainTouched,
       forgetTouched,
@@ -49,6 +55,7 @@ export function StudioModeProvider({isDraftMode, children}) {
       open,
       selection,
       isDraftMode,
+      fieldCount,
       toggle,
       close,
       select,

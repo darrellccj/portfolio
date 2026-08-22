@@ -73,7 +73,7 @@ function collectFields() {
 }
 
 export default function StudioFieldOverlay() {
-  const {select, selection} = useStudioMode();
+  const {select, selection, setFieldCount} = useStudioMode();
   const [fields, setFields] = useState([]);
   const [rects, setRects] = useState([]);
   const frame = useRef(0);
@@ -158,6 +158,12 @@ export default function StudioFieldOverlay() {
       }
     };
   }, [fields, measure]);
+
+  // Report what the scan found, so the panel can say "no editable fields
+  // on this page" rather than inviting a hover that will never light up.
+  useEffect(() => {
+    setFieldCount(fields.length);
+  }, [fields.length, setFieldCount]);
 
   if (typeof document === 'undefined') return null;
 

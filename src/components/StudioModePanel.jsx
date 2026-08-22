@@ -35,6 +35,7 @@ export default function StudioModePanel() {
     selection,
     clearSelection,
     isDraftMode,
+    fieldCount,
     markTouched,
     drainTouched,
     forgetTouched,
@@ -310,7 +311,19 @@ export default function StudioModePanel() {
             )
           ) : (
             <p className="studio-panel__hint">
-              Hover the page and click a highlighted field to edit it here.
+              {fieldCount === 0 ? (
+                <>
+                  <strong>No editable fields found.</strong> Draft Mode is on, but nothing on this
+                  page carries Sanity source data. Usually that means stega is off — check that{' '}
+                  <code>SANITY_API_READ_TOKEN</code> is set on the running server and that the dev
+                  server was restarted after changing it.
+                </>
+              ) : (
+                <>
+                  Hover the page and click a highlighted field to edit it here.
+                  {fieldCount > 0 && ` (${fieldCount} found)`}
+                </>
+              )}
             </p>
           )}
         </div>
