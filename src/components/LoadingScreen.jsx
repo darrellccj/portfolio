@@ -18,66 +18,109 @@ const MAX_DURATION = 1.4;
 // continuous hand rather than a strict relay.
 const OVERLAP = 0.7;
 const HOLD = 0.26;
-// Kept in sync with the `.loading` transform transition in globals.css.
 const EXIT_DURATION = 0.9;
 
+// Same curve as --ease (cubic-bezier(0.22, 1, 0.36, 1)), evaluated frame by
+// frame instead of left to a CSS transition. A CSS transition only animates
+// if the browser gets to paint the "before" style first; on a tab that's
+// backgrounded or still settling when this mounts, that paint can get
+// skipped and the transition snaps straight to its end value with nothing
+// visibly drawn. Computing the in-between frames ourselves has no such
+// requirement — it draws correctly no matter when the frames start running.
+function makeEasing(x1, y1, x2, y2) {
+  const A = (a1, a2) => 1 - 3 * a2 + 3 * a1;
+  const B = (a1, a2) => 3 * a2 - 6 * a1;
+  const C = (a1) => 3 * a1;
+  const bezier = (t, a1, a2) => ((A(a1, a2) * t + B(a1, a2)) * t + C(a1)) * t;
+  const slope = (t, a1, a2) => 3 * A(a1, a2) * t * t + 2 * B(a1, a2) * t + C(a1);
+  return (x) => {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    let t = x;
+    for (let i = 0; i < 8; i++) {
+      const s = slope(t, x1, x2);
+      if (Math.abs(s) < 1e-6) break;
+      t -= (bezier(t, x1, x2) - x) / s;
+    }
+    return bezier(t, y1, y2);
+  };
+}
+const ease = makeEasing(0.22, 1, 0.36, 1);
+
 export default function LoadingScreen() {
-  const [phase, setPhase] = useState('measuring'); // measuring -> drawing -> exiting -> done
-  const [timing, setTiming] = useState(null);
+  const [done, setDone] = useState(false);
+  const containerRef = useRef(null);
   const pathRefs = useRef([]);
 
   useEffect(() => {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    // Timers below drive the state machine directly rather than listening for
-    // the CSS transition to end, so a dropped or restarted transition (e.g. a
-    // stray re-render, a backgrounded tab) can never leave the overlay
-    // stuck covering the site.
     const speedUp = reducedMotion ? 40 : 1;
     document.body.style.overflow = 'hidden';
 
     let delay = 0;
-    const next = pathRefs.current.map((el) => {
+    const timing = pathRefs.current.map((el) => {
       const length = el.getTotalLength();
       const duration = Math.min(MAX_DURATION, Math.max(MIN_DURATION, length / SPEED)) / speedUp;
-      const item = { length, duration, delay };
+      const item = { el, length, duration, delay };
       delay += duration * OVERLAP;
+      el.style.opacity = 1;
+      el.style.strokeDasharray = length;
+      el.style.strokeDashoffset = length;
       return item;
     });
-    setTiming(next);
 
-    const last = next[next.length - 1];
-    const drawMs = (last.delay + last.duration) * 1000;
+    const last = timing[timing.length - 1];
+    const totalDraw = last.delay + last.duration; // seconds
     const holdMs = reducedMotion ? 0 : HOLD * 1000;
-    const exitMs = (EXIT_DURATION / speedUp) * 1000;
+    const exitS = EXIT_DURATION / speedUp;
 
+    let rafId;
     const timers = [];
-    // Two rAFs so the browser paints the "undrawn" state before we flip to
-    // "drawing" — otherwise the two style states can collapse into one
-    // frame and the stroke transition never fires.
-    const outer = requestAnimationFrame(() => {
-      const inner = requestAnimationFrame(() => {
-        setPhase('drawing');
-        timers.push(
-          window.setTimeout(() => {
-            document.body.style.overflow = '';
-            setPhase('exiting');
-            timers.push(window.setTimeout(() => setPhase('done'), exitMs));
-          }, drawMs + holdMs)
-        );
+    let drawStart = null;
+
+    const drawTick = (ts) => {
+      if (drawStart === null) drawStart = ts;
+      const elapsed = (ts - drawStart) / 1000;
+      timing.forEach((t) => {
+        const local = Math.min(1, Math.max(0, (elapsed - t.delay) / t.duration));
+        t.el.style.strokeDashoffset = t.length * (1 - ease(local));
       });
-      timers.push(inner);
-    });
-    timers.push(outer);
+      if (elapsed < totalDraw) {
+        rafId = requestAnimationFrame(drawTick);
+      } else {
+        timing.forEach((t) => (t.el.style.strokeDashoffset = 0));
+        timers.push(window.setTimeout(startExit, holdMs));
+      }
+    };
+
+    const startExit = () => {
+      document.body.style.overflow = '';
+      let exitStart = null;
+      const exitTick = (ts) => {
+        if (exitStart === null) exitStart = ts;
+        const elapsed = (ts - exitStart) / 1000;
+        const local = Math.min(1, Math.max(0, elapsed / exitS));
+        if (containerRef.current) {
+          containerRef.current.style.transform = `translateY(${-100 * ease(local)}%)`;
+        }
+        if (elapsed < exitS) {
+          rafId = requestAnimationFrame(exitTick);
+        } else {
+          setDone(true);
+        }
+      };
+      rafId = requestAnimationFrame(exitTick);
+    };
+
+    rafId = requestAnimationFrame(drawTick);
 
     return () => {
-      timers.forEach((id) => {
-        cancelAnimationFrame(id);
-        clearTimeout(id);
-      });
+      cancelAnimationFrame(rafId);
+      timers.forEach((id) => clearTimeout(id));
     };
   }, []);
 
-  if (phase === 'done') return null;
+  if (done) return null;
 
   return (
     <>
@@ -86,27 +129,11 @@ export default function LoadingScreen() {
       <noscript>
         <style>{'.loading { display: none; }'}</style>
       </noscript>
-      <div className={`loading loading--${phase}`} aria-hidden="true">
+      <div ref={containerRef} className="loading" aria-hidden="true">
         <svg className="loading__sig" viewBox="0 0 3508 2480">
-          {SIGNATURE_PATHS.map((d, i) => {
-            const t = timing?.[i];
-            return (
-              <path
-                key={i}
-                ref={(el) => (pathRefs.current[i] = el)}
-                d={d}
-                style={
-                  t && {
-                    opacity: 1,
-                    strokeDasharray: t.length,
-                    strokeDashoffset: phase === 'measuring' ? t.length : 0,
-                    transitionDuration: `${t.duration}s`,
-                    transitionDelay: `${t.delay}s`,
-                  }
-                }
-              />
-            );
-          })}
+          {SIGNATURE_PATHS.map((d, i) => (
+            <path key={i} ref={(el) => (pathRefs.current[i] = el)} d={d} />
+          ))}
         </svg>
       </div>
     </>
