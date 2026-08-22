@@ -28,7 +28,6 @@ export default function Hero({ profile }) {
         </div>
         <div className="hero__meta" aria-hidden="true">
           <span>LOC — {(profile.location || '').toUpperCase()}</span>
-          <span className="hero__meta-fig">FIG. 01 — SKY, DUOTONE</span>
           <a href="#about" className="hero__scroll" aria-hidden="false" aria-label="Scroll to content">
             SCROLL ↓
           </a>
