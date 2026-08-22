@@ -197,6 +197,10 @@ button:focus-visible {
   font-weight: 500;
   white-space: nowrap;
 }
+.nav__toggle {
+  display: none;
+  color: inherit;
+}
 .nav__links {
   display: flex;
   gap: clamp(0.85rem, 1.6vw, 1.6rem);
@@ -1039,17 +1043,76 @@ main {
     overscroll-behavior-y: none;
   }
   .nav {
-    font-size: 0.6rem;
+    font-size: 0.68rem;
     letter-spacing: 0.06em;
   }
   .nav__pill {
+    width: 100%;
+    justify-content: center;
+    padding: 0.7rem 1.1rem;
+  }
+  .nav__brand {
+    flex: 1;
+    text-align: center;
+  }
+  .nav__toggle {
+    position: absolute;
+    right: 1.1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.7rem 1.2rem;
-    border-radius: 1.9rem;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    width: 1.6rem;
+    height: 1.6rem;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  .nav__toggle-bar {
+    display: block;
+    width: 100%;
+    height: 1.5px;
+    background: currentColor;
+    border-radius: 1px;
+    transition: transform 0.3s var(--ease), opacity 0.3s var(--ease);
+  }
+  .nav--open .nav__toggle-bar:nth-child(1) {
+    transform: translateY(5.5px) rotate(45deg);
+  }
+  .nav--open .nav__toggle-bar:nth-child(2) {
+    opacity: 0;
+  }
+  .nav--open .nav__toggle-bar:nth-child(3) {
+    transform: translateY(-5.5px) rotate(-45deg);
   }
   .nav__links {
-    gap: 0.75rem;
+    position: absolute;
+    top: calc(100% + 0.6rem);
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.1rem;
+    padding: 1.3rem 1.2rem;
+    border-radius: 1.4rem;
+    background: inherit;
+    border: inherit;
+    box-shadow: inherit;
+    -webkit-backdrop-filter: inherit;
+    backdrop-filter: inherit;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+  }
+  .nav--open .nav__links {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
   }
   .hero__meta-fig {
     display: none;
