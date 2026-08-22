@@ -1,5 +1,6 @@
 import {NextResponse} from 'next/server';
 import {draftMode} from 'next/headers';
+import {revalidatePath} from 'next/cache';
 import {createClient} from 'next-sanity';
 import {apiVersion, dataset, projectId} from '@/sanity/env';
 
@@ -25,16 +26,26 @@ export async function POST(request: Request) {
     );
   }
 
-  // Studio Mode sends the documents it actually touched. Publishing every
-  // draft in the dataset instead would sweep up unrelated work-in-progress
-  // that happens to be open in Studio, so only fall back to that when the
-  // caller names nothing.
-  let ids: string[] | undefined;
+  // Studio Mode names the documents it actually touched, and this route
+  // publishes those and nothing else.
+  //
+  // There used to be a fallback that published every draft in the dataset
+  // when the caller named none. It fired — it published four
+  // sanity.previewUrlSecret documents that Presentation had left lying
+  // around as drafts. Nothing was lost that time, but the same code would
+  // just as happily publish half-written work someone had open in Studio.
+  // An empty list now means "publish nothing", which is the only safe
+  // reading of it.
+  let ids: string[] = [];
   try {
     const body = await request.json();
     if (Array.isArray(body?.ids)) ids = body.ids.filter((id: unknown) => typeof id === 'string');
   } catch {
-    // No body — publish everything pending, as before.
+    // No body at all — still means nothing to publish.
+  }
+
+  if (ids.length === 0) {
+    return NextResponse.json({published: []});
   }
 
   const client = createClient({
@@ -46,12 +57,9 @@ export async function POST(request: Request) {
     perspective: 'raw',
   });
 
-  const drafts = ids?.length
-    ? await client.fetch<{_id: string; _type: string}[]>(
-        '*[_id in $ids]',
-        {ids: ids.map((id) => (id.startsWith(DRAFT_PREFIX) ? id : `${DRAFT_PREFIX}${id}`))}
-      )
-    : await client.fetch<{_id: string; _type: string}[]>('*[_id in path("drafts.**")]');
+  const drafts = await client.fetch<{_id: string; _type: string}[]>('*[_id in $ids]', {
+    ids: ids.map((id) => (id.startsWith(DRAFT_PREFIX) ? id : `${DRAFT_PREFIX}${id}`)),
+  });
 
   if (drafts.length === 0) {
     return NextResponse.json({published: []});
@@ -63,6 +71,14 @@ export async function POST(request: Request) {
     tx.createOrReplace({...draft, _id: id}).delete(draft._id);
   }
   await tx.commit();
+
+  // Publishing writes to Sanity, which Next has no way of knowing about.
+  // sanityFetch caches published reads with `revalidate: false`, so without
+  // this the page keeps serving the pre-publish HTML and the edit looks
+  // like it never happened. SanityLive does revalidate on live events, but
+  // only while a page is open listening — closing Studio Mode right after
+  // Save beats it every time.
+  revalidatePath('/', 'layout');
 
   return NextResponse.json({published: drafts.map((d) => d._id.slice(DRAFT_PREFIX.length))});
 }
