@@ -1,6 +1,8 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import logoCloud from '../assets/logo-cloud.png';
 
 const LINKS = [
   { label: 'About', href: '#about' },
@@ -34,6 +36,7 @@ export default function Nav({ name }) {
     <header className={`nav ${solid ? 'nav--solid' : ''} ${open ? 'nav--open' : ''}`}>
       <div className="nav__pill">
         <a href="#top" className="nav__brand" onClick={() => setOpen(false)}>
+          <Image src={logoCloud} alt="" priority className="nav__logo" />
           {name}
         </a>
         <button

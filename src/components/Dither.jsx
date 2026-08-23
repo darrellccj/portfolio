@@ -25,7 +25,7 @@ const BAYER2 = [0, 2, 3, 1];
 
 // The site's two inks — deep navy dots on a paper-sky ground.
 const BG = [13, 51, 114]; // --ink
-const FG = [159, 212, 247]; // --paper
+const FG = [154, 231, 255]; // --paper
 const CONTRAST = 1.55;
 const BRIGHTNESS = 0.04;
 const STEP_MS = 140;
