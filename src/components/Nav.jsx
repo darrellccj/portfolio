@@ -10,7 +10,7 @@ const LINKS = [
   { label: 'Contact', href: '#contact' },
 ];
 
-export default function Nav({ name }) {
+export default function Nav() {
   const [solid, setSolid] = useState(false);
 
   useEffect(() => {
@@ -23,9 +23,6 @@ export default function Nav({ name }) {
   return (
     <header className={`nav ${solid ? 'nav--solid' : ''}`}>
       <div className="nav__pill">
-        <a href="#top" className="nav__brand">
-          {name}
-        </a>
         <nav className="nav__links" aria-label="Sections">
           {LINKS.map((l) => (
             <a key={l.href} href={l.href}>

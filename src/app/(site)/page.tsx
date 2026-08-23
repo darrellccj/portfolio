@@ -28,7 +28,7 @@ export default async function Home() {
 
   return (
     <>
-      <Nav name={profile.name} />
+      <Nav />
       <main>
         <Hero profile={profile} />
         <About about={profile.about} stack={profile.stack ?? []} />

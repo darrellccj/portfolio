@@ -193,12 +193,10 @@ button:focus-visible {
     inset 0 -1px 0 rgba(13, 51, 114, 0.1);
 }
 
-.nav__brand {
-  font-weight: 500;
-  white-space: nowrap;
-}
 .nav__links {
+  flex: 1;
   display: flex;
+  justify-content: space-between;
   gap: clamp(0.85rem, 1.6vw, 1.6rem);
 }
 .nav__links a {
