@@ -30,14 +30,10 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
   },
   twitter: {card: 'summary_large_image'},
-  // Two-ink registration cross, inlined so it costs no extra request.
-  icons: {
-    icon:
-      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%239fd4f7'/%3E%3Cpath d='M16 6v20M6 16h20' stroke='%230d3372' stroke-width='2.5' stroke-linecap='square'/%3E%3C/svg%3E",
-  },
+  icons: {icon: '/favicon.png'},
 };
 
-export const viewport: Viewport = {themeColor: '#9fd4f7'};
+export const viewport: Viewport = {themeColor: '#9ae7ff'};
 
 // The font classes only declare CSS custom properties, so they cost the
 // Studio nothing; the rules that consume them live in globals.css, which
