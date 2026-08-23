@@ -3,13 +3,15 @@
 import useReveal from '../hooks/useReveal.js';
 import StudioModeToggle from './StudioModeToggle';
 
-export default function Contact({ profile }) {
+// `label` is overridable because the numbered section prefix only makes
+// sense on the home page, where Contact is the fifth movement.
+export default function Contact({ profile, label = '05 / Contact' }) {
   const ref = useReveal({ threshold: 0.2 });
 
   return (
     <section className="contact" id="contact">
       <div className="contact__inner reveal" ref={ref}>
-        <p className="section__label">05 / Contact</p>
+        <p className="section__label">{label}</p>
         <h2 className="contact__title">Let&rsquo;s make something.</h2>
         <p className="contact__sub">
           Open to selected projects and collaborations. I reply to every

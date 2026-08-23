@@ -1,9 +1,12 @@
 # Portfolio
 
-A one-page personal portfolio in two inks — sky `#9fd4f7` on ultramarine
+A personal portfolio in two inks — sky `#9fd4f7` on ultramarine
 `#0d3372`. A WebGL **duotone sky** backs the hero; below it sit About,
 Selected Work (a pinned horizontal card-scroll), KIV (Keep In Vault —
 concepts in progress), a canvas **ordered-dither** study, and Contact.
+
+Every project and KIV item also has a page of its own — `/work/<slug>` and
+`/kiv/<slug>` — reached by clicking its card or row.
 
 Built with **Next.js (App Router)**, hand-written CSS, and **three.js** for
 the sky. Content is managed in **Sanity**, with the Studio embedded in this
@@ -82,9 +85,34 @@ Content lives in Sanity. In the Studio:
 
 - **Profile** (singleton) — name, role, tagline, about, email, location,
   stack, socials.
-- **Projects** — the Selected Work cards. `order` controls sequence.
-- **KIV** — concept cards. `order` controls sequence.
+- **Projects** — the Selected Work cards *and* their detail pages. Fields are
+  split into three Studio tabs:
+  - **Card** — `title`, `slug`, `tag`, `desc`, `year`, `order`. These drive the
+    pinned scroll on the home page; `order` controls sequence.
+  - **Detail page** — `status`, `role`, `timeline`, `stack`, the primary
+    `href` plus a list of other `links`, the narrative fields `overview` /
+    `problem` / `approach` / `outcome`, up to four `metrics`, and any number
+    of free-form `sections`.
+  - **Media** — a `cover` plate and a `gallery`.
+- **KIV** — concept rows and their detail pages, in two tabs:
+  - **Row** — `title`, `slug`, `tag`, `desc`, `order`.
+  - **Detail page** — `status`, `premise`, `why`, `notes`, `openQuestions`,
+    `stack`, and free-form `sections`.
 - **Dither study** (singleton) — the artwork title, credit, and source plate.
+
+Everything below `slug` on both types is **optional**. A document with only
+its card filled in still renders a valid detail page — it just says the
+write-up is still being written, rather than showing an unexplained gap. Fill
+the fields in as you go and the page grows to fit.
+
+### Slugs
+
+`slug` was added after the first documents existed, so it is not required.
+Anything without one falls back to a slugified `title` (`src/lib/routes.ts`),
+which means every project and KIV item has a working URL immediately.
+Authoring a slug in the Studio only pins a URL that already worked — so set
+one before sharing a link you don't want to change, since renaming a
+slug-less document also renames its URL.
 
 Sanity is the **sole** source of truth — there is no committed fallback. The
 two singletons are required; if either is missing the page throws a named
@@ -120,6 +148,9 @@ src/
     (site)/
       layout.tsx          # globals.css, SanityLive, VisualEditing
       page.tsx            # server component — fetches Sanity, renders sections
+      not-found.tsx       # 404 for a mistyped project or KIV slug
+      work/[slug]/        # one page per project
+      kiv/[slug]/         # one page per KIV concept
     studio/[[...tool]]/   # embedded Sanity Studio at /studio
     api/draft-mode/enable # Draft Mode entry point for Visual Editing
   sanity/
@@ -127,10 +158,13 @@ src/
     queries.ts            # GROQ, via defineQuery
     types.ts              # generated — do not edit by hand
     schemaTypes/  structure.ts   # Studio schema + desk structure
+  lib/
+    routes.ts             # slug derivation + /work and /kiv path helpers
   components/
     SkyGL.jsx             # WebGL duotone sky (three.js)
     Dither.jsx            # canvas ordered-dither study
     Nav  Hero  About  Work  Kiv  Contact
+    detail/               # server-rendered pieces of the two detail pages
   hooks/
     useReveal.js          # scroll-in reveal via IntersectionObserver
     usePinnedScroll.js    # pinned horizontal card-scroll

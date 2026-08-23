@@ -1,3 +1,4 @@
+import LoadingScreen from '@/components/LoadingScreen';
 import Nav from '@/components/Nav';
 import Hero from '@/components/Hero';
 import About from '@/components/About';
@@ -28,6 +29,9 @@ export default async function Home() {
 
   return (
     <>
+      {/* Home only — the signature draw-on introduces the site, so it must
+          not replay every time you come back from a project page. */}
+      <LoadingScreen />
       <Nav />
       <main>
         <Hero profile={profile} />
