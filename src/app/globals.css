@@ -5,7 +5,7 @@
    Flat surfaces, hairline rules, zero radius, zero shadows.
    ───────────────────────────────────────────────────────────── */
 :root {
-  --paper: #9fd4f7;
+  --paper: #9ae7ff;
   --ink: #0d3372;
 
   /* ink tints — on paper */
@@ -15,9 +15,9 @@
   --line-soft: rgba(13, 51, 114, 0.2);
 
   /* paper tints — on ink (inverted blocks) */
-  --paper-soft: rgba(159, 212, 247, 0.8);
-  --paper-faint: rgba(159, 212, 247, 0.58);
-  --line-paper: rgba(159, 212, 247, 0.3);
+  --paper-soft: rgba(154, 231, 255, 0.8);
+  --paper-faint: rgba(154, 231, 255, 0.58);
+  --line-paper: rgba(154, 231, 255, 0.3);
 
   --serif: var(--font-serif), Georgia, 'Times New Roman', serif;
   --mono: var(--font-mono), 'SFMono-Regular', Consolas, monospace;
@@ -75,6 +75,42 @@ button:focus-visible {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   LOADING SCREEN — signature draw-on, then pushed off the top
+   Full-viewport paper overlay. Each stroke of the signature draws
+   itself in via stroke-dashoffset (timing computed from the actual
+   path lengths in LoadingScreen.jsx); once the last stroke lands,
+   the whole sheet slides up and out, revealing the page beneath.
+   Both the draw and the slide are driven frame-by-frame from JS
+   rather than CSS transitions — see the comment on `makeEasing` in
+   LoadingScreen.jsx for why — so this file only sets the resting
+   appearance; LoadingScreen.jsx writes `transform`/`stroke-dashoffset`
+   directly on these elements as it animates.
+   ───────────────────────────────────────────────────────────── */
+.loading {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);
+  will-change: transform;
+}
+.loading__sig {
+  width: min(60vw, 420px);
+  height: auto;
+  overflow: visible;
+}
+.loading__sig path {
+  opacity: 0;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 46;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ─────────────────────────────────────────────────────────────
    NAV — centred glass pill
    A 30%-width floating capsule. The one place the flat/zero-radius
    rule is broken on purpose: it has to read as a lens sitting ON
@@ -119,13 +155,13 @@ button:focus-visible {
   );
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(159, 212, 247, 0.28);
+  border: 1px solid rgba(154, 231, 255, 0.28);
 
   /* lift + the edge specular that sells the thickness */
   box-shadow: 0 10px 34px rgba(13, 51, 114, 0.22),
-    inset 0 1px 0 rgba(159, 212, 247, 0.5),
+    inset 0 1px 0 rgba(154, 231, 255, 0.5),
     inset 0 -1px 0 rgba(13, 51, 114, 0.16),
-    inset 0 0 22px rgba(159, 212, 247, 0.08);
+    inset 0 0 22px rgba(154, 231, 255, 0.08);
 
   transition: background 0.45s var(--ease), border-color 0.45s var(--ease),
     box-shadow 0.45s var(--ease), transform 0.45s var(--ease);
@@ -140,8 +176,8 @@ button:focus-visible {
   border-radius: 999px 999px 40% 40% / 999px 999px 100% 100%;
   background: linear-gradient(
     to bottom,
-    rgba(159, 212, 247, 0.26),
-    rgba(159, 212, 247, 0)
+    rgba(154, 231, 255, 0.26),
+    rgba(154, 231, 255, 0)
   );
   pointer-events: none;
   z-index: -1;
@@ -155,8 +191,8 @@ button:focus-visible {
   border-radius: inherit;
   background: radial-gradient(
     120% 180% at 18% -40%,
-    rgba(159, 212, 247, 0.3),
-    rgba(159, 212, 247, 0) 60%
+    rgba(154, 231, 255, 0.3),
+    rgba(154, 231, 255, 0) 60%
   );
   pointer-events: none;
   z-index: -1;
@@ -165,9 +201,9 @@ button:focus-visible {
 .nav__pill:hover {
   transform: translateY(-1px);
   box-shadow: 0 14px 40px rgba(13, 51, 114, 0.26),
-    inset 0 1px 0 rgba(159, 212, 247, 0.6),
+    inset 0 1px 0 rgba(154, 231, 255, 0.6),
     inset 0 -1px 0 rgba(13, 51, 114, 0.16),
-    inset 0 0 22px rgba(159, 212, 247, 0.1);
+    inset 0 0 22px rgba(154, 231, 255, 0.1);
 }
 
 /* Past the hero the pill sits on paper, so the tint flips to ink. */
@@ -177,26 +213,40 @@ button:focus-visible {
 .nav--solid .nav__pill {
   background: linear-gradient(
     160deg,
-    rgba(159, 212, 247, 0.66) 0%,
-    rgba(159, 212, 247, 0.42) 55%,
+    rgba(154, 231, 255, 0.66) 0%,
+    rgba(154, 231, 255, 0.42) 55%,
     rgba(13, 51, 114, 0.06) 100%
   );
   border-color: rgba(13, 51, 114, 0.18);
   box-shadow: 0 10px 30px rgba(13, 51, 114, 0.14),
-    inset 0 1px 0 rgba(159, 212, 247, 0.85),
+    inset 0 1px 0 rgba(154, 231, 255, 0.85),
     inset 0 -1px 0 rgba(13, 51, 114, 0.1);
 }
 .nav--solid .nav__pill:hover {
   transform: translateY(-1px);
   box-shadow: 0 14px 36px rgba(13, 51, 114, 0.18),
-    inset 0 1px 0 rgba(159, 212, 247, 0.9),
+    inset 0 1px 0 rgba(154, 231, 255, 0.9),
     inset 0 -1px 0 rgba(13, 51, 114, 0.1);
 }
 
-.nav__links {
-  flex: 1;
+.nav__brand {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 0.55em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.nav__logo {
+  width: 1.9em;
+  height: auto;
+  flex: none;
+}
+.nav__toggle {
+  display: none;
+  color: inherit;
+}
+.nav__links {
+  display: flex;
   gap: clamp(0.85rem, 1.6vw, 1.6rem);
 }
 .nav__links a {
@@ -231,7 +281,7 @@ button:focus-visible {
     background: rgba(13, 51, 114, 0.55);
   }
   .nav--solid .nav__pill {
-    background: rgba(159, 212, 247, 0.92);
+    background: rgba(154, 231, 255, 0.92);
   }
 }
 
@@ -300,50 +350,85 @@ main {
 }
 .hero__eyebrow {
   font-size: 0.7rem;
+  font-weight: 600;
   letter-spacing: 0.36em;
   text-transform: uppercase;
   color: var(--paper-soft);
   margin-bottom: 1.4rem;
   animation: rise 1s var(--ease) both;
 }
+.hero__cursor {
+  display: inline-block;
+  width: 1px;
+  height: 0.8em;
+  margin-left: 3px;
+  background: currentColor;
+  vertical-align: -0.05em;
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
 .hero__name {
   font-family: var(--serif);
-  font-weight: 400;
+  font-weight: 600;
   font-size: clamp(3.2rem, 12vw, 9rem);
   line-height: 0.96;
   letter-spacing: -0.01em;
   animation: rise 1s var(--ease) 0.08s both;
 }
-.hero__tagline {
-  margin: 1.7rem auto 0;
-  max-width: 42ch;
-  font-size: clamp(0.78rem, 1.6vw, 0.88rem);
-  letter-spacing: 0.04em;
-  color: var(--paper-soft);
-  animation: rise 1s var(--ease) 0.16s both;
-}
-/* Spec strip: the hero's title block. Solid paper, hairline top —
-   the hard edge where the sky ends and the document begins. */
-.hero__meta {
+/* Bottom strip: two stacked bands — a running tagline ticker over the
+   spec title block. Solid paper, hairline top — the hard edge where
+   the sky ends and the document begins. */
+.hero__strip {
   position: absolute;
   inset: auto 0 0 0;
   z-index: 2;
   display: flex;
+  flex-direction: column;
+  animation: rise 1s var(--ease) 0.3s both;
+}
+.hero__ticker {
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(--paper);
+  padding: 0.6rem 0;
+}
+.hero__ticker-track {
+  display: inline-flex;
+  width: max-content;
+  animation: marquee 26s linear infinite;
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.hero__ticker-track span {
+  padding: 0 2.4rem;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(0.82rem, 1.6vw, 1rem);
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+.hero__meta {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
   padding: 0.85rem var(--gutter);
   background: var(--paper);
   border-top: 1px solid var(--line);
   font-size: 0.62rem;
+  font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--ink-faint);
-  animation: rise 1s var(--ease) 0.3s both;
 }
 .hero__scroll {
   position: relative;
   display: inline-block;
+  justify-self: center;
   padding: 0.4em 0.7em;
   color: var(--ink);
   letter-spacing: 0.2em;
@@ -1037,20 +1122,81 @@ main {
     overscroll-behavior-y: none;
   }
   .nav {
-    font-size: 0.6rem;
+    font-size: 0.68rem;
     letter-spacing: 0.06em;
   }
   .nav__pill {
+    width: 100%;
+    justify-content: center;
+    padding: 0.7rem 1.1rem;
+  }
+  .nav__brand {
+    flex: 1;
+    justify-content: center;
+  }
+  .nav__toggle {
+    position: absolute;
+    right: 1.1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.7rem 1.2rem;
-    border-radius: 1.9rem;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    width: 1.6rem;
+    height: 1.6rem;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  .nav__toggle-bar {
+    display: block;
+    width: 100%;
+    height: 1.5px;
+    background: currentColor;
+    border-radius: 1px;
+    transition: transform 0.3s var(--ease), opacity 0.3s var(--ease);
+  }
+  .nav--open .nav__toggle-bar:nth-child(1) {
+    transform: translateY(5.5px) rotate(45deg);
+  }
+  .nav--open .nav__toggle-bar:nth-child(2) {
+    opacity: 0;
+  }
+  .nav--open .nav__toggle-bar:nth-child(3) {
+    transform: translateY(-5.5px) rotate(-45deg);
   }
   .nav__links {
-    gap: 0.75rem;
+    position: absolute;
+    top: calc(100% + 0.6rem);
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.1rem;
+    padding: 1.3rem 1.2rem;
+    border-radius: 1.4rem;
+    background: var(--ink);
+    border: 1px solid rgba(154, 231, 255, 0.28);
+    box-shadow: 0 10px 34px rgba(13, 51, 114, 0.32);
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
   }
-  .hero__meta-fig {
-    display: none;
+  .nav--solid .nav__links {
+    background: var(--paper);
+    border-color: rgba(13, 51, 114, 0.18);
+  }
+  .nav--open .nav__links {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .hero__ticker-track span {
+    padding: 0 1.4rem;
   }
   .footer {
     flex-direction: column;

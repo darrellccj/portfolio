@@ -164,7 +164,7 @@ const fragmentShader = /* glsl */ `
     float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
     float tone = pow(smoothstep(0.13, 0.97, lum), 1.35);
     vec3 ink = vec3(0.051, 0.200, 0.447);   // #0d3372
-    vec3 paper = vec3(0.624, 0.831, 0.969); // #9fd4f7
+    vec3 paper = vec3(0.604, 0.906, 1.000); // #9ae7ff
     col = mix(ink, paper, tone);
 
     // Ordered grain kills gradient banding in the big two-tone field.
