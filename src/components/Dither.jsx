@@ -1,8 +1,13 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useReveal from '../hooks/useReveal.js';
 import lastSupperSrc from '../assets/last-supper.jpg';
+
+// Blown up on export so the download matches the blocky look the CSS
+// gives the on-screen canvas (`image-rendering: pixelated`) — the raw
+// canvas is only a few hundred pixels wide at processing resolution.
+const EXPORT_SCALE = 8;
 
 // Ordered (Bayer) dither matrices, row-major.
 const BAYER8 = [
@@ -138,20 +143,24 @@ export default function Dither({ copy }) {
   const reveal = useReveal({ threshold: 0.1 });
   const frameRef = useRef(null);
   const canvasRef = useRef(null);
+  const imgRef = useRef(null);
+  const objectUrlRef = useRef(null);
   const techniqueIndexRef = useRef(0);
   const renderRef = useRef(() => {});
   const timerRef = useRef(null);
   const animatingRef = useRef(false);
+  const [isReady, setIsReady] = useState(false);
+  const [hasCustomImage, setHasCustomImage] = useState(false);
 
   useEffect(() => {
     const frame = frameRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     const img = new Image();
-    let ready = false;
+    imgRef.current = img;
 
     function render() {
-      if (!ready) return;
+      if (!img.complete || !img.naturalWidth) return;
       const rect = frame.getBoundingClientRect();
       const cssW = rect.width;
       const cssH = rect.height;
@@ -192,7 +201,7 @@ export default function Dither({ copy }) {
     renderRef.current = render;
 
     img.onload = () => {
-      ready = true;
+      setIsReady(true);
       render();
     };
     const remote = ditherCopy?.imageUrl;
@@ -205,8 +214,80 @@ export default function Dither({ copy }) {
     return () => {
       ro.disconnect();
       clearTimeout(timerRef.current);
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
     };
   }, []);
+
+  // Swaps in a viewer-chosen photo, replacing whatever's currently loaded
+  // (the default plate or a previous upload). Blob URLs are same-origin,
+  // so no crossOrigin dance is needed the way the remote Sanity plate needs.
+  function handleUpload(event) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file || !file.type.startsWith('image/')) return;
+
+    const img = imgRef.current;
+    if (!img) return;
+
+    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    const url = URL.createObjectURL(file);
+    objectUrlRef.current = url;
+
+    clearTimeout(timerRef.current);
+    animatingRef.current = false;
+    frameRef.current?.classList.remove('is-cycling');
+    techniqueIndexRef.current = 0;
+    setIsReady(false);
+    setHasCustomImage(true);
+    img.src = url;
+  }
+
+  // Back to the site's own plate.
+  function handleReset() {
+    const img = imgRef.current;
+    if (!img) return;
+
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+
+    clearTimeout(timerRef.current);
+    animatingRef.current = false;
+    frameRef.current?.classList.remove('is-cycling');
+    techniqueIndexRef.current = 0;
+    setIsReady(false);
+    setHasCustomImage(false);
+
+    const remote = ditherCopy?.imageUrl;
+    if (remote) img.crossOrigin = 'anonymous';
+    img.src = remote || lastSupperSrc.src;
+  }
+
+  // Re-draws the current canvas into a larger one with smoothing off, so
+  // the exported file keeps the same blocky dots the pixelated CSS shows
+  // on screen instead of a few-hundred-pixel sliver.
+  function handleDownload() {
+    const canvas = canvasRef.current;
+    if (!canvas || !isReady) return;
+
+    const out = document.createElement('canvas');
+    out.width = canvas.width * EXPORT_SCALE;
+    out.height = canvas.height * EXPORT_SCALE;
+    const octx = out.getContext('2d');
+    octx.imageSmoothingEnabled = false;
+    octx.drawImage(canvas, 0, 0, out.width, out.height);
+
+    out.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'dither.png';
+      a.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  }
 
   // Plays through every technique, one per tick, for two full laps —
   // still lands back on the technique it started from either way,
@@ -236,6 +317,10 @@ export default function Dither({ copy }) {
     timerRef.current = setTimeout(advance, STEP_MS);
   }
 
+  const frameLabel = hasCustomImage
+    ? 'Ordered-dither rendering of your uploaded image. Click to play through the dithering techniques.'
+    : `Ordered-dither rendering of ${ditherCopy.work}, ${ditherCopy.credit}. Click to play through the dithering techniques.`;
+
   return (
     <section className="section dither" id="dither">
       <button
@@ -246,10 +331,35 @@ export default function Dither({ copy }) {
           frameRef.current = el;
         }}
         onClick={playCycle}
-        aria-label={`Ordered-dither rendering of ${ditherCopy.work}, ${ditherCopy.credit}. Click to play through the dithering techniques.`}
+        aria-label={frameLabel}
       >
         <canvas ref={canvasRef} className="dither__canvas" aria-hidden="true" />
       </button>
+
+      <div className="dither__toolbar">
+        <label className="dither__action dither__upload">
+          Upload image
+          <input
+            type="file"
+            accept="image/*"
+            className="dither__file-input"
+            onChange={handleUpload}
+          />
+        </label>
+        <button
+          type="button"
+          className="dither__action"
+          onClick={handleDownload}
+          disabled={!isReady}
+        >
+          Download
+        </button>
+        {hasCustomImage && (
+          <button type="button" className="dither__action" onClick={handleReset}>
+            Reset
+          </button>
+        )}
+      </div>
     </section>
   );
 }

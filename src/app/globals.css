@@ -804,6 +804,47 @@ main {
   image-rendering: crisp-edges;
   image-rendering: pixelated;
 }
+.dither__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+.dither__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5em 0.9em;
+  background: none;
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.dither__action:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.dither__action:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.dither__upload {
+  position: relative;
+}
+.dither__file-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
 
 /* ─────────────────────────────────────────────────────────────
    CONTACT — full inverted band + footer
