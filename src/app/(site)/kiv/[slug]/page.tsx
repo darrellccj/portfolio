@@ -3,12 +3,12 @@ import Link from 'next/link';
 import {notFound} from 'next/navigation';
 
 import Nav from '@/components/Nav';
-import Contact from '@/components/Contact';
+import StudioModeToggle from '@/components/StudioModeToggle';
 import Pager from '@/components/detail/Pager';
 import {Block, TextBlock, Spec, Notes} from '@/components/detail/parts';
 
 import {sanityFetch} from '@/sanity/lib/live';
-import {PROFILE_QUERY, KIV_INDEX_QUERY, KIV_DETAIL_QUERY} from '@/sanity/queries';
+import {KIV_INDEX_QUERY, KIV_DETAIL_QUERY} from '@/sanity/queries';
 import {indexOfSlug, kivPath} from '@/lib/routes';
 
 type Params = {params: Promise<{slug: string}>};
@@ -49,7 +49,6 @@ export default async function KivPage({params}: Params) {
   if (!resolved) notFound();
 
   const {item, list, position} = resolved;
-  const {data: profile} = await sanityFetch({query: PROFILE_QUERY});
 
   const prev = list[position - 1];
   const next = list[position + 1];
@@ -130,9 +129,13 @@ export default async function KivPage({params}: Params) {
             backHref="/#kiv"
             backLabel="All concepts"
           />
+
+          {/* See the note on the project page — toggle only, no band. */}
+          <div className="detail__foot">
+            <StudioModeToggle />
+          </div>
         </div>
       </main>
-      {profile ? <Contact profile={profile} label="Contact" /> : null}
     </>
   );
 }

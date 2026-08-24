@@ -46,7 +46,7 @@ Studio Mode still opens and edits, but its Save button fails.
 
 ## Editing content
 
-The **Studio Mode** toggle sits in the footer. Clicking it does two things:
+The **Studio Mode** toggle sits in the footer on the home page, and at the very bottom of each project / KIV page — those carry no contact band, but most of what Studio Mode edits lives on them. Clicking it does two things:
 it puts the live page itself into click-to-edit mode (via Sanity Visual
 Editing), and it opens a small floating panel, bottom-right, that you can
 drag anywhere. The panel shows nothing until you hover and click a

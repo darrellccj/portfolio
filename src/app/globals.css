@@ -1482,6 +1482,26 @@ a.d-pager__side:hover .d-pager__dir {
   color: var(--ink);
 }
 
+/* End of page. The detail pages carry no contact band, so the Studio Mode
+   toggle has no footer to sit in — it gets a quiet strip of its own, and
+   ink tokens, since its own styling is tuned for the inverted band. */
+.detail__foot {
+  display: flex;
+  justify-content: center;
+  padding-top: clamp(2rem, 5vw, 3rem);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.detail__foot .studio-toggle {
+  color: var(--ink-faint);
+  border-color: var(--line-soft);
+}
+.detail__foot .studio-toggle:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
 /* Entrance — fires on load, staggered by an inline `--i`. */
 @keyframes detail-rise {
   from {

@@ -3,12 +3,12 @@ import Link from 'next/link';
 import {notFound} from 'next/navigation';
 
 import Nav from '@/components/Nav';
-import Contact from '@/components/Contact';
+import StudioModeToggle from '@/components/StudioModeToggle';
 import Pager from '@/components/detail/Pager';
 import {Block, TextBlock, Spec, Metrics, Plate, LinkRow} from '@/components/detail/parts';
 
 import {sanityFetch} from '@/sanity/lib/live';
-import {PROFILE_QUERY, PROJECT_INDEX_QUERY, PROJECT_DETAIL_QUERY} from '@/sanity/queries';
+import {PROJECT_INDEX_QUERY, PROJECT_DETAIL_QUERY} from '@/sanity/queries';
 import {indexOfSlug, projectPath} from '@/lib/routes';
 
 type Params = {params: Promise<{slug: string}>};
@@ -58,7 +58,6 @@ export default async function ProjectPage({params}: Params) {
   if (!resolved) notFound();
 
   const {project, list, position} = resolved;
-  const {data: profile} = await sanityFetch({query: PROFILE_QUERY});
 
   const prev = list[position - 1];
   const next = list[position + 1];
@@ -143,9 +142,16 @@ export default async function ProjectPage({params}: Params) {
             backHref="/#work"
             backLabel="All work"
           />
+
+          {/* No contact band down here — the page ends on the pager. This
+              carries the Studio Mode toggle alone, because the toggle is
+              the only way into click-to-edit and most of what it edits
+              lives on this page. */}
+          <div className="detail__foot">
+            <StudioModeToggle />
+          </div>
         </div>
       </main>
-      {profile ? <Contact profile={profile} label="Contact" /> : null}
     </>
   );
 }
