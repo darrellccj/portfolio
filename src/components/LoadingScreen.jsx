@@ -53,6 +53,16 @@ export default function LoadingScreen() {
   const pathRefs = useRef([]);
 
   useEffect(() => {
+    // Arriving on a specific section — /#about from the nav on a project
+    // page, /#work from a detail page's back link — is a request for a
+    // place, not for the introduction. Playing it anyway would hold the
+    // page under a full-screen overlay with scrolling locked, exactly
+    // while the browser is trying to jump to the anchor.
+    if (window.location.hash) {
+      setDone(true);
+      return;
+    }
+
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const speedUp = reducedMotion ? 40 : 1;
     document.body.style.overflow = 'hidden';

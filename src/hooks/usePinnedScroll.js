@@ -83,6 +83,17 @@ export default function usePinnedScroll() {
     window.addEventListener('resize', onResize);
     measure();
 
+    // measure() just grew this section from one viewport to however wide
+    // the track is, which moves every anchor below it down the page. If
+    // the page was opened on one of those anchors (/#dither, /#contact)
+    // the browser has already jumped, and jumped short. Redo it now that
+    // the layout is final — instantly, so it reads as the landing
+    // position rather than a scroll the visitor did not ask for.
+    if (window.location.hash) {
+      const target = document.getElementById(window.location.hash.slice(1));
+      if (target) target.scrollIntoView({ behavior: 'instant', block: 'start' });
+    }
+
     return () => {
       io.disconnect();
       window.removeEventListener('scroll', onScroll);

@@ -1,15 +1,19 @@
 'use client';
 
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import logoCloud from '../assets/logo-cloud.png';
 
+// Every section the nav points at lives on the home page. As bare
+// fragments these resolved against whatever page you were on, so on a
+// project or KIV page they pointed at anchors that were never there.
 const LINKS = [
-  { label: 'About', href: '#about' },
-  { label: 'Work', href: '#work' },
-  { label: 'KIV', href: '#kiv' },
-  { label: 'Study', href: '#dither' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'About', hash: '#about' },
+  { label: 'Work', hash: '#work' },
+  { label: 'KIV', hash: '#kiv' },
+  { label: 'Study', hash: '#dither' },
+  { label: 'Contact', hash: '#contact' },
 ];
 
 // `alwaysSolid` is for pages with no dark hero behind the pill — the
@@ -18,6 +22,13 @@ const LINKS = [
 export default function Nav({ alwaysSolid = false }) {
   const [solid, setSolid] = useState(alwaysSolid);
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  // On the home page these stay bare fragments, so clicking one scrolls
+  // without touching the URL's path or reloading. Anywhere else they have
+  // to name the home page explicitly.
+  const onHome = pathname === '/';
+  const linkTo = (hash) => (onHome ? hash : `/${hash}`);
 
   useEffect(() => {
     if (alwaysSolid) return;
@@ -40,7 +51,7 @@ export default function Nav({ alwaysSolid = false }) {
     <header className={`nav ${solid ? 'nav--solid' : ''} ${open ? 'nav--open' : ''}`}>
       <div className="nav__pill">
         <a
-          href="#top"
+          href={linkTo('#top')}
           className="nav__brand"
           aria-label="Back to top"
           onClick={() => setOpen(false)}
@@ -61,7 +72,7 @@ export default function Nav({ alwaysSolid = false }) {
         </button>
         <nav id="nav-links" className="nav__links" aria-label="Sections">
           {LINKS.map((l) => (
-            <a key={l.href} href={l.href} onClick={() => setOpen(false)}>
+            <a key={l.hash} href={linkTo(l.hash)} onClick={() => setOpen(false)}>
               {l.label}
             </a>
           ))}
