@@ -22,7 +22,6 @@
   --serif: var(--font-serif), Georgia, 'Times New Roman', serif;
   --mono: var(--font-mono), 'SFMono-Regular', Consolas, monospace;
 
-  --maxw: 1120px;
   --gutter: clamp(1.4rem, 5vw, 4rem);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
@@ -460,8 +459,6 @@ main {
    ───────────────────────────────────────────────────────────── */
 .section {
   position: relative;
-  max-width: var(--maxw);
-  margin: 0 auto;
   padding: clamp(4.5rem, 10vw, 7.5rem) var(--gutter);
 }
 .section::before {
@@ -858,8 +855,6 @@ main {
   color: var(--ink);
 }
 .contact__inner {
-  max-width: var(--maxw);
-  margin: 0 auto;
   padding: clamp(4.5rem, 11vw, 8rem) var(--gutter) clamp(3.5rem, 8vw, 6rem);
 }
 .contact .section__label {
@@ -905,8 +900,6 @@ main {
   color: var(--paper);
 }
 .footer {
-  max-width: var(--maxw);
-  margin: 0 auto;
   padding: 1.6rem var(--gutter);
   border-top: 1px solid var(--line-paper);
   display: flex;
@@ -1163,8 +1156,6 @@ main {
   min-height: 72vh;
 }
 .detail__inner {
-  max-width: var(--maxw);
-  margin: 0 auto;
   padding: 0 var(--gutter);
 }
 

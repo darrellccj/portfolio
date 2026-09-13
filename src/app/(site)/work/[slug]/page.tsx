@@ -94,7 +94,7 @@ export default async function ProjectPage({params}: Params) {
             <LinkRow primary={{label: 'Visit project', href: project.href}} links={project.links} />
           </header>
 
-          <Plate image={project.cover} priority sizes="(max-width: 1120px) 100vw, 1120px" />
+          <Plate image={project.cover} priority sizes="100vw" />
 
           <Spec
             items={[
