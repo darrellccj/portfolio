@@ -1453,6 +1453,38 @@ main {
   top: 0.2rem;
 }
 
+/* Lab — placeholder fields inside each experiment's d-block, filled in as
+   runs actually happen. Unset entries stay visibly italic/faint rather
+   than disappearing, so a shell page still reads as a shell. */
+.lab__fields {
+  margin-top: clamp(1.4rem, 3vw, 2rem);
+}
+.lab__field {
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.lab__field:first-child {
+  padding-top: 0;
+}
+.lab__field:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.lab__field dt {
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 0.5rem;
+}
+.lab__field dd {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--ink-faint);
+}
+
 .detail__gallery {
   margin-top: clamp(2.4rem, 6vw, 3.4rem);
   padding-top: clamp(2rem, 5vw, 3rem);

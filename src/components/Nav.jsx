@@ -8,11 +8,14 @@ import logoCloud from '../assets/logo-cloud.png';
 // Every section the nav points at lives on the home page. As bare
 // fragments these resolved against whatever page you were on, so on a
 // project or KIV page they pointed at anchors that were never there.
+// Most entries are hashes on the home page (see `linkTo`); `href` is for
+// links that are a real route of their own, like /lab.
 const LINKS = [
   { label: 'About', hash: '#about' },
   { label: 'Work', hash: '#work' },
   { label: 'KIV', hash: '#kiv' },
   { label: 'Study', hash: '#dither' },
+  { label: 'Lab', href: '/lab' },
   { label: 'Contact', hash: '#contact' },
 ];
 
@@ -72,7 +75,7 @@ export default function Nav({ alwaysSolid = false }) {
         </button>
         <nav id="nav-links" className="nav__links" aria-label="Sections">
           {LINKS.map((l) => (
-            <a key={l.hash} href={linkTo(l.hash)} onClick={() => setOpen(false)}>
+            <a key={l.label} href={l.href ?? linkTo(l.hash)} onClick={() => setOpen(false)}>
               {l.label}
             </a>
           ))}
