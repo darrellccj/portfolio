@@ -1,0 +1,578 @@
+/* ─────────────────────────────────────────────────────────────
+   Claire Teo — property advisor landing page (Lab experiment 001)
+   Self-contained: every rule is scoped under .page so nothing here
+   leaks into, or is leaked into by, the portfolio's own globals.css.
+   Palette and motifs are drawn from SG property vernacular — floor
+   plans, agent licence cards, void-deck directory boards — rather
+   than generic landing-page defaults.
+   ───────────────────────────────────────────────────────────── */
+
+.page {
+  --paper: #eaeae2;
+  --panel: #dfdfd3;
+  --ink: #16231f;
+  --ink-soft: rgba(22, 35, 31, 0.7);
+  --ink-faint: rgba(22, 35, 31, 0.48);
+  --accent: #c2792c;
+  --line: rgba(22, 35, 31, 0.18);
+  --line-soft: rgba(22, 35, 31, 0.1);
+
+  --display: var(--font-lab-display), 'Arial Narrow', Arial, sans-serif;
+  --body: var(--font-lab-body), Georgia, 'Times New Roman', serif;
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  line-height: 1.6;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page * {
+  box-sizing: border-box;
+}
+
+.page a {
+  color: inherit;
+}
+
+.page ::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.page a:focus-visible,
+.page button:focus-visible,
+.page input:focus-visible,
+.page textarea:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 5vw, 3rem);
+}
+
+/* ── Back link ─────────────────────────────────────────────── */
+.back {
+  display: block;
+  padding: 1.1rem clamp(1.25rem, 5vw, 3rem);
+  font-family: var(--display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-faint);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line-soft);
+}
+.back:hover {
+  color: var(--ink);
+}
+
+/* ── Nav ───────────────────────────────────────────────────── */
+.nav {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-top: clamp(1.6rem, 4vw, 2.4rem);
+  padding-bottom: clamp(1.6rem, 4vw, 2.4rem);
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.wordmark {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.01em;
+}
+.wordtag {
+  display: block;
+  font-family: var(--body);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+  margin-top: 0.2rem;
+}
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.1rem, 3vw, 2rem);
+  font-family: var(--display);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.navLinks a {
+  text-decoration: none;
+  padding-bottom: 0.15rem;
+  border-bottom: 1px solid transparent;
+}
+.navLinks a:hover {
+  border-bottom-color: var(--ink);
+}
+.navCta {
+  background: var(--accent);
+  color: var(--paper) !important;
+  padding: 0.55rem 1.1rem;
+  text-decoration: none;
+  border-bottom: none !important;
+}
+.navCta:hover {
+  background: var(--ink);
+}
+
+/* ── Hero ──────────────────────────────────────────────────── */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+  padding-top: clamp(3rem, 8vw, 5.5rem);
+  padding-bottom: clamp(3rem, 8vw, 5.5rem);
+}
+.heroText {
+  max-width: 34rem;
+}
+.heroHeadline {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2rem, 4.6vw, 3.4rem);
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  margin-bottom: 1.3rem;
+}
+.heroSub {
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  max-width: 32rem;
+  margin-bottom: 1.9rem;
+}
+.heroActions {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+  margin-bottom: clamp(2.4rem, 6vw, 3.4rem);
+}
+.btnPrimary {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--paper);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-decoration: none;
+  padding: 0.85rem 1.5rem;
+}
+.btnPrimary:hover {
+  background: var(--ink);
+}
+.textLink {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.92rem;
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 0.1rem;
+}
+.textLink:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.stats {
+  display: flex;
+  gap: clamp(1.6rem, 4vw, 2.6rem);
+  flex-wrap: wrap;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 9.5rem;
+}
+.statNum {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 2.1rem;
+  line-height: 1;
+}
+.statLabel {
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+  line-height: 1.35;
+}
+
+.heroPlan {
+  width: 100%;
+  height: auto;
+  color: var(--ink);
+}
+.planLine {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1600;
+  stroke-dashoffset: 1600;
+  animation: draw 2.1s var(--ease, ease) 0.15s forwards;
+}
+.planDoor {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  opacity: 0;
+  animation: fadeIn 0.6s ease 1.7s forwards;
+}
+.planLabel {
+  font-family: var(--display);
+  font-size: 8.5px;
+  font-weight: 600;
+  fill: var(--ink-faint);
+  opacity: 0;
+  animation: fadeIn 0.6s ease 1.9s forwards;
+}
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .planLine,
+  .planDoor,
+  .planLabel {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* ── Section shell ─────────────────────────────────────────── */
+.section {
+  padding-top: clamp(3rem, 7vw, 4.5rem);
+  padding-bottom: clamp(3rem, 7vw, 4.5rem);
+  border-top: 1px solid var(--line);
+}
+.sectionAlt {
+  background: var(--panel);
+}
+.sectionHead {
+  max-width: 34rem;
+  margin-bottom: clamp(2rem, 5vw, 3rem);
+}
+.sectionHeading {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  letter-spacing: -0.01em;
+  margin-bottom: 0.7rem;
+}
+.sectionSub {
+  color: var(--ink-soft);
+}
+
+/* ── About ─────────────────────────────────────────────────── */
+.about {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: clamp(2.4rem, 6vw, 4rem);
+  align-items: start;
+}
+.aboutBody p {
+  max-width: 38rem;
+  margin-bottom: 1.1rem;
+}
+.aboutBody p:last-child {
+  margin-bottom: 0;
+}
+
+.quote {
+  margin-top: clamp(2rem, 5vw, 2.6rem);
+  padding-left: 1.2rem;
+  border-left: 2px solid var(--accent);
+  max-width: 34rem;
+}
+.quote p {
+  font-style: italic;
+  font-size: 1.02rem;
+  margin-bottom: 0.6rem;
+}
+.quote cite {
+  display: block;
+  font-style: normal;
+  font-family: var(--display);
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
+.idCard {
+  border: 1px solid var(--ink);
+  padding: 1.6rem;
+  background: var(--paper);
+}
+.idMonogram {
+  width: 3.4rem;
+  height: 3.4rem;
+  border: 1px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.3rem;
+  margin-bottom: 1.2rem;
+}
+.idName {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.15rem;
+  margin-bottom: 0.15rem;
+}
+.idRole {
+  font-style: italic;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  margin-bottom: 1.1rem;
+}
+.idList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1.1rem;
+}
+.idRow dt {
+  font-family: var(--display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--ink-faint);
+  margin-bottom: 0.1rem;
+}
+.idRow dd {
+  font-size: 0.92rem;
+}
+.idBarcode {
+  margin-top: 1.3rem;
+  height: 1.5rem;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--ink) 0px,
+    var(--ink) 2px,
+    transparent 2px,
+    transparent 5px,
+    var(--ink) 5px,
+    var(--ink) 6px,
+    transparent 6px,
+    transparent 10px
+  );
+  opacity: 0.8;
+}
+
+/* ── Listings ──────────────────────────────────────────────── */
+.listings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+.listing {
+  padding: clamp(1.6rem, 3vw, 2.2rem);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.listingIcon {
+  width: 2.4rem;
+  height: 2.4rem;
+  color: var(--ink);
+}
+.listingAddr {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.listingSpec {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+.listingPrice {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  margin-top: 0.2rem;
+}
+.listingLink {
+  margin-top: auto;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.86rem;
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink);
+  align-self: flex-start;
+  padding-bottom: 0.05rem;
+}
+.listingLink:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Contact ───────────────────────────────────────────────── */
+.contact {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
+  gap: clamp(2.4rem, 6vw, 4rem);
+  align-items: start;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  max-width: 30rem;
+}
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.formRow label {
+  font-family: var(--display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.formRow input,
+.formRow textarea {
+  font-family: var(--body);
+  font-size: 0.98rem;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  padding: 0.5rem 0.1rem;
+  resize: vertical;
+}
+.formRow input:focus,
+.formRow textarea:focus {
+  border-bottom-color: var(--ink);
+}
+.formSubmit {
+  align-self: flex-start;
+  margin-top: 0.4rem;
+  background: var(--accent);
+  color: var(--paper);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.92rem;
+  border: none;
+  padding: 0.85rem 1.6rem;
+  cursor: pointer;
+}
+.formSubmit:hover {
+  background: var(--ink);
+}
+.formDone {
+  max-width: 30rem;
+  padding: 1.6rem;
+  border: 1px solid var(--ink);
+}
+.formDone p:first-child {
+  font-family: var(--display);
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+.formDone p:last-child {
+  color: var(--ink-soft);
+}
+
+.signboard {
+  border: 1px solid var(--ink);
+  padding: 1.6rem;
+}
+.signboard h3 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.9rem;
+}
+.signboard p {
+  font-size: 0.94rem;
+  margin-bottom: 0.6rem;
+}
+.signboard a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.signboard p:last-child {
+  margin-bottom: 0;
+  color: var(--ink-faint);
+  font-size: 0.86rem;
+}
+
+/* ── Footer ────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid var(--line);
+  padding-top: clamp(1.6rem, 4vw, 2.2rem);
+  padding-bottom: clamp(2rem, 5vw, 2.8rem);
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--ink-faint);
+}
+.footer p {
+  margin-bottom: 0.2rem;
+}
+.footer a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+  .heroPlan {
+    max-width: 22rem;
+  }
+  .about,
+  .contact {
+    grid-template-columns: 1fr;
+  }
+  .idCard {
+    max-width: 24rem;
+  }
+  .listings {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .nav {
+    align-items: flex-start;
+  }
+  .navLinks {
+    gap: 1rem;
+    font-size: 0.8rem;
+  }
+  .heroActions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.1rem;
+  }
+  .footer {
+    flex-direction: column;
+  }
+}

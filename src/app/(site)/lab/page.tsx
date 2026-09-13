@@ -12,10 +12,46 @@ type Experiment = {
   id: string;
   name: string;
   question: string;
-  fields: {label: string; placeholder: string}[];
+  fields: {label: string; placeholder: string; value?: React.ReactNode}[];
 };
 
 const EXPERIMENTS: Experiment[] = [
+  {
+    id: '001',
+    name: 'One-shot build',
+    question:
+      'Given a full creative brief in one go — audience, goals, style, required sections — does the output read as a real, trustworthy landing page or a generic template?',
+    fields: [
+      {
+        label: 'Prompt',
+        placeholder: 'Not yet run. (Model: —)',
+        value: (
+          <>
+            Build a landing page for a Singapore property agent.
+            <br />
+            Audience: potential home buyers
+            <br />
+            Primary goal: establish trust in the agent
+            <br />
+            Secondary goal: encourage visitors to explore property listings
+            <br />
+            Style: modern and professional, but not corporate
+            <br />
+            Required sections: Hero, About, Featured Listings, Contact
+            <br />
+            Desktop and mobile responsive
+            <br />
+            (Model: Claude Sonnet 5)
+          </>
+        ),
+      },
+      {
+        label: 'Output',
+        placeholder: 'No output recorded yet.',
+        value: <Link href="/lab/001">Claire Teo, Property Advisor — view the page</Link>,
+      },
+    ],
+  },
   {
     id: '01',
     name: 'Repeatability',
@@ -82,7 +118,9 @@ export default function LabPage() {
                   {exp.fields.map((field) => (
                     <div className="lab__field" key={field.label}>
                       <dt>{field.label}</dt>
-                      <dd>{field.placeholder}</dd>
+                      <dd className={field.value ? 'lab__field-value--filled' : undefined}>
+                        {field.value ?? field.placeholder}
+                      </dd>
                     </div>
                   ))}
                 </dl>

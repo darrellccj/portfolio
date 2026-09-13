@@ -1494,6 +1494,14 @@ main {
   line-height: 1.6;
   color: var(--ink-faint);
 }
+.lab__field dd.lab__field-value--filled {
+  font-style: normal;
+  color: var(--ink);
+}
+.lab__field dd.lab__field-value--filled a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
 
 .detail__gallery {
   margin-top: clamp(2.4rem, 6vw, 3.4rem);
