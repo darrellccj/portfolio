@@ -21,9 +21,8 @@ const EXPERIMENTS: Experiment[] = [
     name: 'Repeatability',
     question: 'Same prompt, run multiple times — how much does the output actually vary?',
     fields: [
-      {label: 'Hypothesis', placeholder: 'Not yet written.'},
-      {label: 'Setup', placeholder: 'Prompt, model, temperature, number of runs — TBD.'},
-      {label: 'Findings', placeholder: 'No runs recorded yet.'},
+      {label: 'Prompt', placeholder: 'Not yet run. (Model: —)'},
+      {label: 'Output', placeholder: 'No output recorded yet.'},
     ],
   },
   {
@@ -31,9 +30,8 @@ const EXPERIMENTS: Experiment[] = [
     name: 'Vocabulary',
     question: 'Different words, same meaning — does rephrasing a prompt change the answer?',
     fields: [
-      {label: 'Hypothesis', placeholder: 'Not yet written.'},
-      {label: 'Setup', placeholder: 'Prompt variants and what "same meaning" means here — TBD.'},
-      {label: 'Findings', placeholder: 'No runs recorded yet.'},
+      {label: 'Prompt', placeholder: 'Not yet run. (Model: —)'},
+      {label: 'Output', placeholder: 'No output recorded yet.'},
     ],
   },
   {
@@ -41,9 +39,8 @@ const EXPERIMENTS: Experiment[] = [
     name: 'Specificity',
     question: 'Different prompts, differing specificity — does more detail actually help?',
     fields: [
-      {label: 'Hypothesis', placeholder: 'Not yet written.'},
-      {label: 'Setup', placeholder: 'Prompt ladder from vague to precise — TBD.'},
-      {label: 'Findings', placeholder: 'No runs recorded yet.'},
+      {label: 'Prompt', placeholder: 'Not yet run. (Model: —)'},
+      {label: 'Output', placeholder: 'No output recorded yet.'},
     ],
   },
 ];
