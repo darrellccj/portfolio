@@ -50,9 +50,25 @@ export default function Nav({ alwaysSolid = false }) {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [open]);
 
+  // Split evenly either side of the centred mark — three tabs left,
+  // three right — rather than one solid block after the logo.
+  const half = Math.ceil(LINKS.length / 2);
+  const leftLinks = LINKS.slice(0, half);
+  const rightLinks = LINKS.slice(half);
+
+  const renderLink = (l) => (
+    <a key={l.label} href={l.href ?? linkTo(l.hash)} onClick={() => setOpen(false)}>
+      {l.label}
+    </a>
+  );
+
   return (
     <header className={`nav ${solid ? 'nav--solid' : ''} ${open ? 'nav--open' : ''}`}>
       <div className="nav__pill">
+        <nav className="nav__links nav__links--left" aria-label="Primary">
+          {leftLinks.map(renderLink)}
+        </nav>
+
         <a
           href={linkTo('#top')}
           className="nav__brand"
@@ -61,6 +77,11 @@ export default function Nav({ alwaysSolid = false }) {
         >
           <Image src={logoCloud} alt="" priority className="nav__logo" />
         </a>
+
+        <nav className="nav__links nav__links--right" aria-label="Primary">
+          {rightLinks.map(renderLink)}
+        </nav>
+
         <button
           type="button"
           className="nav__toggle"
@@ -73,12 +94,9 @@ export default function Nav({ alwaysSolid = false }) {
           <span className="nav__toggle-bar" />
           <span className="nav__toggle-bar" />
         </button>
-        <nav id="nav-links" className="nav__links" aria-label="Sections">
-          {LINKS.map((l) => (
-            <a key={l.label} href={l.href ?? linkTo(l.hash)} onClick={() => setOpen(false)}>
-              {l.label}
-            </a>
-          ))}
+
+        <nav id="nav-links" className="nav__links-mobile" aria-label="Sections">
+          {LINKS.map(renderLink)}
         </nav>
       </div>
     </header>

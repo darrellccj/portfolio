@@ -21,6 +21,9 @@
 
   --serif: var(--font-serif), Georgia, 'Times New Roman', serif;
   --mono: var(--font-mono), 'SFMono-Regular', Consolas, monospace;
+  /* Condensed, bold, uppercase-leaning — livery/pit-board lettering for the
+     nav only. Everything else on the page stays on --mono. */
+  --nav-font: var(--font-nav), 'Arial Narrow', sans-serif;
 
   --gutter: clamp(1.4rem, 5vw, 4rem);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -110,11 +113,12 @@ button:focus-visible {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   NAV — centred glass pill
-   A 30%-width floating capsule. The one place the flat/zero-radius
-   rule is broken on purpose: it has to read as a lens sitting ON
-   the page, not as part of it. Still two inks only — the "glass"
-   is paper-alpha over whatever it happens to be refracting.
+   NAV — centred glass pill, livery layout
+   A floating capsule (the one place the flat/zero-radius rule is
+   broken on purpose — it has to read as a lens sitting ON the page).
+   The mark sits dead centre, tabs split evenly either side of it —
+   Gulf-style number-roundel symmetry — set in a condensed, bold
+   uppercase face instead of the body's mono.
    ───────────────────────────────────────────────────────────── */
 .nav {
   position: fixed;
@@ -124,8 +128,10 @@ button:focus-visible {
   justify-content: center;
   padding: 1rem var(--gutter) 0;
   pointer-events: none;
-  font-size: clamp(0.64rem, 0.62vw, 0.8rem);
-  letter-spacing: 0.14em;
+  font-family: var(--nav-font);
+  font-weight: 600;
+  font-size: clamp(0.66rem, 0.64vw, 0.84rem);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--paper);
   transition: color 0.35s var(--ease), padding 0.35s var(--ease);
@@ -134,14 +140,12 @@ button:focus-visible {
 .nav__pill {
   position: relative;
   pointer-events: auto;
-  width: 38vw;
-  min-width: 30rem;
-  max-width: 46rem;
-  display: flex;
+  width: min(94vw, 76rem);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.6rem;
-  padding: 0.9rem 1.7rem;
+  column-gap: clamp(1.2rem, 3vw, 2.8rem);
+  padding: 0.6rem 1.8rem;
   border-radius: 999px;
   isolation: isolate;
 
@@ -231,12 +235,10 @@ button:focus-visible {
 .nav__brand {
   display: flex;
   align-items: center;
-  gap: 0.55em;
-  font-weight: 500;
-  white-space: nowrap;
+  justify-content: center;
 }
 .nav__logo {
-  width: 1.9em;
+  width: clamp(2.6rem, 5.4vw, 4.4rem);
   height: auto;
   flex: none;
 }
@@ -246,15 +248,27 @@ button:focus-visible {
 }
 .nav__links {
   display: flex;
+  align-items: center;
   gap: clamp(0.85rem, 1.6vw, 1.6rem);
 }
-.nav__links a {
+.nav__links--left {
+  justify-content: flex-end;
+}
+.nav__links--right {
+  justify-content: flex-start;
+}
+.nav__links-mobile {
+  display: none;
+}
+.nav__links a,
+.nav__links-mobile a {
   position: relative;
   white-space: nowrap;
   opacity: 0.75;
   transition: opacity 0.25s var(--ease);
 }
-.nav__links a::after {
+.nav__links a::after,
+.nav__links-mobile a::after {
   content: '';
   position: absolute;
   left: 0;
@@ -266,10 +280,12 @@ button:focus-visible {
   transform-origin: left;
   transition: transform 0.3s var(--ease);
 }
-.nav__links a:hover {
+.nav__links a:hover,
+.nav__links-mobile a:hover {
   opacity: 1;
 }
-.nav__links a:hover::after {
+.nav__links a:hover::after,
+.nav__links-mobile a:hover::after {
   transform: scaleX(1);
 }
 
@@ -1667,14 +1683,14 @@ a.d-pager__side:hover .d-pager__dir {
   .nav {
     padding: 0.85rem 1rem 0;
     font-size: 0.66rem;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
   }
   .nav__pill {
-    width: auto;
-    min-width: 0;
-    max-width: 100%;
-    gap: 1.1rem;
-    padding: 0.72rem 1.3rem;
+    column-gap: 1rem;
+    padding: 0.6rem 1.3rem;
+  }
+  .nav__logo {
+    width: clamp(2.4rem, 7vw, 3.4rem);
   }
 }
 
@@ -1689,12 +1705,16 @@ a.d-pager__side:hover .d-pager__dir {
   }
   .nav__pill {
     width: 100%;
-    justify-content: center;
     padding: 0.7rem 1.1rem;
   }
-  .nav__brand {
-    flex: 1;
-    justify-content: center;
+  /* Below the split-tab breakpoint the two flanking lists fold into
+     the toggle's dropdown, so only the centred mark stays inline. */
+  .nav__links--left,
+  .nav__links--right {
+    display: none;
+  }
+  .nav__logo {
+    width: clamp(2.6rem, 11vw, 3.4rem);
   }
   .nav__toggle {
     position: absolute;
@@ -1730,11 +1750,12 @@ a.d-pager__side:hover .d-pager__dir {
   .nav--open .nav__toggle-bar:nth-child(3) {
     transform: translateY(-5.5px) rotate(-45deg);
   }
-  .nav__links {
+  .nav__links-mobile {
     position: absolute;
     top: calc(100% + 0.6rem);
     left: 0;
     right: 0;
+    display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1.1rem;
@@ -1748,11 +1769,11 @@ a.d-pager__side:hover .d-pager__dir {
     pointer-events: none;
     transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
   }
-  .nav--solid .nav__links {
+  .nav--solid .nav__links-mobile {
     background: var(--paper);
     border-color: rgba(13, 51, 114, 0.18);
   }
-  .nav--open .nav__links {
+  .nav--open .nav__links-mobile {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;

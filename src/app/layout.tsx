@@ -1,5 +1,5 @@
 import type {Metadata, Viewport} from 'next';
-import {Inter, IBM_Plex_Mono} from 'next/font/google';
+import {Inter, IBM_Plex_Mono, Oswald} from 'next/font/google';
 
 const serif = Inter({
   subsets: ['latin'],
@@ -13,6 +13,15 @@ const mono = IBM_Plex_Mono({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
   variable: '--font-mono',
+  display: 'swap',
+});
+
+// Condensed, bold, uppercase-friendly — the pit-board/livery lettering feel
+// the nav is going for. Scoped to the nav only; body copy stays on --font-mono.
+const nav = Oswald({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-nav',
   display: 'swap',
 });
 
@@ -40,7 +49,7 @@ export const viewport: Viewport = {themeColor: '#9ae7ff'};
 // is loaded by the (site) layout alone.
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="en" className={`${serif.variable} ${mono.variable}`}>
+    <html lang="en" className={`${serif.variable} ${mono.variable} ${nav.variable}`}>
       <body>{children}</body>
     </html>
   );
