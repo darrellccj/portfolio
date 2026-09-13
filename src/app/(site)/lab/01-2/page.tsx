@@ -5,7 +5,7 @@ import {Manrope} from 'next/font/google';
 import ContactForm from './ContactForm';
 import styles from './page.module.css';
 
-// Lab experiment 001, run 2 — same brief as /lab/001, built independently
+// Lab experiment 01, run 2 — same brief as /lab/01, built independently
 // (fresh persona, palette, type system and layout decisions) to see how
 // much a one-shot output actually varies between attempts. See LAB.md.
 
@@ -17,7 +17,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: 'Ivy Tan, Property Consultant — Lab 001 (Run 2)',
+  title: 'Ivy Tan, Property Consultant — Lab 01 (Run 2)',
   description:
     'Concept landing page for a Singapore property consultant — a Claude Code lab experiment, second run.',
   robots: {index: false, follow: false},
@@ -111,7 +111,7 @@ const LISTINGS = [
   },
 ];
 
-export default function Lab001Run2Page() {
+export default function Lab01Run2Page() {
   return (
     <div className={`${styles.page} ${manrope.variable}`}>
       <Link className={styles.back} href="/lab">

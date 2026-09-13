@@ -17,10 +17,9 @@ type Experiment = {
 
 const EXPERIMENTS: Experiment[] = [
   {
-    id: '001',
-    name: 'One-shot build',
-    question:
-      'Given a full creative brief in one go — audience, goals, style, required sections — does the output read as a real, trustworthy landing page or a generic template?',
+    id: '01',
+    name: 'Repeatability',
+    question: 'Same prompt, run multiple times — how much does the output actually vary?',
     fields: [
       {
         label: 'Prompt 1',
@@ -48,7 +47,7 @@ const EXPERIMENTS: Experiment[] = [
       {
         label: 'Output 1',
         placeholder: 'No output recorded yet.',
-        value: <Link href="/lab/001">Claire Teo, Property Advisor — view the page</Link>,
+        value: <Link href="/lab/01">Claire Teo, Property Advisor — view the page</Link>,
       },
       {
         label: 'Prompt 2',
@@ -76,17 +75,8 @@ const EXPERIMENTS: Experiment[] = [
       {
         label: 'Output 2',
         placeholder: 'No output recorded yet.',
-        value: <Link href="/lab/001-2">Ivy Tan, Property Consultant — view the page</Link>,
+        value: <Link href="/lab/01-2">Ivy Tan, Property Consultant — view the page</Link>,
       },
-    ],
-  },
-  {
-    id: '01',
-    name: 'Repeatability',
-    question: 'Same prompt, run multiple times — how much does the output actually vary?',
-    fields: [
-      {label: 'Prompt', placeholder: 'Not yet run. (Model: —)'},
-      {label: 'Output', placeholder: 'No output recorded yet.'},
     ],
   },
   {

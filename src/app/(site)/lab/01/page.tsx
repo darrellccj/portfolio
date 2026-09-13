@@ -5,7 +5,8 @@ import {Archivo, Source_Serif_4} from 'next/font/google';
 import ContactForm from './ContactForm';
 import styles from './page.module.css';
 
-// Lab experiment 001 — a landing page built from a one-shot creative brief.
+// Lab experiment 01 (Repeatability) — a landing page built from a one-shot creative brief,
+// run twice to test how much the output varies.
 // Deliberately isolated from the portfolio's own two-tone theme: this is a
 // fictional client (Claire Teo, property advisor) so it needs its own
 // palette and fonts, loaded and scoped here rather than in the root layout.
@@ -26,7 +27,7 @@ const body = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: 'Claire Teo, Property Advisor — Lab 001',
+  title: 'Claire Teo, Property Advisor — Lab 01',
   description:
     'Concept landing page for a Singapore property advisor — a Claude Code lab experiment.',
   robots: {index: false, follow: false},
@@ -103,7 +104,7 @@ const LISTINGS = [
   },
 ];
 
-export default function Lab001Page() {
+export default function Lab01Page() {
   return (
     <div className={`${styles.page} ${display.variable} ${body.variable}`}>
       <Link className={styles.back} href="/lab">
