@@ -23,7 +23,7 @@ const EXPERIMENTS: Experiment[] = [
       'Given a full creative brief in one go — audience, goals, style, required sections — does the output read as a real, trustworthy landing page or a generic template?',
     fields: [
       {
-        label: 'Prompt',
+        label: 'Prompt 1',
         placeholder: 'Not yet run. (Model: —)',
         value: (
           <>
@@ -46,9 +46,37 @@ const EXPERIMENTS: Experiment[] = [
         ),
       },
       {
-        label: 'Output',
+        label: 'Output 1',
         placeholder: 'No output recorded yet.',
         value: <Link href="/lab/001">Claire Teo, Property Advisor — view the page</Link>,
+      },
+      {
+        label: 'Prompt 2',
+        placeholder: 'Not yet run. (Model: —)',
+        value: (
+          <>
+            Build a landing page for a Singapore property agent.
+            <br />
+            Audience: potential home buyers
+            <br />
+            Primary goal: establish trust in the agent
+            <br />
+            Secondary goal: encourage visitors to explore property listings
+            <br />
+            Style: modern and professional, but not corporate
+            <br />
+            Required sections: Hero, About, Featured Listings, Contact
+            <br />
+            Desktop and mobile responsive
+            <br />
+            (Model: Claude Sonnet 5)
+          </>
+        ),
+      },
+      {
+        label: 'Output 2',
+        placeholder: 'No output recorded yet.',
+        value: <Link href="/lab/001-2">Ivy Tan, Property Consultant — view the page</Link>,
       },
     ],
   },
