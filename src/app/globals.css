@@ -21,9 +21,9 @@
 
   --serif: var(--font-serif), Georgia, 'Times New Roman', serif;
   --mono: var(--font-mono), 'SFMono-Regular', Consolas, monospace;
-  /* Condensed, bold, uppercase-leaning — livery/pit-board lettering for the
-     nav only. Everything else on the page stays on --mono. */
-  --nav-font: var(--font-nav), 'Arial Narrow', sans-serif;
+  /* Bold, technical, open-width — livery/pit-board lettering for the nav
+     only. Everything else on the page stays on --mono. */
+  --nav-font: var(--font-nav), 'Segoe UI', Arial, sans-serif;
 
   --gutter: clamp(1.4rem, 5vw, 4rem);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -113,12 +113,15 @@ button:focus-visible {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   NAV — centred glass pill, livery layout
+   NAV — centred pill, livery layout
    A floating capsule (the one place the flat/zero-radius rule is
    broken on purpose — it has to read as a lens sitting ON the page).
    The mark sits dead centre, tabs split evenly either side of it —
-   Gulf-style number-roundel symmetry — set in a condensed, bold
-   uppercase face instead of the body's mono.
+   Gulf-style number-roundel symmetry — set in a bold, open-width
+   technical face instead of the body's mono, in sentence case rather
+   than the all-caps tracking used elsewhere on the page.
+   Bare over the hero; the liquid-glass body only switches on under
+   .nav--solid — see the two rule blocks below.
    ───────────────────────────────────────────────────────────── */
 .nav {
   position: fixed;
@@ -130,9 +133,8 @@ button:focus-visible {
   pointer-events: none;
   font-family: var(--nav-font);
   font-weight: 600;
-  font-size: clamp(0.66rem, 0.64vw, 0.84rem);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: clamp(0.78rem, 0.76vw, 0.92rem);
+  letter-spacing: 0.01em;
   color: var(--paper);
   transition: color 0.35s var(--ease), padding 0.35s var(--ease);
 }
@@ -149,28 +151,22 @@ button:focus-visible {
   border-radius: 999px;
   isolation: isolate;
 
-  /* the glass body */
-  background: linear-gradient(
-    160deg,
-    rgba(13, 51, 114, 0.32) 0%,
-    rgba(13, 51, 114, 0.2) 48%,
-    rgba(13, 51, 114, 0.3) 100%
-  );
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(154, 231, 255, 0.28);
-
-  /* lift + the edge specular that sells the thickness */
-  box-shadow: 0 10px 34px rgba(13, 51, 114, 0.22),
-    inset 0 1px 0 rgba(154, 231, 255, 0.5),
-    inset 0 -1px 0 rgba(13, 51, 114, 0.16),
-    inset 0 0 22px rgba(154, 231, 255, 0.08);
+  /* Bare over the hero — no glass, just the mark and type floating on
+     the sky. The liquid-glass body below only switches on under
+     .nav--solid, which the home page reaches by scrolling past the
+     hero; pages with no hero (Lab, detail pages, 404) set it from
+     first paint via `alwaysSolid`, so they see the glass immediately. */
+  background: transparent;
+  border: 1px solid transparent;
+  box-shadow: none;
 
   transition: background 0.45s var(--ease), border-color 0.45s var(--ease),
-    box-shadow 0.45s var(--ease), transform 0.45s var(--ease);
+    box-shadow 0.45s var(--ease), transform 0.45s var(--ease),
+    backdrop-filter 0.45s var(--ease);
 }
 
-/* Top gloss — the light catching the upper curve of the capsule. */
+/* Top gloss — the light catching the upper curve of the capsule.
+   Dormant until the glass body appears (.nav--solid, below). */
 .nav__pill::before {
   content: '';
   position: absolute;
@@ -182,11 +178,14 @@ button:focus-visible {
     rgba(154, 231, 255, 0.26),
     rgba(154, 231, 255, 0)
   );
+  opacity: 0;
   pointer-events: none;
   z-index: -1;
+  transition: opacity 0.45s var(--ease);
 }
 
-/* Off-centre specular hotspot — keeps the surface from reading flat. */
+/* Off-centre specular hotspot — keeps the surface from reading flat
+   once the glass is on. */
 .nav__pill::after {
   content: '';
   position: absolute;
@@ -197,19 +196,18 @@ button:focus-visible {
     rgba(154, 231, 255, 0.3),
     rgba(154, 231, 255, 0) 60%
   );
+  opacity: 0;
   pointer-events: none;
   z-index: -1;
+  transition: opacity 0.45s var(--ease);
 }
 
 .nav__pill:hover {
   transform: translateY(-1px);
-  box-shadow: 0 14px 40px rgba(13, 51, 114, 0.26),
-    inset 0 1px 0 rgba(154, 231, 255, 0.6),
-    inset 0 -1px 0 rgba(13, 51, 114, 0.16),
-    inset 0 0 22px rgba(154, 231, 255, 0.1);
 }
 
-/* Past the hero the pill sits on paper, so the tint flips to ink. */
+/* Past the hero the pill sits on paper — this is where the liquid
+   glass actually lives, fading in as .nav--solid lands. */
 .nav--solid {
   color: var(--ink);
 }
@@ -220,10 +218,16 @@ button:focus-visible {
     rgba(154, 231, 255, 0.42) 55%,
     rgba(13, 51, 114, 0.06) 100%
   );
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
   border-color: rgba(13, 51, 114, 0.18);
   box-shadow: 0 10px 30px rgba(13, 51, 114, 0.14),
     inset 0 1px 0 rgba(154, 231, 255, 0.85),
     inset 0 -1px 0 rgba(13, 51, 114, 0.1);
+}
+.nav--solid .nav__pill::before,
+.nav--solid .nav__pill::after {
+  opacity: 1;
 }
 .nav--solid .nav__pill:hover {
   transform: translateY(-1px);
@@ -289,12 +293,11 @@ button:focus-visible {
   transform: scaleX(1);
 }
 
-/* No backdrop-filter (older Firefox / Safari fallbacks): go opaque
-   enough that the type stays legible instead of shipping a ghost. */
+/* No backdrop-filter (older Firefox / Safari fallbacks): once the glass
+   body is meant to be on, go opaque enough that the type stays legible
+   instead of shipping a ghost. The bare hero state has nothing to fall
+   back from — it was never translucent. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .nav__pill {
-    background: rgba(13, 51, 114, 0.55);
-  }
   .nav--solid .nav__pill {
     background: rgba(154, 231, 255, 0.92);
   }
@@ -1682,8 +1685,8 @@ a.d-pager__side:hover .d-pager__dir {
 @media (max-width: 900px) {
   .nav {
     padding: 0.85rem 1rem 0;
-    font-size: 0.66rem;
-    letter-spacing: 0.08em;
+    font-size: 0.74rem;
+    letter-spacing: 0.005em;
   }
   .nav__pill {
     column-gap: 1rem;
@@ -1700,8 +1703,8 @@ a.d-pager__side:hover .d-pager__dir {
     overscroll-behavior-y: none;
   }
   .nav {
-    font-size: 0.68rem;
-    letter-spacing: 0.06em;
+    font-size: 0.76rem;
+    letter-spacing: 0;
   }
   .nav__pill {
     width: 100%;

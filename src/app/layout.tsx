@@ -1,5 +1,5 @@
 import type {Metadata, Viewport} from 'next';
-import {Inter, IBM_Plex_Mono, Oswald} from 'next/font/google';
+import {Inter, IBM_Plex_Mono, Titillium_Web} from 'next/font/google';
 
 const serif = Inter({
   subsets: ['latin'],
@@ -16,11 +16,12 @@ const mono = IBM_Plex_Mono({
   display: 'swap',
 });
 
-// Condensed, bold, uppercase-friendly — the pit-board/livery lettering feel
-// the nav is going for. Scoped to the nav only; body copy stays on --font-mono.
-const nav = Oswald({
+// Technical, open-width sans — the pit-board/livery lettering feel the nav
+// is going for, without going full condensed. Scoped to the nav only; body
+// copy stays on --font-mono.
+const nav = Titillium_Web({
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
+  weight: ['600', '700'],
   variable: '--font-nav',
   display: 'swap',
 });
