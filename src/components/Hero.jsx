@@ -1,37 +1,35 @@
-import SkyGL from './SkyGL.jsx';
 import TypedRole from './TypedRole.jsx';
 
 const roleWords = (profile) => (profile.roles?.length ? profile.roles : [profile.role]);
 
-// Server component — the sky canvas and the typewriter eyebrow are
-// the only client work; everything else renders on the server.
+// 2026 redesign — centred and purely typographic. The WebGL sky is gone
+// (see SkyGL's removal); personality now comes from the script-plus-bold
+// headline pairing instead of a background device. Server component —
+// only the role typewriter needs the client.
 export default function Hero({ profile }) {
   return (
     <section className="hero" id="top">
-      {/* Duotone sky — rendered in the site's two inks only. */}
-      <SkyGL />
+      <p className="hero__eyebrow">
+        <TypedRole words={roleWords(profile)} /> &mdash; {(profile.location || '').toUpperCase()}
+      </p>
 
-      <div className="hero__inner">
-        <p className="hero__eyebrow">
-          <TypedRole words={roleWords(profile)} />
-        </p>
-        <h1 className="hero__name">{profile.name}</h1>
-      </div>
+      <p className="hero__script">Software an institution</p>
+      <h1 className="hero__name">didn&rsquo;t know it needed.</h1>
 
-      {/* Bottom strip: a running tagline ticker over the spec title block. */}
-      <div className="hero__strip">
-        <div className="hero__ticker">
-          <div className="hero__ticker-track">
-            <span>{profile.tagline}</span>
-            <span aria-hidden="true">{profile.tagline}</span>
-          </div>
-        </div>
-        <div className="hero__meta" aria-hidden="true">
-          <span>LOC — {(profile.location || '').toUpperCase()}</span>
-          <a href="#about" className="hero__scroll" aria-hidden="false" aria-label="Scroll to content">
-            SCROLL ↓
+      <p className="hero__sub">
+        Solo, AI-assisted, and <mark>fast</mark> &mdash; for institutions without a tech team,
+        niches nobody&rsquo;s built for, and problems in my own life.
+      </p>
+
+      <div className="hero__actions">
+        <div className="bracket">
+          <a href="#work" className="hero__cta">
+            See the work
           </a>
         </div>
+        <a href="/lab" className="hero__cta--outline">
+          Read the log
+        </a>
       </div>
     </section>
   );

@@ -14,7 +14,6 @@
     "next-sanity": "^13.3.3",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "three": "^0.185.1",
     "@sanity/image-url": "^1.1.0",
     "sanity": "^6.10.1",
     "@sanity/vision": "^6.10.1",

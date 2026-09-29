@@ -322,43 +322,53 @@ export default function Dither({ copy }) {
     : `Ordered-dither rendering of ${ditherCopy.work}, ${ditherCopy.credit}. Click to play through the dithering techniques.`;
 
   return (
-    <section className="section dither" id="dither">
-      <button
-        type="button"
-        className="reveal dither__frame"
-        ref={(el) => {
-          reveal.current = el;
-          frameRef.current = el;
-        }}
-        onClick={playCycle}
-        aria-label={frameLabel}
-      >
-        <canvas ref={canvasRef} className="dither__canvas" aria-hidden="true" />
-      </button>
+    <section className="study" id="dither">
+      <div className="reveal" ref={reveal}>
+        <p className="study__label">04 / Study</p>
+        <h2 className="study__title">A small dithering study</h2>
+        <p className="study__sub">
+          Click the plate to cycle through five dithering techniques, or drop in your own photo.
+        </p>
 
-      <div className="dither__toolbar">
-        <label className="dither__action dither__upload">
-          Upload image
-          <input
-            type="file"
-            accept="image/*"
-            className="dither__file-input"
-            onChange={handleUpload}
-          />
-        </label>
-        <button
-          type="button"
-          className="dither__action"
-          onClick={handleDownload}
-          disabled={!isReady}
-        >
-          Download
-        </button>
-        {hasCustomImage && (
-          <button type="button" className="dither__action" onClick={handleReset}>
-            Reset
+        <div className="study__frame-wrap">
+          <button
+            type="button"
+            className="dither__frame"
+            ref={frameRef}
+            onClick={playCycle}
+            aria-label={frameLabel}
+          >
+            <canvas ref={canvasRef} className="dither__canvas" aria-hidden="true" />
           </button>
-        )}
+        </div>
+        <p className="study__caption">
+          {ditherCopy.work} &mdash; {ditherCopy.credit}
+        </p>
+
+        <div className="dither__toolbar">
+          <label className="dither__action dither__upload">
+            Upload image
+            <input
+              type="file"
+              accept="image/*"
+              className="dither__file-input"
+              onChange={handleUpload}
+            />
+          </label>
+          <button
+            type="button"
+            className="dither__action"
+            onClick={handleDownload}
+            disabled={!isReady}
+          >
+            Download
+          </button>
+          {hasCustomImage && (
+            <button type="button" className="dither__action" onClick={handleReset}>
+              Reset
+            </button>
+          )}
+        </div>
       </div>
     </section>
   );

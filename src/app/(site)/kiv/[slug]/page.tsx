@@ -64,7 +64,7 @@ export default async function KivPage({params}: Params) {
 
   return (
     <>
-      <Nav alwaysSolid />
+      <Nav />
       <main className="detail detail--kiv">
         <div className="detail__inner">
           <div className="detail__top">

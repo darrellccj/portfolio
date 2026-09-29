@@ -33,7 +33,7 @@ export default async function Home() {
           not replay every time you come back from a project page. */}
       <LoadingScreen />
       <Nav />
-      <main>
+      <main className="home">
         <Hero profile={profile} />
         <About about={profile.about} stack={profile.stack ?? []} />
         <Work projects={projectsRes.data ?? []} />

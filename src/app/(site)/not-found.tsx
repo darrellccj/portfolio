@@ -6,7 +6,7 @@ import Nav from '@/components/Nav';
 export default function NotFound() {
   return (
     <>
-      <Nav alwaysSolid />
+      <Nav />
       <main className="detail detail--empty">
         <div className="detail__inner">
           <p className="detail__eyebrow">404</p>

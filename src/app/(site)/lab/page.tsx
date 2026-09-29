@@ -107,7 +107,7 @@ export const metadata: Metadata = {
 export default function LabPage() {
   return (
     <>
-      <Nav alwaysSolid />
+      <Nav />
       <main className="detail">
         <div className="detail__inner">
           <div className="detail__top">

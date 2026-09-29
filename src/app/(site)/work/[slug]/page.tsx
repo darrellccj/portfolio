@@ -75,7 +75,7 @@ export default async function ProjectPage({params}: Params) {
 
   return (
     <>
-      <Nav alwaysSolid />
+      <Nav />
       <main className="detail">
         <div className="detail__inner">
           <div className="detail__top">
