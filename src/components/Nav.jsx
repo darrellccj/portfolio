@@ -12,7 +12,7 @@ const LINKS = [
   { label: 'About', hash: '#about' },
   { label: 'Work', hash: '#work' },
   { label: 'KIV', hash: '#kiv' },
-  { label: 'Study', hash: '#dither' },
+  { label: 'Study', href: '/dither' },
   { label: 'Lab', href: '/lab' },
 ];
 

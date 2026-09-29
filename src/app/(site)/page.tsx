@@ -4,7 +4,7 @@ import Hero from '@/components/Hero';
 import About from '@/components/About';
 import Work from '@/components/Work';
 import Kiv from '@/components/Kiv';
-import Dither from '@/components/Dither';
+import DitherCard from '@/components/DitherCard';
 import Contact from '@/components/Contact';
 
 import {sanityFetch} from '@/sanity/lib/live';
@@ -38,7 +38,7 @@ export default async function Home() {
         <About about={profile.about} stack={profile.stack ?? []} />
         <Work projects={projectsRes.data ?? []} />
         <Kiv items={kivRes.data ?? []} />
-        <Dither copy={dither} />
+        <DitherCard copy={dither} />
         <Contact profile={profile} />
       </main>
     </>

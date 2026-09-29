@@ -730,16 +730,15 @@ main {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   STUDY — the dither tool, framed with the offset shadow + reticle
-   corners; the canvas mechanics (aspect-ratio, cursor states) are
-   unchanged, only the frame and controls are restyled.
+   STUDY CARD — homepage teaser only. A live mini-preview cycling
+   through a few techniques, linking out to the full /dither page;
+   the offset-shadow card pattern is shared with .work-feature.
    ───────────────────────────────────────────────────────────── */
 .study {
   max-width: 72rem;
   margin: 0 auto;
   padding: clamp(4rem, 9vw, 6.5rem) var(--gutter);
   border-top: 1px solid var(--line-soft);
-  text-align: center;
 }
 .study__label {
   font-family: var(--ui);
@@ -762,14 +761,118 @@ main {
   line-height: 1.6;
   color: var(--ink-soft);
   max-width: 28rem;
-  margin: 0 auto clamp(1.8rem, 4vw, 2.6rem);
+  margin-bottom: clamp(1.8rem, 4vw, 2.6rem);
 }
-.study__frame-wrap {
+.study__caption {
+  font-family: var(--ui);
+  font-size: 0.76rem;
+  color: var(--ink-faint);
+  margin-top: 1.1rem;
+}
+.study-card {
+  position: relative;
+  display: block;
+}
+.study-card::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 100%;
+  height: 100%;
+  background: var(--ink);
+  z-index: 0;
+}
+.study-card__inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  align-items: stretch;
+  background: var(--surface);
+  border: 1.5px solid var(--ink);
+}
+.study-card__frame {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-right: 1.5px solid var(--ink);
+}
+.study-card__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+.study-card__body {
+  padding: clamp(1.4rem, 3vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.study-card__body .study__sub {
+  margin-bottom: 0;
+}
+.study-card__cta {
+  margin-top: 1.4rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--line-soft);
+  font-family: var(--ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.study-card__cta span {
+  color: var(--accent);
+}
+@media (max-width: 720px) {
+  .study-card__inner {
+    grid-template-columns: 1fr;
+  }
+  .study-card__frame {
+    aspect-ratio: 16 / 10;
+    border-right: none;
+    border-bottom: 1.5px solid var(--ink);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   DITHER PAGE (/dither) — the full tool: reticle-cornered frame
+   plus a control panel for algorithm, matrix size, contrast,
+   brightness, dot size and ink/paper colors.
+   ───────────────────────────────────────────────────────────── */
+.dither-page-main {
+  min-height: 100vh;
+  padding-top: 5.5rem;
+}
+.dither-page__inner {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: clamp(2rem, 6vw, 3.5rem) var(--gutter) clamp(4rem, 9vw, 6rem);
+}
+.dither-page__top {
+  margin-bottom: clamp(1.6rem, 4vw, 2.4rem);
+}
+.dither-page__head {
+  text-align: center;
+  margin-bottom: clamp(1.8rem, 4vw, 2.6rem);
+}
+.dither-page__head .study__sub {
+  margin-left: auto;
+  margin-right: auto;
+}
+.dither-page__frame-wrap {
   position: relative;
   width: min(100%, 26rem);
   margin: 0 auto;
 }
-.study__frame-wrap::before {
+.dither-page__frame-wrap::before {
   content: '';
   position: absolute;
   top: 8px;
@@ -788,9 +891,6 @@ main {
   overflow: hidden;
   background: var(--surface);
   border: 1.5px solid var(--ink);
-  padding: 0;
-  font: inherit;
-  cursor: pointer;
 }
 .dither__frame::after {
   content: '';
@@ -809,9 +909,6 @@ main {
   color: var(--ink);
   opacity: 0.5;
 }
-.dither__frame.is-cycling {
-  cursor: progress;
-}
 .dither__canvas {
   position: absolute;
   inset: 0;
@@ -822,11 +919,89 @@ main {
   image-rendering: crisp-edges;
   image-rendering: pixelated;
 }
-.study__caption {
+.dither-controls {
+  margin-top: clamp(2rem, 5vw, 2.8rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+.dither-controls__group {
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--line-soft);
+}
+.dither-controls__label {
+  font-family: var(--ui);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 0.7rem;
+}
+.dither-controls__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.dither-pill {
+  padding: 0.5em 1em;
+  background: none;
+  color: var(--ink-soft);
+  border: 1.5px solid var(--line);
   font-family: var(--ui);
   font-size: 0.76rem;
-  color: var(--ink-faint);
-  margin-top: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s var(--ease), color 0.2s var(--ease), background 0.2s var(--ease);
+}
+.dither-pill:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.dither-pill.is-active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.dither-controls__group--sliders {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1.2rem 1.6rem;
+}
+.dither-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-family: var(--ui);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.dither-slider input[type='range'] {
+  accent-color: var(--accent);
+  width: 100%;
+}
+.dither-controls__swatches {
+  display: flex;
+  gap: 1.4rem;
+  margin-top: 0.9rem;
+}
+.dither-swatch {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--ui);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.dither-swatch input[type='color'] {
+  width: 2rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 1.5px solid var(--line);
+  background: none;
+  cursor: pointer;
 }
 .dither__toolbar {
   display: flex;
@@ -834,7 +1009,7 @@ main {
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  margin-top: 1.6rem;
+  margin-top: 2rem;
 }
 .dither__action {
   display: inline-flex;
