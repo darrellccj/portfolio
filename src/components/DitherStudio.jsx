@@ -102,141 +102,156 @@ export default function DitherStudio({ copy }) {
 
   return (
     <section className="dither-page">
-      <div className="dither-page__frame-wrap">
-        <div className="dither__frame" ref={frameRef} role="img" aria-label={frameLabel}>
-          <canvas ref={canvasRef} className="dither__canvas" aria-hidden="true" />
-        </div>
-      </div>
-      {!hasCustomImage && (copy?.work || copy?.credit) ? (
-        <p className="study__caption">
-          {copy.work}
-          {copy.work && copy.credit ? ' — ' : ''}
-          {copy.credit}
-        </p>
-      ) : null}
-
-      <div className="dither-controls">
-        <div className="dither-controls__group">
-          <p className="dither-controls__label">Effect</p>
-          <div className="dither-controls__pills">
-            {ALGORITHMS.map((a) => (
-              <button
-                key={a.id}
-                type="button"
-                className={`dither-pill ${params.algorithmId === a.id ? 'is-active' : ''}`}
-                onClick={() => update({ algorithmId: a.id })}
-              >
-                {a.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {showMatrixSize ? (
-          <div className="dither-controls__group">
-            <p className="dither-controls__label">{kind === 'halftone' ? 'Dot cell' : 'Matrix size'}</p>
-            <div className="dither-controls__pills">
-              {MATRIX_SIZES.map((size) => (
-                <button
-                  key={size}
-                  type="button"
-                  className={`dither-pill ${params.matrixSize === size ? 'is-active' : ''}`}
-                  onClick={() => update({ matrixSize: size })}
-                >
-                  {size}
-                </button>
-              ))}
+      <div className="dither-page__layout">
+        {/* Sticky so the result stays in view while you scroll through the
+            controls instead of hopping back and forth to check a change. */}
+        <div className="dither-page__preview">
+          <div className="dither-page__frame-wrap">
+            <div className="dither__frame" ref={frameRef} role="img" aria-label={frameLabel}>
+              <canvas ref={canvasRef} className="dither__canvas" aria-hidden="true" />
             </div>
           </div>
-        ) : null}
-
-        <div className="dither-controls__group dither-controls__group--sliders">
-          <label className="dither-slider">
-            <span>Contrast</span>
-            <input
-              type="range"
-              min="0.5"
-              max="3"
-              step="0.05"
-              value={params.contrast}
-              onChange={(e) => update({ contrast: Number(e.target.value) })}
-            />
-          </label>
-          <label className="dither-slider">
-            <span>Brightness</span>
-            <input
-              type="range"
-              min="-0.3"
-              max="0.3"
-              step="0.01"
-              value={params.brightness}
-              onChange={(e) => update({ brightness: Number(e.target.value) })}
-            />
-          </label>
-          <label className="dither-slider">
-            <span>Dot size</span>
-            <input
-              type="range"
-              min="1"
-              max="4"
-              step="0.1"
-              value={params.dotSize || 1.8}
-              onChange={(e) => update({ dotSize: Number(e.target.value) })}
-            />
-          </label>
+          {!hasCustomImage && (copy?.work || copy?.credit) ? (
+            <p className="study__caption">
+              {copy.work}
+              {copy.work && copy.credit ? ' — ' : ''}
+              {copy.credit}
+            </p>
+          ) : null}
         </div>
 
-        <div className="dither-controls__group">
-          <p className="dither-controls__label">Colors</p>
-          <div className="dither-controls__pills">
-            {Object.values(COLOR_PRESETS).map((preset) => (
-              <button
-                key={preset.label}
-                type="button"
-                className="dither-pill"
-                onClick={() => update({ ink: preset.ink, paper: preset.paper })}
-              >
-                {preset.label}
+        <div className="dither-page__panel">
+          <div className="dither-controls">
+            <div className="dither-controls__group">
+              <p className="dither-controls__label">Effect</p>
+              <div className="dither-controls__pills">
+                {ALGORITHMS.map((a) => (
+                  <button
+                    key={a.id}
+                    type="button"
+                    className={`dither-pill ${params.algorithmId === a.id ? 'is-active' : ''}`}
+                    onClick={() => update({ algorithmId: a.id })}
+                  >
+                    {a.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {showMatrixSize ? (
+              <div className="dither-controls__group">
+                <p className="dither-controls__label">
+                  {kind === 'halftone' ? 'Dot cell' : 'Matrix size'}
+                </p>
+                <div className="dither-controls__pills">
+                  {MATRIX_SIZES.map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      className={`dither-pill ${params.matrixSize === size ? 'is-active' : ''}`}
+                      onClick={() => update({ matrixSize: size })}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <div className="dither-controls__group dither-controls__group--sliders">
+              <label className="dither-slider">
+                <span>Contrast</span>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="3"
+                  step="0.05"
+                  value={params.contrast}
+                  onChange={(e) => update({ contrast: Number(e.target.value) })}
+                />
+              </label>
+              <label className="dither-slider">
+                <span>Brightness</span>
+                <input
+                  type="range"
+                  min="-0.3"
+                  max="0.3"
+                  step="0.01"
+                  value={params.brightness}
+                  onChange={(e) => update({ brightness: Number(e.target.value) })}
+                />
+              </label>
+              <label className="dither-slider">
+                <span>Dot size</span>
+                <input
+                  type="range"
+                  min="1"
+                  max="4"
+                  step="0.1"
+                  value={params.dotSize || 1.8}
+                  onChange={(e) => update({ dotSize: Number(e.target.value) })}
+                />
+              </label>
+            </div>
+
+            <div className="dither-controls__group">
+              <p className="dither-controls__label">Colors</p>
+              <div className="dither-controls__pills">
+                {Object.values(COLOR_PRESETS).map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    className="dither-pill"
+                    onClick={() => update({ ink: preset.ink, paper: preset.paper })}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+              <div className="dither-controls__swatches">
+                <label className="dither-swatch">
+                  Ink
+                  <input
+                    type="color"
+                    value={rgbToHex(params.ink)}
+                    onChange={(e) => update({ ink: hexToRgb(e.target.value) })}
+                  />
+                </label>
+                <label className="dither-swatch">
+                  Paper
+                  <input
+                    type="color"
+                    value={rgbToHex(params.paper)}
+                    onChange={(e) => update({ paper: hexToRgb(e.target.value) })}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className="dither__toolbar">
+            <label className="dither__action dither__upload">
+              Upload image
+              <input
+                type="file"
+                accept="image/*"
+                className="dither__file-input"
+                onChange={handleUpload}
+              />
+            </label>
+            <button type="button" className="dither__action" onClick={handleDownload} disabled={!isReady}>
+              Download
+            </button>
+            {hasCustomImage ? (
+              <button type="button" className="dither__action" onClick={handleResetImage}>
+                Reset image
               </button>
-            ))}
-          </div>
-          <div className="dither-controls__swatches">
-            <label className="dither-swatch">
-              Ink
-              <input
-                type="color"
-                value={rgbToHex(params.ink)}
-                onChange={(e) => update({ ink: hexToRgb(e.target.value) })}
-              />
-            </label>
-            <label className="dither-swatch">
-              Paper
-              <input
-                type="color"
-                value={rgbToHex(params.paper)}
-                onChange={(e) => update({ paper: hexToRgb(e.target.value) })}
-              />
-            </label>
+            ) : null}
+            <button type="button" className="dither__action" onClick={handleResetSettings}>
+              Reset settings
+            </button>
           </div>
         </div>
-      </div>
-
-      <div className="dither__toolbar">
-        <label className="dither__action dither__upload">
-          Upload image
-          <input type="file" accept="image/*" className="dither__file-input" onChange={handleUpload} />
-        </label>
-        <button type="button" className="dither__action" onClick={handleDownload} disabled={!isReady}>
-          Download
-        </button>
-        {hasCustomImage ? (
-          <button type="button" className="dither__action" onClick={handleResetImage}>
-            Reset image
-          </button>
-        ) : null}
-        <button type="button" className="dither__action" onClick={handleResetSettings}>
-          Reset settings
-        </button>
       </div>
     </section>
   );

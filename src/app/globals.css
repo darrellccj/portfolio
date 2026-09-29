@@ -852,7 +852,7 @@ main {
   padding-top: 5.5rem;
 }
 .dither-page__inner {
-  max-width: 46rem;
+  max-width: 64rem;
   margin: 0 auto;
   padding: clamp(2rem, 6vw, 3.5rem) var(--gutter) clamp(4rem, 9vw, 6rem);
 }
@@ -866,6 +866,27 @@ main {
 .dither-page__head .study__sub {
   margin-left: auto;
   margin-right: auto;
+}
+
+/* The plate stays pinned in view as the panel scrolls past it — no more
+   hopping back and forth between a filter and the result it changed. */
+.dither-page__preview {
+  position: sticky;
+  top: 5.5rem;
+  z-index: 1;
+  background: var(--paper);
+  padding-bottom: 1rem;
+}
+@media (min-width: 880px) {
+  .dither-page__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(2rem, 4vw, 3.5rem);
+  }
+  .dither-page__preview {
+    padding-bottom: 0;
+  }
 }
 .dither-page__frame-wrap {
   position: relative;
