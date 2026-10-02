@@ -12,8 +12,6 @@
  * ---------------------------------------------------------------------------------
  */
 
-export declare const internalGroqTypeReferenceTo: unique symbol;
-
 // Source: schema.json
 export type SanityImageAssetReference = {
   _ref: string;
@@ -156,6 +154,7 @@ export type Profile = {
   _rev: string;
   name?: string;
   statement?: string;
+  intro?: string;
   exploringSince?: string;
   questions?: Array<string>;
   about?: string;
@@ -288,12 +287,15 @@ export type AllSanitySchemaTypes =
   | SanityImageAsset
   | Geopoint;
 
+export declare const internalGroqTypeReferenceTo: unique symbol;
+
 // Source: src/sanity/queries.ts
 // Variable: PROFILE_QUERY
-// Query: *[_type == "profile"][0]{    name, statement, exploringSince, questions, about, background, email, location,    socials[]{ label, href }  }
+// Query: *[_type == "profile"][0]{    name, statement, intro, exploringSince, questions, about, background, email, location,    socials[]{ label, href }  }
 export type PROFILE_QUERY_RESULT = {
   name: string | null;
   statement: string | null;
+  intro: string | null;
   exploringSince: string | null;
   questions: Array<string> | null;
   about: string | null;
@@ -451,7 +453,7 @@ export type DITHER_QUERY_RESULT = {
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '\n  *[_type == "profile"][0]{\n    name, statement, exploringSince, questions, about, background, email, location,\n    socials[]{ label, href }\n  }\n': PROFILE_QUERY_RESULT;
+    '\n  *[_type == "profile"][0]{\n    name, statement, intro, exploringSince, questions, about, background, email, location,\n    socials[]{ label, href }\n  }\n': PROFILE_QUERY_RESULT;
     '\n  *[_type == "project"] | order(\n    select(status == "Done" => 0, status == "In progress" => 1, status == "Parked" => 2, 3) asc,\n    order asc,\n    year desc\n  ){\n    _id, tag, title, desc, year, status,\n    "slug": slug.current\n  }\n': PROJECTS_QUERY_RESULT;
     '\n  *[_type == "project"] | order(\n    select(status == "Done" => 0, status == "In progress" => 1, status == "Parked" => 2, 3) asc,\n    order asc,\n    year desc\n  ){\n    _id, title, "slug": slug.current\n  }\n': PROJECT_INDEX_QUERY_RESULT;
     '\n  *[_type == "project" && _id == $id][0]{\n    _id, title, tag, desc, year, href, status, timeline,\n    need, requirements, judgement, decisions, change,\n    standing, openQuestions, notes,\n    "slug": slug.current,\n    links[]{ label, href },\n    sections[]{ heading, body },\n    cover{\n      alt, caption,\n      "url": asset->url,\n      "lqip": asset->metadata.lqip,\n      "aspect": asset->metadata.dimensions.aspectRatio\n    },\n    gallery[]{\n      alt, caption,\n      "url": asset->url,\n      "lqip": asset->metadata.lqip,\n      "aspect": asset->metadata.dimensions.aspectRatio\n    },\n    "entries": *[_type == "entry" && references(^._id)] | order(date desc){\n      _id, title, date, kind, "slug": slug.current\n    }\n  }\n': PROJECT_DETAIL_QUERY_RESULT;

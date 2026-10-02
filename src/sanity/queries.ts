@@ -13,7 +13,7 @@ import { defineQuery } from 'next-sanity';
 
 export const PROFILE_QUERY = defineQuery(`
   *[_type == "profile"][0]{
-    name, statement, exploringSince, questions, about, background, email, location,
+    name, statement, intro, exploringSince, questions, about, background, email, location,
     socials[]{ label, href }
   }
 `);

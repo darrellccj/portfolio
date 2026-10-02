@@ -10,9 +10,11 @@ October 2026. Revisit at every checkpoint (see *How it evolves*).
 This is not a portfolio and not a declaration that I'm a UX designer.
 
 It's a **commitment device**: a public, dated record of whether I'm
-actually exploring design — and what I learn while I do. It is written for
-me first. Visitors are welcome, but the site isn't trying to convince them
-of anything.
+actually exploring design — and what I learn while I do. The exploration is
+the hook, but the site is **written for a curious stranger**: someone who
+lands cold, knows nothing about me, and might be a recruiter, a client or
+a peer. Every page has to make sense to them without insider context, tell
+them what's here and what I can do, and make it easy to get in touch.
 
 > Figuring out how things should work — and whether designing them is
 > what I want to do. Exploring since October 2026.
@@ -40,9 +42,10 @@ flattering narrative.
 
 "UX design" is probably too narrow. What I described is closer to
 **product / web design**: interpreting a need, making judgement calls,
-and making the result real on the web. But for the next two years the
-audience is me, so **the site carries no label** — it carries a question
-instead.
+and making the result real on the web. The site
+still **carries no label** — it carries a question instead — but it says in
+plain words what I make and who it's for (the `intro` on the homepage), so
+a stranger isn't left guessing.
 
 ---
 
@@ -72,12 +75,14 @@ publish, so new formats become new **kinds or tags**, not new sections.
 
 ### Homepage
 
-1. One sentence plus "exploring since".
+1. One sentence plus "exploring since", then a plain two-sentence **intro**
+   for a stranger and two clear next steps: *See what I've made* and
+   *Get in touch*.
 2. **Currently exploring** — two or three open questions.
 3. **Latest from the log** — the five most recent entries, dated. The date
    of the newest one is visible, which is the point.
 4. **Projects** — compact list with statuses.
-5. Email.
+5. Email, framed as an invitation: bring me something to work out.
 
 ### A project write-up (only for projects that earned one)
 
@@ -97,14 +102,16 @@ trying to figure out, how far it got, why it stopped.
 
 A "now" page, not a bio: why I started, what I'm exploring, the questions
 I'm holding — including *"is design actually it?"* — one or two lines of
-background, and an email.
+background, and an email. Written to be read by someone who has never met
+me: say what I'd be good to work with on, not only what I'm unsure of.
 
 ---
 
 ## Deliberately left out
 
 - Role titles of any kind, especially rotating ones.
-- Resume / CV, "services", "hire me", testimonials, "open to projects".
+- Pricing, a "services" menu, testimonials, "hire me" banners. (A plain
+  invitation to get in touch is in; selling is out.)
 - Tool and stack lists, skill bars, logos.
 - Metrics and big numbers.
 - Boilerplate process diagrams.
@@ -141,7 +148,25 @@ The checkpoints are the commitment device.
 
 ---
 
+## Writing for outsiders
+
+- Lead with what a visitor gets (a finished thing, a clear idea), then the
+  thinking behind it.
+- Private doubts are fine as questions; they shouldn't be the only thing a
+  stranger can read. Pair every "I'm unsure" with something concrete.
+- Project cards say who it was for and what changed for them. "Write-up to
+  come" is a gap to close, not a state to leave.
+- No in-jokes, no shorthand only I understand ("KIV", "Lab" without a
+  line of context).
+
+---
+
 ## Open now
+
+- Fill in the new `intro` on the profile in the Studio, and check the
+  About page reads well to a stranger.
+- Write the property agent site up properly. It's the one finished project
+  and the main proof for an outsider.
 
 - Write down 3–5 moments on the property agent site where I overrode the
   client or Claude, and why. That's the raw material for its write-up.

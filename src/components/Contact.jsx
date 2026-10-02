@@ -2,8 +2,8 @@
 
 import useReveal from '../hooks/useReveal.js';
 
-// Just an address — no "open to projects", no reply-time promise. This is
-// a place to write to, not a sales funnel (see docs/direction.md).
+// An invitation and an address — no pricing, no "services", no reply-time
+// promise (see docs/direction.md).
 //
 // 2026 redesign — reuses the hero's script-plus-bold headline pairing as
 // a deliberate bookend rather than a one-off, and folds the old separate
@@ -23,8 +23,8 @@ export default function Contact({ profile, label = 'Contact' }) {
         <p className="contact__script">Say</p>
         <h2 className="contact__title">hello.</h2>
         <p className="contact__sub">
-          If something here is interesting to you, or you think I&rsquo;ve got
-          it wrong, I&rsquo;d like to hear about it.
+          Have something that needs working out &mdash; a site, a tool, an
+          idea? Or just a thought on anything here? I&rsquo;d like to hear it.
         </p>
 
         <a className="contact__email" href={`mailto:${profile.email}`}>

@@ -823,6 +823,13 @@
         },
         "optional": true
       },
+      "intro": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "exploringSince": {
         "type": "objectAttribute",
         "value": {

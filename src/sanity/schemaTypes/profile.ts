@@ -23,6 +23,14 @@ export const profile = defineType({
       validation: (r) => r.required(),
     }),
     defineField({
+      name: 'intro',
+      type: 'text',
+      rows: 3,
+      group: 'home',
+      description:
+        'Two plain sentences for someone who knows nothing about you: what you make, who it is for, and what a visitor will find here. No jargon, no private doubts.',
+    }),
+    defineField({
       name: 'exploringSince',
       type: 'date',
       group: 'home',
