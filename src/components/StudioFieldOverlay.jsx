@@ -46,6 +46,28 @@ function decodeField(text) {
   return {id, type: params.get('type'), path};
 }
 
+// Writes a value straight into the page text for a field, so typing in the
+// panel shows up on the next frame instead of waiting on the save and
+// SanityLive's round trip. The stega marker is kept on the end of the new
+// text, otherwise the field would stop being findable (and clickable) until
+// the server re-rendered it. Only touches a node whose text actually
+// differs, so it is safe to call from a MutationObserver without looping.
+export function applyLocalEdit(id, path, value) {
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (!STEGA_CHARS.test(node.nodeValue)) continue;
+    const element = node.parentElement;
+    if (!element || element.closest(IGNORED)) continue;
+
+    const field = decodeField(node.nodeValue);
+    if (!field || field.id !== id || field.path !== path) continue;
+
+    const marker = node.nodeValue.replace(/[^\u200B-\u200D\uFEFF]/g, '');
+    const next = value + marker;
+    if (node.nodeValue !== next) node.nodeValue = next;
+  }
+}
+
 function collectFields() {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   const seen = new Map();

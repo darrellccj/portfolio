@@ -4,7 +4,7 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {projectId} from '@/sanity/env';
 import {useStudioMode} from './StudioModeContext';
-import StudioFieldOverlay from './StudioFieldOverlay';
+import StudioFieldOverlay, {applyLocalEdit} from './StudioFieldOverlay';
 import useStudioDemo from '../hooks/useStudioDemo';
 
 const STATUS_TEXT = {
@@ -59,6 +59,9 @@ export default function StudioModePanel() {
   const [dragPos, setDragPos] = useState(null);
   const panelRef = useRef(null);
   const patchTimer = useRef(null);
+  // What the person has typed into the open field, if anything. Held in a
+  // ref so the observer below can reapply it when a live update lands.
+  const typed = useRef(null);
 
   // No admin session: the panel still works, as a preview that lives and
   // dies in this tab (see hooks/useStudioDemo.js). Never reaches the server.
@@ -129,6 +132,8 @@ export default function StudioModePanel() {
     }
 
     let cancelled = false;
+    typed.current = null;
+
     if (demo) {
       setFieldError(null);
       setSaveError(null);
@@ -210,6 +215,21 @@ export default function StudioModePanel() {
   );
 
   useEffect(() => () => clearTimeout(patchTimer.current), []);
+
+  // SanityLive re-renders the page with whatever has been saved so far,
+  // which trails what is in the box by a debounce and a round trip. Left
+  // alone the text would flick back to the older value mid-sentence, so
+  // while a field has unsaved typing, put it back after any live update.
+  useEffect(() => {
+    if (!isDraftMode || !selection?.id || !selection?.path) return;
+    const {id, path} = selection;
+    const reapply = () => {
+      if (typed.current !== null) applyLocalEdit(id, path, typed.current);
+    };
+    const mo = new MutationObserver(reapply);
+    mo.observe(document.body, {childList: true, subtree: true, characterData: true});
+    return () => mo.disconnect();
+  }, [isDraftMode, selection?.id, selection?.path]);
 
   const handleSave = useCallback(async () => {
     setStatus('saving');
@@ -389,8 +409,13 @@ export default function StudioModePanel() {
                   rows={4}
                   onChange={(e) => {
                     setDraft(e.target.value);
-                    if (demo) preview.setValue(selection.id, selection.path, e.target.value);
-                    else queuePatch(e.target.value);
+                    if (demo) {
+                      preview.setValue(selection.id, selection.path, e.target.value);
+                    } else {
+                      typed.current = e.target.value;
+                      applyLocalEdit(selection.id, selection.path, e.target.value);
+                      queuePatch(e.target.value);
+                    }
                   }}
                 />
                 {saveError && <span className="studio-panel__error">{saveError}</span>}
