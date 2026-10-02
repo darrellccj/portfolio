@@ -1,8 +1,9 @@
 import { defineQuery } from 'next-sanity';
 
-// Singletons use fixed IDs (see studio-structure guidance); everything
-// else is ordered by an explicit `order` field so the Studio controls
-// sequence rather than the query.
+// Singletons use fixed IDs (see studio-structure guidance). Projects sort
+// by status first — finished work, then work in progress, then parked,
+// then ideas — and by the Studio-controlled `order` within each. Log
+// entries are always newest first.
 //
 // Detail pages fetch in two steps: an *_INDEX_QUERY that carries just
 // enough to resolve a URL slug and build the previous/next pager, then a
@@ -12,32 +13,39 @@ import { defineQuery } from 'next-sanity';
 
 export const PROFILE_QUERY = defineQuery(`
   *[_type == "profile"][0]{
-    name, role, roles, tagline, about, email, location,
-    socials[]{ label, href },
-    stack
+    name, statement, exploringSince, questions, about, background, email, location,
+    socials[]{ label, href }
   }
 `);
 
 export const PROJECTS_QUERY = defineQuery(`
-  *[_type == "project"] | order(order asc, year desc){
-    _id, tag, title, desc, year, href, status,
+  *[_type == "project"] | order(
+    select(status == "Done" => 0, status == "In progress" => 1, status == "Parked" => 2, 3) asc,
+    order asc,
+    year desc
+  ){
+    _id, tag, title, desc, year, status,
     "slug": slug.current
   }
 `);
 
 export const PROJECT_INDEX_QUERY = defineQuery(`
-  *[_type == "project"] | order(order asc, year desc){
-    _id, title, tag, "slug": slug.current
+  *[_type == "project"] | order(
+    select(status == "Done" => 0, status == "In progress" => 1, status == "Parked" => 2, 3) asc,
+    order asc,
+    year desc
+  ){
+    _id, title, "slug": slug.current
   }
 `);
 
 export const PROJECT_DETAIL_QUERY = defineQuery(`
   *[_type == "project" && _id == $id][0]{
-    _id, title, tag, desc, year, href, status, role, timeline, stack,
-    overview, problem, approach, outcome,
+    _id, title, tag, desc, year, href, status, timeline,
+    need, requirements, judgement, decisions, change,
+    standing, openQuestions, notes,
     "slug": slug.current,
     links[]{ label, href },
-    metrics[]{ value, label },
     sections[]{ heading, body },
     cover{
       alt, caption,
@@ -50,28 +58,40 @@ export const PROJECT_DETAIL_QUERY = defineQuery(`
       "url": asset->url,
       "lqip": asset->metadata.lqip,
       "aspect": asset->metadata.dimensions.aspectRatio
+    },
+    "entries": *[_type == "entry" && references(^._id)] | order(date desc){
+      _id, title, date, kind, "slug": slug.current
     }
   }
 `);
 
-export const KIV_QUERY = defineQuery(`
-  *[_type == "kivItem"] | order(order asc){
-    _id, tag, title, desc, status,
+export const ENTRIES_QUERY = defineQuery(`
+  *[_type == "entry"] | order(date desc, _createdAt desc){
+    _id, title, date, kind, tags, href,
+    "summary": coalesce(summary, body),
     "slug": slug.current
   }
 `);
 
-export const KIV_INDEX_QUERY = defineQuery(`
-  *[_type == "kivItem"] | order(order asc){
-    _id, title, tag, "slug": slug.current
+export const LATEST_ENTRIES_QUERY = defineQuery(`
+  *[_type == "entry"] | order(date desc, _createdAt desc)[0...5]{
+    _id, title, date, kind, tags, href,
+    "summary": coalesce(summary, body),
+    "slug": slug.current
   }
 `);
 
-export const KIV_DETAIL_QUERY = defineQuery(`
-  *[_type == "kivItem" && _id == $id][0]{
-    _id, title, tag, desc, status, premise, why, notes, openQuestions, stack,
+export const ENTRY_INDEX_QUERY = defineQuery(`
+  *[_type == "entry"] | order(date desc, _createdAt desc){
+    _id, title, "slug": slug.current
+  }
+`);
+
+export const ENTRY_DETAIL_QUERY = defineQuery(`
+  *[_type == "entry" && _id == $id][0]{
+    _id, title, date, kind, tags, summary, body, href,
     "slug": slug.current,
-    sections[]{ heading, body }
+    project->{ _id, title, status, "slug": slug.current }
   }
 `);
 

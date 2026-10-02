@@ -17,6 +17,6 @@ export const structure: StructureResolver = (S) =>
           .child(S.document().schemaType(type).documentId(id).title(title)),
       ),
       S.divider(),
+      S.documentTypeListItem('entry').title('Log'),
       S.documentTypeListItem('project').title('Projects'),
-      S.documentTypeListItem('kivItem').title('KIV'),
     ])

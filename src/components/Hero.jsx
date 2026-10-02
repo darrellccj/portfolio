@@ -1,36 +1,31 @@
-import TypedRole from './TypedRole.jsx';
+import { formatDate } from '../lib/routes';
 
-const roleWords = (profile) => (profile.roles?.length ? profile.roles : [profile.role]);
-
-// 2026 redesign — centred and purely typographic. The WebGL sky is gone
-// (see SkyGL's removal); personality now comes from the script-plus-bold
-// headline pairing instead of a background device. Server component —
-// only the role typewriter needs the client.
+// A statement and a few open questions — no title, no role, no calls to
+// action. The site carries a question rather than a label (see
+// docs/direction.md). Server component; nothing here needs the browser.
 export default function Hero({ profile }) {
+  const since = formatDate(profile.exploringSince, { month: true });
+  const questions = (profile.questions ?? []).filter(Boolean);
+
   return (
     <section className="hero" id="top">
       <p className="hero__eyebrow">
-        <TypedRole words={roleWords(profile)} /> &mdash; {(profile.location || '').toUpperCase()}
+        {profile.name}
+        {since ? <> &mdash; exploring since {since}</> : null}
       </p>
 
-      <p className="hero__script">Software an institution</p>
-      <h1 className="hero__name">didn&rsquo;t know it needed.</h1>
+      {profile.statement ? <h1 className="hero__statement">{profile.statement}</h1> : null}
 
-      <p className="hero__sub">
-        Solo, AI-assisted, and <mark>fast</mark> &mdash; for institutions without a tech team,
-        niches nobody&rsquo;s built for, and problems in my own life.
-      </p>
-
-      <div className="hero__actions">
-        <div className="bracket">
-          <a href="#work" className="hero__cta">
-            See the work
-          </a>
+      {questions.length ? (
+        <div className="hero__questions">
+          <p className="hero__questions-label">Currently exploring</p>
+          <ul>
+            {questions.map((q) => (
+              <li key={q}>{q}</li>
+            ))}
+          </ul>
         </div>
-        <a href="/lab" className="hero__cta--outline">
-          Read the log
-        </a>
-      </div>
+      ) : null}
     </section>
   );
 }

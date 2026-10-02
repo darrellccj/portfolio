@@ -80,7 +80,7 @@ sequenceDiagram
 
 | Path | Role |
 | --- | --- |
-| `src/components/StudioModeToggle.jsx` | The button. Owns no UI beyond itself — the panel it opens is rendered separately so it can float over the whole page. Currently placed in `Contact.jsx`, `(site)/work/[slug]/page.tsx` and `(site)/kiv/[slug]/page.tsx`. |
+| `src/components/StudioModeToggle.jsx` | The button. Owns no UI beyond itself — the panel it opens is rendered separately so it can float over the whole page. Currently placed in `Contact.jsx` and the `(site)/projects` and `(site)/log` pages. |
 | `src/components/StudioModeContext.jsx` | Shared state: `open`, `selection`, `isDraftMode`, `fieldCount`, and the touched-document set. |
 | `src/components/StudioModePanel.jsx` | The floating panel — auth, field loading, debounced patching, Save, Close, drag. |
 | `src/components/StudioFieldOverlay.jsx` | Finds editable fields by decoding stega, measures them, draws the boxes. |
@@ -235,9 +235,9 @@ revalidatePath('/', 'layout');
 listening. Closing Studio Mode immediately after Save beats it every time.
 
 The `'layout'` argument matters: it invalidates the root layout **and every
-route nested under it**, so the work and KIV detail pages are covered by the
-same call. Editing a project title from `/work/<slug>` and editing it from the
-home page both land correctly.
+route nested under it**, so the project and log pages are covered by the
+same call. Editing a project title from `/projects/<slug>` and editing it from
+the home page both land correctly.
 
 ---
 

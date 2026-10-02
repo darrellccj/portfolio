@@ -1,15 +1,22 @@
 # Portfolio
 
-A personal portfolio in two inks — sky `#9fd4f7` on ultramarine
-`#0d3372`. A WebGL **duotone sky** backs the hero; below it sit About,
-Selected Work (a pinned horizontal card-scroll), KIV (Keep In Vault —
-concepts in progress), a canvas **ordered-dither** study, and Contact.
+Not a portfolio — a dated record of exploring design. Why it is shaped
+this way, and how it is meant to grow, is in [`docs/direction.md`](docs/direction.md).
 
-Every project and KIV item also has a page of its own — `/work/<slug>` and
-`/kiv/<slug>` — reached by clicking its card or row.
+Three sections, each its own route:
 
-Built with **Next.js (App Router)**, hand-written CSS, and **three.js** for
-the sky. Content is managed in **Sanity**, with the Studio embedded in this
+- **Projects** (`/projects`, `/projects/<slug>`) — things made for someone,
+  each with an honest status: Idea · In progress · Parked · Done.
+- **Log** (`/log`, `/log/<slug>`) — one dated stream of notes, experiments,
+  project updates and checkpoints.
+- **About** (`/about`) — a "now" page.
+
+The home page carries a statement, the open questions, the five newest log
+entries and the project list. `/dither` and `/lab` still exist as pages of
+their own and are reached through log entries. Old `/work/*` and `/kiv/*`
+URLs redirect to `/projects/*` (`next.config.ts`).
+
+Built with **Next.js (App Router)** and hand-written CSS. Content is managed in **Sanity**, with the Studio embedded in this
 same app at `/studio`.
 
 ## Getting started
@@ -46,7 +53,7 @@ Studio Mode still opens and edits, but its Save button fails.
 
 ## Editing content
 
-The **Studio Mode** toggle sits in the footer on the home page, and at the very bottom of each project / KIV page — those carry no contact band, but most of what Studio Mode edits lives on them. Clicking it does two things:
+The **Studio Mode** toggle sits in the footer on the home page, and at the very bottom of the project, log and index pages — those carry no contact band, but most of what Studio Mode edits lives on them. Clicking it does two things:
 it puts the live page itself into click-to-edit mode (via Sanity Visual
 Editing), and it opens a small floating panel, bottom-right, that you can
 drag anywhere. The panel shows nothing until you hover and click a
@@ -83,44 +90,53 @@ normally.
 
 Content lives in Sanity. In the Studio:
 
-- **Profile** (singleton) — name, role, tagline, about, email, location,
-  stack, socials.
-- **Projects** — the Selected Work cards *and* their detail pages. Fields are
-  split into three Studio tabs:
-  - **Card** — `title`, `slug`, `tag`, `desc`, `year`, `order`. These drive the
-    pinned scroll on the home page; `order` controls sequence.
-  - **Detail page** — `status`, `role`, `timeline`, `stack`, the primary
-    `href` plus a list of other `links`, the narrative fields `overview` /
-    `problem` / `approach` / `outcome`, up to four `metrics`, and any number
-    of free-form `sections`.
-  - **Media** — a `cover` plate and a `gallery`.
-- **KIV** — concept rows and their detail pages, in two tabs:
-  - **Row** — `title`, `slug`, `tag`, `desc`, `order`.
-  - **Detail page** — `status`, `premise`, `why`, `notes`, `openQuestions`,
-    `stack`, and free-form `sections`.
+- **Profile** (singleton) — `name`, `statement`, `exploringSince`, up to three
+  `questions` (home); `about` and `background` (About page); `email`,
+  `location`, `socials`. There is deliberately no role, title or stack field.
+- **Projects** — in four Studio tabs:
+  - **List** — `title`, `slug`, `status`, `desc`, `tag`, `year`, `order`. The
+    list sorts by status (Done → In progress → Parked → Idea), then `order`.
+  - **Write-up** — `need`, `requirements`, `judgement`, `decisions`, `change`,
+    plus free-form `sections`. For projects that have earned one.
+  - **Idea / parked** — `standing`, `openQuestions`, `notes`.
+  - **Media & links** — `timeline`, `href`, `links`, `cover`, `gallery`.
+- **Log entries** — `title`, `slug`, `date`, `kind` (note · experiment · update
+  · checkpoint), `tags`, `summary`, plain-text `body`, an optional `project`
+  reference and an optional `href` for entries that live on a page of their
+  own (e.g. `/dither`).
 - **Dither study** (singleton) — the artwork title, credit, and source plate.
 
-Everything below `slug` on both types is **optional**. A document with only
-its card filled in still renders a valid detail page — it just says the
-write-up is still being written, rather than showing an unexplained gap. Fill
-the fields in as you go and the page grows to fit.
+Every page field is **optional**. A project with only a line still renders a
+valid page; it says nothing has been written yet rather than showing a gap.
 
 ### Slugs
 
 `slug` was added after the first documents existed, so it is not required.
 Anything without one falls back to a slugified `title` (`src/lib/routes.ts`),
-which means every project and KIV item has a working URL immediately.
+which means every project and log entry has a working URL immediately.
 Authoring a slug in the Studio only pins a URL that already worked — so set
 one before sharing a link you don't want to change, since renaming a
 slug-less document also renames its URL.
 
 Sanity is the **sole** source of truth — there is no committed fallback. The
-two singletons are required; if either is missing the page throws a named
-error rather than rendering with holes in it.
+profile singleton is required; if it is missing the page throws a named error
+rather than rendering with holes in it.
 
-`seed.ndjson` records how the dataset was first populated. It is a one-time
-artefact and references an absolute image path, so it is not portable between
-machines as-is.
+`seed.ndjson` is the dataset in its current shape, for a fresh setup. It
+references an absolute image path, so it is not portable between machines
+as-is.
+
+### Migrations
+
+`migrations/restructure-2026-10` moves an existing dataset from the old
+Work / KIV shape to Projects / Log: KIV items become projects with status
+*Idea*, old write-up fields move into `sections`, and the property agent site
+and two log entries are created. It is safe to re-run. Dry run first:
+
+```bash
+npx sanity migration run restructure-2026-10
+npx sanity migration run restructure-2026-10 --no-dry-run
+```
 
 ## Data flow
 
@@ -147,10 +163,12 @@ src/
     globals.css           # design tokens + all styling
     (site)/
       layout.tsx          # globals.css, SanityLive, VisualEditing
-      page.tsx            # server component — fetches Sanity, renders sections
-      not-found.tsx       # 404 for a mistyped project or KIV slug
-      work/[slug]/        # one page per project
-      kiv/[slug]/         # one page per KIV concept
+      page.tsx            # home — statement, questions, latest log, projects
+      not-found.tsx       # 404 for a mistyped project or log slug
+      projects/           # index + one page per project
+      log/                # index + one page per entry
+      about/              # the "now" page
+      dither/  lab/       # pages of their own, linked from log entries
     studio/[[...tool]]/   # embedded Sanity Studio at /studio
     api/draft-mode/enable # Draft Mode entry point for Visual Editing
   sanity/
@@ -159,18 +177,19 @@ src/
     types.ts              # generated — do not edit by hand
     schemaTypes/  structure.ts   # Studio schema + desk structure
   lib/
-    routes.ts             # slug derivation + /work and /kiv path helpers
+    routes.ts             # slug derivation, path helpers, date formatting
+    rows.ts               # Sanity results → IndexList rows
+    dither.js             # dithering engine for /dither
   components/
-    SkyGL.jsx             # WebGL duotone sky (three.js)
-    Dither.jsx            # canvas ordered-dither study
-    Nav  Hero  About  Work  Kiv  Contact
-    detail/               # server-rendered pieces of the two detail pages
+    Nav  Hero  IndexList  Contact  LoadingScreen
+    DitherStudio.jsx      # the /dither tool
+    detail/               # server-rendered pieces of the detail pages
   hooks/
     useReveal.js          # scroll-in reveal via IntersectionObserver
-    usePinnedScroll.js    # pinned horizontal card-scroll
+    useDitherCanvas.js
 ```
 
-Components that touch `window`, canvas, or three.js are client components;
+Components that touch `window` or canvas are client components;
 everything else renders on the server.
 
 ## Deploying
@@ -189,5 +208,3 @@ Node host). Remember to:
    the Sanity API.
 
 The Studio deploys with the site — there is no separate `sanity deploy` step.
-
-Note: three.js adds roughly 150 KB gzipped — the cost of the WebGL sky.

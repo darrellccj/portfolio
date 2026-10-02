@@ -1,0 +1,64 @@
+{
+  "profile": {
+    "statement": "Figuring out how things should work — and whether designing them is what I want to do.",
+    "exploringSince": "2026-10-01",
+    "questions": [
+      "Is design — working out what something should be — what I actually want to do?",
+      "Which parts of making something should I not hand to AI?",
+      "What changes when I make something for a real person, not just for myself?"
+    ],
+    "about": "I'm studying Information Systems at SMU. The degree isn't about design, so this site is where I explore it in my own time.\n\nIn poly, UX design and front-end web development came easily to me — far more easily than maths. I like working out what something should be, solving the problem, and ending up with something you can actually use. I've also noticed I don't enjoy code for its own sake.\n\nSo this is a direction I'm choosing to explore seriously, not a title I've earned. The site is the record: what I make, what I try, and how my thinking changes. Every few months I write a checkpoint asking whether it's still the direction.\n\nI'm exploring AI the same way — until I can confidently say I use it as a tool.",
+    "background": "Information Systems at SMU. Before that, poly."
+  },
+  "websiteFactory": {
+    "status": "Idea",
+    "desc": "An idea for a multi-agent pipeline that generates websites for Singapore property agents. I barely started it.",
+    "standing": "I went for automation before I had done the work once by hand. The one property agent site I did finish, I made by going back and forth with Claude instead."
+  },
+  "newProjects": [
+    {
+      "_id": "project-property-agent-site",
+      "_type": "project",
+      "title": "The property agent site",
+      "slug": {
+        "_type": "slug",
+        "current": "property-agent-site"
+      },
+      "status": "Done",
+      "tag": "Proptech",
+      "desc": "A website for a Singapore property agent — the one project I've finished. Write-up to come.",
+      "order": 0
+    }
+  ],
+  "newEntries": [
+    {
+      "_id": "entry-dithering-study",
+      "_type": "entry",
+      "title": "A small dithering study",
+      "slug": {
+        "_type": "slug",
+        "current": "dithering-study"
+      },
+      "date": "2026-07-13",
+      "kind": "experiment",
+      "summary": "Ordered dither, error diffusion, halftone and noise — a canvas tool to see what each technique does to an image, including your own photo.",
+      "href": "/dither"
+    },
+    {
+      "_id": "entry-lab-repeatability",
+      "_type": "entry",
+      "title": "Repeatability: same prompt, two runs",
+      "slug": {
+        "_type": "slug",
+        "current": "repeatability"
+      },
+      "date": "2026-09-13",
+      "kind": "experiment",
+      "tags": [
+        "ai"
+      ],
+      "summary": "Asked Claude for the same property agent landing page twice, to see how much the output actually varies.",
+      "href": "/lab"
+    }
+  ]
+}

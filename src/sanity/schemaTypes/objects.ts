@@ -1,8 +1,8 @@
 import {defineField, defineType} from 'sanity'
 
-// Shared building blocks for the project / KIV detail pages. They are
-// registered as named types rather than inlined so both document types
-// stay readable and TypeGen emits one type per shape instead of a dozen
+// Shared building blocks for the project detail page. They are
+// registered as named types rather than inlined so the document type
+// stays readable and TypeGen emits one type per shape instead of a dozen
 // anonymous ones.
 
 export const linkItem = defineType({
@@ -19,28 +19,6 @@ export const linkItem = defineType({
     }),
   ],
   preview: {select: {title: 'label', subtitle: 'href'}},
-})
-
-export const metric = defineType({
-  name: 'metric',
-  title: 'Metric',
-  type: 'object',
-  description: 'A single number worth putting in large type.',
-  fields: [
-    defineField({
-      name: 'value',
-      type: 'string',
-      description: 'Keep it short — "12k", "3 weeks", "1 person".',
-      validation: (r) => r.required(),
-    }),
-    defineField({
-      name: 'label',
-      type: 'string',
-      description: 'What the number counts.',
-      validation: (r) => r.required(),
-    }),
-  ],
-  preview: {select: {title: 'value', subtitle: 'label'}},
 })
 
 export const contentSection = defineType({
