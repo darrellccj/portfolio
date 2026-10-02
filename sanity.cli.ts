@@ -2,8 +2,8 @@ import {defineCliConfig} from 'sanity/cli';
 
 export default defineCliConfig({
   api: {
-    projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-    dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
+    projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '2i3f87ic',
+    dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
   },
   /**
    * TypeGen reads the schema and this app's `defineQuery` calls, and
