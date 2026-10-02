@@ -2,6 +2,7 @@ import {NextResponse} from 'next/server';
 import {draftMode} from 'next/headers';
 import {createClient} from 'next-sanity';
 import {apiVersion, dataset, projectId} from '@/sanity/env';
+import {ALLOWED_ROLES} from '@/sanity/studioModeGuard';
 
 // Turns Draft Mode on for Studio Mode, using the caller's own Sanity
 // session as the authorisation.
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
     useCdn: false,
   });
 
-  let user: {id?: string} | null = null;
+  let user: {id?: string; role?: string} | null = null;
   try {
     user = await client.request({uri: '/users/me', tag: 'studio-mode.auth'});
   } catch {
@@ -66,6 +67,16 @@ export async function POST(request: Request) {
 
   if (!user?.id) {
     return NextResponse.json({error: 'Studio session is not valid.'}, {status: 401});
+  }
+
+  // A valid session is not enough: Draft Mode unlocks the write token for
+  // the field and publish routes, so it is for administrators only. Fails
+  // closed — a response with no role is refused too.
+  if (!user.role || !ALLOWED_ROLES.includes(user.role)) {
+    return NextResponse.json(
+      {code: 'not-admin', error: 'Studio Mode is for administrators of this project.'},
+      {status: 403}
+    );
   }
 
   (await draftMode()).enable();

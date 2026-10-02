@@ -72,7 +72,7 @@ function collectFields() {
   return Array.from(seen.values());
 }
 
-export default function StudioFieldOverlay() {
+export default function StudioFieldOverlay({scan = collectFields}) {
   const {select, selection, setFieldCount} = useStudioMode();
   const [fields, setFields] = useState([]);
   const [rects, setRects] = useState([]);
@@ -92,7 +92,7 @@ export default function StudioFieldOverlay() {
     const rescan = () => {
       clearTimeout(idle);
       idle = setTimeout(() => {
-        const found = collectFields();
+        const found = scan();
         const next = found.map((f) => f.key).join('|');
         if (next === signature.current) return;
         signature.current = next;
@@ -108,7 +108,7 @@ export default function StudioFieldOverlay() {
       mo.disconnect();
       clearTimeout(idle);
     };
-  }, []);
+  }, [scan]);
 
   // Measure them. Cheap enough to redo on every scroll frame, and it has to
   // be — the page pins and translates sections as you scroll.

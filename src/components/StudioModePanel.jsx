@@ -5,6 +5,7 @@ import {useRouter} from 'next/navigation';
 import {projectId} from '@/sanity/env';
 import {useStudioMode} from './StudioModeContext';
 import StudioFieldOverlay from './StudioFieldOverlay';
+import useStudioDemo from '../hooks/useStudioDemo';
 
 const STATUS_TEXT = {
   saving: 'Publishing…',
@@ -59,6 +60,11 @@ export default function StudioModePanel() {
   const panelRef = useRef(null);
   const patchTimer = useRef(null);
 
+  // No admin session: the panel still works, as a preview that lives and
+  // dies in this tab (see hooks/useStudioDemo.js). Never reaches the server.
+  const demo = open && !isDraftMode && Boolean(needsAuth);
+  const preview = useStudioDemo(demo);
+
   // Enable Draft Mode by handing our own Sanity session to the server,
   // which verifies it against the project before flipping the cookie.
   // No Studio boot, so this settles in one round trip.
@@ -94,7 +100,13 @@ export default function StudioModePanel() {
         // rather than repeating "sign in", which sounds like nothing
         // happened. The server also reports its own misconfiguration here.
         const body = await res.json().catch(() => ({}));
-        setNeedsAuth(body.code === 'no-read-token' ? 'no-read-token' : 'rejected');
+        setNeedsAuth(
+          body.code === 'no-read-token'
+            ? 'no-read-token'
+            : body.code === 'not-admin'
+              ? 'not-admin'
+              : 'rejected'
+        );
       })
       .catch(() => {
         if (!cancelled) setNeedsAuth('unreachable');
@@ -117,6 +129,14 @@ export default function StudioModePanel() {
     }
 
     let cancelled = false;
+    if (demo) {
+      setFieldError(null);
+      setSaveError(null);
+      setEditable(true);
+      setDraft(preview.find(selection.id, selection.path)?.current ?? '');
+      return;
+    }
+
     setLoadingField(true);
 
     const params = new URLSearchParams({id: selection.id, path: selection.path});
@@ -152,7 +172,7 @@ export default function StudioModePanel() {
     return () => {
       cancelled = true;
     };
-  }, [selection?.id, selection?.path]);
+  }, [selection?.id, selection?.path, demo, preview.find]);
 
   // Debounced write to the draft document. SanityLive pushes the change
   // back into the page, so the edit shows up in place without a refresh.
@@ -258,6 +278,7 @@ export default function StudioModePanel() {
   return (
     <>
       {isDraftMode && <StudioFieldOverlay />}
+      {demo && preview.status === 'ready' && <StudioFieldOverlay scan={preview.scan} />}
 
       <div
         ref={panelRef}
@@ -279,14 +300,16 @@ export default function StudioModePanel() {
                 ‹ Back
               </button>
             )}
-            <button
-              type="button"
-              className="studio-panel__save"
-              onClick={handleSave}
-              disabled={status === 'saving'}
-            >
-              Save
-            </button>
+            {!demo && (
+              <button
+                type="button"
+                className="studio-panel__save"
+                onClick={handleSave}
+                disabled={status === 'saving'}
+              >
+                Save
+              </button>
+            )}
             <button type="button" className="studio-panel__close" onClick={handleClose}>
               ✕
             </button>
@@ -294,7 +317,27 @@ export default function StudioModePanel() {
         </div>
 
         <div className="studio-panel__body">
-          {!isDraftMode ? (
+          {demo && (
+            <p className="studio-panel__hint">
+              <strong>Preview only.</strong> Edits show up on this page but stay in this tab and
+              vanish on reload.{' '}
+              {needsAuth === 'not-admin' ? (
+                'Saving is limited to administrators of this project.'
+              ) : (
+                <>
+                  An administrator can{' '}
+                  <a href="/studio" target="_blank" rel="noopener">
+                    sign in
+                  </a>{' '}
+                  to save for real.
+                </>
+              )}
+              {preview.status === 'loading' && ' Finding editable fields…'}
+              {preview.status === 'error' && ' Could not load the page content to preview.'}
+            </p>
+          )}
+
+          {!isDraftMode && !demo ? (
             <p className="studio-panel__hint">
               {needsAuth === 'no-session' && (
                 <>
@@ -308,6 +351,12 @@ export default function StudioModePanel() {
                   <strong>Session rejected.</strong> Found a Sanity session but the server would not
                   accept it — usually expired, or for another project.{' '}
                   <a href="/studio" target="_blank" rel="noopener">Sign in again</a>.
+                </>
+              )}
+              {needsAuth === 'not-admin' && (
+                <>
+                  <strong>Admins only.</strong> You&rsquo;re signed in to Sanity, but editing and
+                  publishing here is limited to administrators of this project.
                 </>
               )}
               {needsAuth === 'no-read-token' && (
@@ -340,7 +389,8 @@ export default function StudioModePanel() {
                   rows={4}
                   onChange={(e) => {
                     setDraft(e.target.value);
-                    queuePatch(e.target.value);
+                    if (demo) preview.setValue(selection.id, selection.path, e.target.value);
+                    else queuePatch(e.target.value);
                   }}
                 />
                 {saveError && <span className="studio-panel__error">{saveError}</span>}
@@ -356,7 +406,9 @@ export default function StudioModePanel() {
             )
           ) : (
             <p className="studio-panel__hint">
-              {fieldCount === 0 ? (
+              {demo ? (
+                'Hover the page and click a highlighted field to try editing it.'
+              ) : fieldCount === 0 ? (
                 <>
                   <strong>No editable fields found.</strong> Draft Mode is on, but nothing on this
                   page carries Sanity source data. Usually that means stega is off — check that{' '}

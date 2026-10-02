@@ -31,9 +31,6 @@
 
   --serif: var(--font-serif), Georgia, 'Times New Roman', serif;
   --mono: var(--font-mono), 'SFMono-Regular', Consolas, monospace;
-  /* Bold, technical, open-width — livery/pit-board lettering for the nav
-     only. Everything else on the page stays on --mono. */
-  --nav-font: var(--font-nav), 'Segoe UI', Arial, sans-serif;
 
   /* Home page's own type system: an italic script for a single accent
      phrase, a heavy grotesk for headline/display moments, and a plain

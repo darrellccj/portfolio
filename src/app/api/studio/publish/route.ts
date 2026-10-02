@@ -3,6 +3,7 @@ import {draftMode} from 'next/headers';
 import {revalidatePath} from 'next/cache';
 import {createClient} from 'next-sanity';
 import {apiVersion, dataset, projectId} from '@/sanity/env';
+import {EDITABLE_TYPES} from '@/sanity/studioModeGuard';
 
 const DRAFT_PREFIX = 'drafts.';
 
@@ -61,12 +62,13 @@ export async function POST(request: Request) {
     ids: ids.map((id) => (id.startsWith(DRAFT_PREFIX) ? id : `${DRAFT_PREFIX}${id}`)),
   });
 
-  if (drafts.length === 0) {
+  const publishable = drafts.filter((d) => EDITABLE_TYPES.includes(d._type));
+  if (publishable.length === 0) {
     return NextResponse.json({published: []});
   }
 
   const tx = client.transaction();
-  for (const draft of drafts) {
+  for (const draft of publishable) {
     const id = draft._id.slice(DRAFT_PREFIX.length);
     tx.createOrReplace({...draft, _id: id}).delete(draft._id);
   }
@@ -80,5 +82,5 @@ export async function POST(request: Request) {
   // Save beats it every time.
   revalidatePath('/', 'layout');
 
-  return NextResponse.json({published: drafts.map((d) => d._id.slice(DRAFT_PREFIX.length))});
+  return NextResponse.json({published: publishable.map((d) => d._id.slice(DRAFT_PREFIX.length))});
 }

@@ -2,6 +2,7 @@ import {NextResponse} from 'next/server';
 import {draftMode} from 'next/headers';
 import {createClient} from 'next-sanity';
 import {apiVersion, dataset, projectId} from '@/sanity/env';
+import {EDITABLE_TYPES, isWritablePath} from '@/sanity/studioModeGuard';
 
 const DRAFT_PREFIX = 'drafts.';
 
@@ -116,9 +117,16 @@ export async function PATCH(request: Request) {
     return NextResponse.json({error: 'Expected `id` and `path`.'}, {status: 400});
   }
 
+  if (typeof path !== 'string' || typeof id !== 'string' || !isWritablePath(path)) {
+    return NextResponse.json({error: 'That field cannot be edited.'}, {status: 400});
+  }
+
   const client = clientWith(process.env.SANITY_API_WRITE_TOKEN!);
   const target = draftId(id);
   const source = await client.getDocument(publishedId(id));
+  if (source && !EDITABLE_TYPES.includes(source._type)) {
+    return NextResponse.json({error: 'That document cannot be edited.'}, {status: 403});
+  }
 
   // Edits always land on the draft, so nothing reaches the live site until
   // Save publishes it. If no draft exists yet, fork one off the published

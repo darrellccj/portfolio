@@ -1,5 +1,5 @@
 import type {Metadata, Viewport} from 'next';
-import {Inter, IBM_Plex_Mono, Titillium_Web, Instrument_Serif, Archivo, Geist} from 'next/font/google';
+import {Inter, IBM_Plex_Mono, Instrument_Serif, Archivo, Geist} from 'next/font/google';
 
 const serif = Inter({
   subsets: ['latin'],
@@ -16,17 +16,7 @@ const mono = IBM_Plex_Mono({
   display: 'swap',
 });
 
-// Technical, open-width sans — the pit-board/livery lettering feel the nav
-// is going for, without going full condensed. Scoped to the nav only; body
-// copy stays on --font-mono.
-const nav = Titillium_Web({
-  subsets: ['latin'],
-  weight: ['600', '700'],
-  variable: '--font-nav',
-  display: 'swap',
-});
-
-// 2026 redesign — the home page's own type system. Serif/mono/nav above
+// 2026 redesign — the home page's own type system. Serif/mono above
 // stay loaded as-is for Lab and the project/KIV detail pages, which keep
 // the original manifest look until they're redesigned in turn.
 const script = Instrument_Serif({
@@ -62,7 +52,6 @@ export const metadata: Metadata = {
     type: 'website',
     title: 'Darrell — Independent Technologist',
     description,
-    images: ['/og-image.png'],
   },
   twitter: {card: 'summary_large_image'},
   icons: {icon: '/favicon.png'},
@@ -77,7 +66,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html
       lang="en"
-      className={`${serif.variable} ${mono.variable} ${nav.variable} ${script.variable} ${display.variable} ${ui.variable}`}
+      className={`${serif.variable} ${mono.variable} ${script.variable} ${display.variable} ${ui.variable}`}
     >
       <body>{children}</body>
     </html>
