@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-// Presentational pieces shared by /work/[slug] and /kiv/[slug]. All server
+// Presentational pieces shared by the detail pages. All server
 // components: the detail pages have no interactive state, and their
 // entrance animation is CSS-only (see `.detail-reveal` in globals.css), so
 // nothing here needs to reach the browser as JavaScript.

@@ -1,7 +1,6 @@
-// Shared dithering engine — pure canvas-pixel functions, no React. Used by
-// both the homepage teaser (DitherCard) and the full control panel
-// (DitherStudio) so the two never drift out of sync on what an algorithm
-// or parameter actually does.
+// Dithering engine — pure canvas-pixel functions, no React. Used by the
+// control panel on /dither (DitherStudio); kept separate from the component
+// so what an algorithm or parameter does is readable on its own.
 
 export const MATRIX_SIZES = [2, 4, 8, 16];
 

@@ -1,44 +1,55 @@
 import LoadingScreen from '@/components/LoadingScreen';
 import Nav from '@/components/Nav';
 import Hero from '@/components/Hero';
-import About from '@/components/About';
-import Work from '@/components/Work';
-import Kiv from '@/components/Kiv';
-import DitherCard from '@/components/DitherCard';
+import IndexList from '@/components/IndexList';
 import Contact from '@/components/Contact';
 
 import {sanityFetch} from '@/sanity/lib/live';
-import {PROFILE_QUERY, PROJECTS_QUERY, KIV_QUERY, DITHER_QUERY} from '@/sanity/queries';
+import {PROFILE_QUERY, PROJECTS_QUERY, LATEST_ENTRIES_QUERY} from '@/sanity/queries';
+import {entryRow, projectRow} from '@/lib/rows';
 
 // Sanity is the sole source of truth — content is authored in the
-// embedded Studio at /studio. The singletons are required: failing loudly
-// beats rendering a page with holes in it.
+// embedded Studio at /studio. The profile singleton is required: failing
+// loudly beats rendering a page with holes in it.
+//
+// Order follows docs/direction.md: the statement and open questions, then
+// the newest log entries (dated, so a quiet month shows), then projects.
 export default async function Home() {
-  const [profileRes, projectsRes, kivRes, ditherRes] = await Promise.all([
+  const [profileRes, projectsRes, entriesRes] = await Promise.all([
     sanityFetch({query: PROFILE_QUERY}),
     sanityFetch({query: PROJECTS_QUERY}),
-    sanityFetch({query: KIV_QUERY}),
-    sanityFetch({query: DITHER_QUERY}),
+    sanityFetch({query: LATEST_ENTRIES_QUERY}),
   ]);
 
   const profile = profileRes.data;
-  const dither = ditherRes.data;
-
   if (!profile) throw new Error('Sanity: no `profile` document. Create it at /studio.');
-  if (!dither) throw new Error('Sanity: no `ditherStudy` document. Create it at /studio.');
+
+  const entries = entriesRes.data ?? [];
+  const projects = projectsRes.data ?? [];
 
   return (
     <>
       {/* Home only — the signature draw-on introduces the site, so it must
-          not replay every time you come back from a project page. */}
+          not replay every time you come back from another page. */}
       <LoadingScreen />
       <Nav />
       <main className="home">
         <Hero profile={profile} />
-        <About about={profile.about} stack={profile.stack ?? []} />
-        <Work projects={projectsRes.data ?? []} />
-        <Kiv items={kivRes.data ?? []} />
-        <DitherCard copy={dither} />
+        <IndexList
+          id="log"
+          label="Log"
+          title="Latest"
+          rows={entries.map(entryRow)}
+          empty="Nothing logged yet."
+          more={entries.length ? {href: '/log', label: 'All entries'} : null}
+        />
+        <IndexList
+          id="projects"
+          label="Projects"
+          title="Things made for someone"
+          rows={projects.map(projectRow)}
+          empty="No projects yet."
+        />
         <Contact profile={profile} />
       </main>
     </>

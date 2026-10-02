@@ -38,12 +38,6 @@ export type ContentSection = {
   body?: string;
 };
 
-export type Metric = {
-  _type: "metric";
-  value?: string;
-  label?: string;
-};
-
 export type LinkItem = {
   _type: "linkItem";
   label?: string;
@@ -83,28 +77,28 @@ export type SanityImageHotspot = {
   width?: number;
 };
 
-export type KivItem = {
+export type ProjectReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "project";
+};
+
+export type Entry = {
   _id: string;
-  _type: "kivItem";
+  _type: "entry";
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
   title?: string;
   slug?: Slug;
-  tag?: string;
-  desc?: string;
-  order?: number;
-  status?: "Parked" | "Researching" | "Sketching" | "Prototyping" | "Next up";
-  premise?: string;
-  why?: string;
-  notes?: Array<string>;
-  openQuestions?: Array<string>;
-  stack?: Array<string>;
-  sections?: Array<
-    {
-      _key: string;
-    } & ContentSection
-  >;
+  date?: string;
+  kind?: "note" | "experiment" | "update" | "checkpoint";
+  tags?: Array<string>;
+  summary?: string;
+  body?: string;
+  project?: ProjectReference;
+  href?: string;
 };
 
 export type Slug = {
@@ -121,33 +115,30 @@ export type Project = {
   _rev: string;
   title?: string;
   slug?: Slug;
-  tag?: string;
+  status?: "Idea" | "In progress" | "Parked" | "Done";
   desc?: string;
+  tag?: string;
   year?: string;
   order?: number;
-  status?: "Live" | "In development" | "Shipped" | "Prototype" | "Archived";
-  role?: string;
+  need?: string;
+  requirements?: string;
+  judgement?: string;
+  decisions?: string;
+  change?: string;
+  sections?: Array<
+    {
+      _key: string;
+    } & ContentSection
+  >;
+  standing?: string;
+  openQuestions?: Array<string>;
+  notes?: Array<string>;
   timeline?: string;
-  stack?: Array<string>;
   href?: string;
   links?: Array<
     {
       _key: string;
     } & LinkItem
-  >;
-  overview?: string;
-  problem?: string;
-  approach?: string;
-  outcome?: string;
-  metrics?: Array<
-    {
-      _key: string;
-    } & Metric
-  >;
-  sections?: Array<
-    {
-      _key: string;
-    } & ContentSection
   >;
   cover?: Plate;
   gallery?: Array<
@@ -164,13 +155,13 @@ export type Profile = {
   _updatedAt: string;
   _rev: string;
   name?: string;
-  role?: string;
-  roles?: Array<string>;
-  tagline?: string;
+  statement?: string;
+  exploringSince?: string;
+  questions?: Array<string>;
   about?: string;
+  background?: string;
   email?: string;
   location?: string;
-  stack?: Array<string>;
   socials?: Array<{
     label?: string;
     href?: string;
@@ -279,12 +270,12 @@ export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | Plate
   | ContentSection
-  | Metric
   | LinkItem
   | DitherStudy
   | SanityImageCrop
   | SanityImageHotspot
-  | KivItem
+  | ProjectReference
+  | Entry
   | Slug
   | Project
   | Profile
@@ -299,50 +290,47 @@ export type AllSanitySchemaTypes =
 
 // Source: src/sanity/queries.ts
 // Variable: PROFILE_QUERY
-// Query: *[_type == "profile"][0]{    name, role, roles, tagline, about, email, location,    socials[]{ label, href },    stack  }
+// Query: *[_type == "profile"][0]{    name, statement, exploringSince, questions, about, background, email, location,    socials[]{ label, href }  }
 export type PROFILE_QUERY_RESULT = {
   name: string | null;
-  role: string | null;
-  roles: Array<string> | null;
-  tagline: string | null;
+  statement: string | null;
+  exploringSince: string | null;
+  questions: Array<string> | null;
   about: string | null;
+  background: string | null;
   email: string | null;
   location: string | null;
   socials: Array<{
     label: string | null;
     href: string | null;
   }> | null;
-  stack: Array<string> | null;
 } | null;
 
 // Source: src/sanity/queries.ts
 // Variable: PROJECTS_QUERY
-// Query: *[_type == "project"] | order(order asc, year desc){    _id, tag, title, desc, year, href, status,    "slug": slug.current  }
+// Query: *[_type == "project"] | order(    select(status == "Done" => 0, status == "In progress" => 1, status == "Parked" => 2, 3) asc,    order asc,    year desc  ){    _id, tag, title, desc, year, status,    "slug": slug.current  }
 export type PROJECTS_QUERY_RESULT = Array<{
   _id: string;
   tag: string | null;
   title: string | null;
   desc: string | null;
   year: string | null;
-  href: string | null;
-  status:
-    "Archived" | "In development" | "Live" | "Prototype" | "Shipped" | null;
+  status: "Done" | "Idea" | "In progress" | "Parked" | null;
   slug: string | null;
 }>;
 
 // Source: src/sanity/queries.ts
 // Variable: PROJECT_INDEX_QUERY
-// Query: *[_type == "project"] | order(order asc, year desc){    _id, title, tag, "slug": slug.current  }
+// Query: *[_type == "project"] | order(    select(status == "Done" => 0, status == "In progress" => 1, status == "Parked" => 2, 3) asc,    order asc,    year desc  ){    _id, title, "slug": slug.current  }
 export type PROJECT_INDEX_QUERY_RESULT = Array<{
   _id: string;
   title: string | null;
-  tag: string | null;
   slug: string | null;
 }>;
 
 // Source: src/sanity/queries.ts
 // Variable: PROJECT_DETAIL_QUERY
-// Query: *[_type == "project" && _id == $id][0]{    _id, title, tag, desc, year, href, status, role, timeline, stack,    overview, problem, approach, outcome,    "slug": slug.current,    links[]{ label, href },    metrics[]{ value, label },    sections[]{ heading, body },    cover{      alt, caption,      "url": asset->url,      "lqip": asset->metadata.lqip,      "aspect": asset->metadata.dimensions.aspectRatio    },    gallery[]{      alt, caption,      "url": asset->url,      "lqip": asset->metadata.lqip,      "aspect": asset->metadata.dimensions.aspectRatio    }  }
+// Query: *[_type == "project" && _id == $id][0]{    _id, title, tag, desc, year, href, status, timeline,    need, requirements, judgement, decisions, change,    standing, openQuestions, notes,    "slug": slug.current,    links[]{ label, href },    sections[]{ heading, body },    cover{      alt, caption,      "url": asset->url,      "lqip": asset->metadata.lqip,      "aspect": asset->metadata.dimensions.aspectRatio    },    gallery[]{      alt, caption,      "url": asset->url,      "lqip": asset->metadata.lqip,      "aspect": asset->metadata.dimensions.aspectRatio    },    "entries": *[_type == "entry" && references(^._id)] | order(date desc){      _id, title, date, kind, "slug": slug.current    }  }
 export type PROJECT_DETAIL_QUERY_RESULT = {
   _id: string;
   title: string | null;
@@ -350,23 +338,20 @@ export type PROJECT_DETAIL_QUERY_RESULT = {
   desc: string | null;
   year: string | null;
   href: string | null;
-  status:
-    "Archived" | "In development" | "Live" | "Prototype" | "Shipped" | null;
-  role: string | null;
+  status: "Done" | "Idea" | "In progress" | "Parked" | null;
   timeline: string | null;
-  stack: Array<string> | null;
-  overview: string | null;
-  problem: string | null;
-  approach: string | null;
-  outcome: string | null;
+  need: string | null;
+  requirements: string | null;
+  judgement: string | null;
+  decisions: string | null;
+  change: string | null;
+  standing: string | null;
+  openQuestions: Array<string> | null;
+  notes: Array<string> | null;
   slug: string | null;
   links: Array<{
     label: string | null;
     href: string | null;
-  }> | null;
-  metrics: Array<{
-    value: string | null;
-    label: string | null;
   }> | null;
   sections: Array<{
     heading: string | null;
@@ -386,51 +371,71 @@ export type PROJECT_DETAIL_QUERY_RESULT = {
     lqip: string | null;
     aspect: number | null;
   }> | null;
+  entries: Array<{
+    _id: string;
+    title: string | null;
+    date: string | null;
+    kind: "checkpoint" | "experiment" | "note" | "update" | null;
+    slug: string | null;
+  }>;
 } | null;
 
 // Source: src/sanity/queries.ts
-// Variable: KIV_QUERY
-// Query: *[_type == "kivItem"] | order(order asc){    _id, tag, title, desc, status,    "slug": slug.current  }
-export type KIV_QUERY_RESULT = Array<{
+// Variable: ENTRIES_QUERY
+// Query: *[_type == "entry"] | order(date desc, _createdAt desc){    _id, title, date, kind, tags, href,    "summary": coalesce(summary, body),    "slug": slug.current  }
+export type ENTRIES_QUERY_RESULT = Array<{
   _id: string;
-  tag: string | null;
   title: string | null;
-  desc: string | null;
-  status:
-    "Next up" | "Parked" | "Prototyping" | "Researching" | "Sketching" | null;
+  date: string | null;
+  kind: "checkpoint" | "experiment" | "note" | "update" | null;
+  tags: Array<string> | null;
+  href: string | null;
+  summary: string | null;
   slug: string | null;
 }>;
 
 // Source: src/sanity/queries.ts
-// Variable: KIV_INDEX_QUERY
-// Query: *[_type == "kivItem"] | order(order asc){    _id, title, tag, "slug": slug.current  }
-export type KIV_INDEX_QUERY_RESULT = Array<{
+// Variable: LATEST_ENTRIES_QUERY
+// Query: *[_type == "entry"] | order(date desc, _createdAt desc)[0...5]{    _id, title, date, kind, tags, href,    "summary": coalesce(summary, body),    "slug": slug.current  }
+export type LATEST_ENTRIES_QUERY_RESULT = Array<{
   _id: string;
   title: string | null;
-  tag: string | null;
+  date: string | null;
+  kind: "checkpoint" | "experiment" | "note" | "update" | null;
+  tags: Array<string> | null;
+  href: string | null;
+  summary: string | null;
   slug: string | null;
 }>;
 
 // Source: src/sanity/queries.ts
-// Variable: KIV_DETAIL_QUERY
-// Query: *[_type == "kivItem" && _id == $id][0]{    _id, title, tag, desc, status, premise, why, notes, openQuestions, stack,    "slug": slug.current,    sections[]{ heading, body }  }
-export type KIV_DETAIL_QUERY_RESULT = {
+// Variable: ENTRY_INDEX_QUERY
+// Query: *[_type == "entry"] | order(date desc, _createdAt desc){    _id, title, "slug": slug.current  }
+export type ENTRY_INDEX_QUERY_RESULT = Array<{
   _id: string;
   title: string | null;
-  tag: string | null;
-  desc: string | null;
-  status:
-    "Next up" | "Parked" | "Prototyping" | "Researching" | "Sketching" | null;
-  premise: string | null;
-  why: string | null;
-  notes: Array<string> | null;
-  openQuestions: Array<string> | null;
-  stack: Array<string> | null;
   slug: string | null;
-  sections: Array<{
-    heading: string | null;
-    body: string | null;
-  }> | null;
+}>;
+
+// Source: src/sanity/queries.ts
+// Variable: ENTRY_DETAIL_QUERY
+// Query: *[_type == "entry" && _id == $id][0]{    _id, title, date, kind, tags, summary, body, href,    "slug": slug.current,    project->{ _id, title, status, "slug": slug.current }  }
+export type ENTRY_DETAIL_QUERY_RESULT = {
+  _id: string;
+  title: string | null;
+  date: string | null;
+  kind: "checkpoint" | "experiment" | "note" | "update" | null;
+  tags: Array<string> | null;
+  summary: string | null;
+  body: string | null;
+  href: string | null;
+  slug: string | null;
+  project: {
+    _id: string;
+    title: string | null;
+    status: "Done" | "Idea" | "In progress" | "Parked" | null;
+    slug: string | null;
+  } | null;
 } | null;
 
 // Source: src/sanity/queries.ts
@@ -446,13 +451,14 @@ export type DITHER_QUERY_RESULT = {
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '\n  *[_type == "profile"][0]{\n    name, role, roles, tagline, about, email, location,\n    socials[]{ label, href },\n    stack\n  }\n': PROFILE_QUERY_RESULT;
-    '\n  *[_type == "project"] | order(order asc, year desc){\n    _id, tag, title, desc, year, href, status,\n    "slug": slug.current\n  }\n': PROJECTS_QUERY_RESULT;
-    '\n  *[_type == "project"] | order(order asc, year desc){\n    _id, title, tag, "slug": slug.current\n  }\n': PROJECT_INDEX_QUERY_RESULT;
-    '\n  *[_type == "project" && _id == $id][0]{\n    _id, title, tag, desc, year, href, status, role, timeline, stack,\n    overview, problem, approach, outcome,\n    "slug": slug.current,\n    links[]{ label, href },\n    metrics[]{ value, label },\n    sections[]{ heading, body },\n    cover{\n      alt, caption,\n      "url": asset->url,\n      "lqip": asset->metadata.lqip,\n      "aspect": asset->metadata.dimensions.aspectRatio\n    },\n    gallery[]{\n      alt, caption,\n      "url": asset->url,\n      "lqip": asset->metadata.lqip,\n      "aspect": asset->metadata.dimensions.aspectRatio\n    }\n  }\n': PROJECT_DETAIL_QUERY_RESULT;
-    '\n  *[_type == "kivItem"] | order(order asc){\n    _id, tag, title, desc, status,\n    "slug": slug.current\n  }\n': KIV_QUERY_RESULT;
-    '\n  *[_type == "kivItem"] | order(order asc){\n    _id, title, tag, "slug": slug.current\n  }\n': KIV_INDEX_QUERY_RESULT;
-    '\n  *[_type == "kivItem" && _id == $id][0]{\n    _id, title, tag, desc, status, premise, why, notes, openQuestions, stack,\n    "slug": slug.current,\n    sections[]{ heading, body }\n  }\n': KIV_DETAIL_QUERY_RESULT;
+    '\n  *[_type == "profile"][0]{\n    name, statement, exploringSince, questions, about, background, email, location,\n    socials[]{ label, href }\n  }\n': PROFILE_QUERY_RESULT;
+    '\n  *[_type == "project"] | order(\n    select(status == "Done" => 0, status == "In progress" => 1, status == "Parked" => 2, 3) asc,\n    order asc,\n    year desc\n  ){\n    _id, tag, title, desc, year, status,\n    "slug": slug.current\n  }\n': PROJECTS_QUERY_RESULT;
+    '\n  *[_type == "project"] | order(\n    select(status == "Done" => 0, status == "In progress" => 1, status == "Parked" => 2, 3) asc,\n    order asc,\n    year desc\n  ){\n    _id, title, "slug": slug.current\n  }\n': PROJECT_INDEX_QUERY_RESULT;
+    '\n  *[_type == "project" && _id == $id][0]{\n    _id, title, tag, desc, year, href, status, timeline,\n    need, requirements, judgement, decisions, change,\n    standing, openQuestions, notes,\n    "slug": slug.current,\n    links[]{ label, href },\n    sections[]{ heading, body },\n    cover{\n      alt, caption,\n      "url": asset->url,\n      "lqip": asset->metadata.lqip,\n      "aspect": asset->metadata.dimensions.aspectRatio\n    },\n    gallery[]{\n      alt, caption,\n      "url": asset->url,\n      "lqip": asset->metadata.lqip,\n      "aspect": asset->metadata.dimensions.aspectRatio\n    },\n    "entries": *[_type == "entry" && references(^._id)] | order(date desc){\n      _id, title, date, kind, "slug": slug.current\n    }\n  }\n': PROJECT_DETAIL_QUERY_RESULT;
+    '\n  *[_type == "entry"] | order(date desc, _createdAt desc){\n    _id, title, date, kind, tags, href,\n    "summary": coalesce(summary, body),\n    "slug": slug.current\n  }\n': ENTRIES_QUERY_RESULT;
+    '\n  *[_type == "entry"] | order(date desc, _createdAt desc)[0...5]{\n    _id, title, date, kind, tags, href,\n    "summary": coalesce(summary, body),\n    "slug": slug.current\n  }\n': LATEST_ENTRIES_QUERY_RESULT;
+    '\n  *[_type == "entry"] | order(date desc, _createdAt desc){\n    _id, title, "slug": slug.current\n  }\n': ENTRY_INDEX_QUERY_RESULT;
+    '\n  *[_type == "entry" && _id == $id][0]{\n    _id, title, date, kind, tags, summary, body, href,\n    "slug": slug.current,\n    project->{ _id, title, status, "slug": slug.current }\n  }\n': ENTRY_DETAIL_QUERY_RESULT;
     '\n  *[_type == "ditherStudy"][0]{\n    work, credit, "imageUrl": image.asset->url\n  }\n': DITHER_QUERY_RESULT;
   }
 }

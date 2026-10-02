@@ -121,36 +121,6 @@
     }
   },
   {
-    "name": "metric",
-    "type": "type",
-    "value": {
-      "type": "object",
-      "attributes": {
-        "_type": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string",
-            "value": "metric"
-          }
-        },
-        "value": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string"
-          },
-          "optional": true
-        },
-        "label": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string"
-          },
-          "optional": true
-        }
-      }
-    }
-  },
-  {
     "name": "linkItem",
     "type": "type",
     "value": {
@@ -367,7 +337,37 @@
     }
   },
   {
-    "name": "kivItem",
+    "type": "type",
+    "name": "project.reference",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_ref": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          }
+        },
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "reference"
+          }
+        },
+        "_weak": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "boolean"
+          },
+          "optional": true
+        }
+      },
+      "dereferencesTo": "project"
+    }
+  },
+  {
+    "name": "entry",
     "type": "document",
     "attributes": {
       "_id": {
@@ -380,7 +380,7 @@
         "type": "objectAttribute",
         "value": {
           "type": "string",
-          "value": "kivItem"
+          "value": "entry"
         }
       },
       "_createdAt": {
@@ -416,119 +416,74 @@
         },
         "optional": true
       },
-      "tag": {
+      "date": {
         "type": "objectAttribute",
         "value": {
           "type": "string"
         },
         "optional": true
       },
-      "desc": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "order": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "number"
-        },
-        "optional": true
-      },
-      "status": {
+      "kind": {
         "type": "objectAttribute",
         "value": {
           "type": "union",
           "of": [
             {
               "type": "string",
-              "value": "Parked"
+              "value": "note"
             },
             {
               "type": "string",
-              "value": "Researching"
+              "value": "experiment"
             },
             {
               "type": "string",
-              "value": "Sketching"
+              "value": "update"
             },
             {
               "type": "string",
-              "value": "Prototyping"
-            },
-            {
-              "type": "string",
-              "value": "Next up"
+              "value": "checkpoint"
             }
           ]
         },
         "optional": true
       },
-      "premise": {
+      "tags": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "string"
+          }
+        },
+        "optional": true
+      },
+      "summary": {
         "type": "objectAttribute",
         "value": {
           "type": "string"
         },
         "optional": true
       },
-      "why": {
+      "body": {
         "type": "objectAttribute",
         "value": {
           "type": "string"
         },
         "optional": true
       },
-      "notes": {
+      "project": {
         "type": "objectAttribute",
         "value": {
-          "type": "array",
-          "of": {
-            "type": "string"
-          }
+          "type": "inline",
+          "name": "project.reference"
         },
         "optional": true
       },
-      "openQuestions": {
+      "href": {
         "type": "objectAttribute",
         "value": {
-          "type": "array",
-          "of": {
-            "type": "string"
-          }
-        },
-        "optional": true
-      },
-      "stack": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "array",
-          "of": {
-            "type": "string"
-          }
-        },
-        "optional": true
-      },
-      "sections": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "array",
-          "of": {
-            "type": "object",
-            "attributes": {
-              "_key": {
-                "type": "objectAttribute",
-                "value": {
-                  "type": "string"
-                }
-              }
-            },
-            "rest": {
-              "type": "inline",
-              "name": "contentSection"
-            }
-          }
+          "type": "string"
         },
         "optional": true
       }
@@ -614,14 +569,39 @@
         },
         "optional": true
       },
-      "tag": {
+      "status": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "Idea"
+            },
+            {
+              "type": "string",
+              "value": "In progress"
+            },
+            {
+              "type": "string",
+              "value": "Parked"
+            },
+            {
+              "type": "string",
+              "value": "Done"
+            }
+          ]
+        },
+        "optional": true
+      },
+      "desc": {
         "type": "objectAttribute",
         "value": {
           "type": "string"
         },
         "optional": true
       },
-      "desc": {
+      "tag": {
         "type": "objectAttribute",
         "value": {
           "type": "string"
@@ -642,39 +622,87 @@
         },
         "optional": true
       },
-      "status": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "union",
-          "of": [
-            {
-              "type": "string",
-              "value": "Live"
-            },
-            {
-              "type": "string",
-              "value": "In development"
-            },
-            {
-              "type": "string",
-              "value": "Shipped"
-            },
-            {
-              "type": "string",
-              "value": "Prototype"
-            },
-            {
-              "type": "string",
-              "value": "Archived"
-            }
-          ]
-        },
-        "optional": true
-      },
-      "role": {
+      "need": {
         "type": "objectAttribute",
         "value": {
           "type": "string"
+        },
+        "optional": true
+      },
+      "requirements": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "judgement": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "decisions": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "change": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "sections": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "object",
+            "attributes": {
+              "_key": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string"
+                }
+              }
+            },
+            "rest": {
+              "type": "inline",
+              "name": "contentSection"
+            }
+          }
+        },
+        "optional": true
+      },
+      "standing": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "openQuestions": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "string"
+          }
+        },
+        "optional": true
+      },
+      "notes": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "string"
+          }
         },
         "optional": true
       },
@@ -682,16 +710,6 @@
         "type": "objectAttribute",
         "value": {
           "type": "string"
-        },
-        "optional": true
-      },
-      "stack": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "array",
-          "of": {
-            "type": "string"
-          }
         },
         "optional": true
       },
@@ -719,78 +737,6 @@
             "rest": {
               "type": "inline",
               "name": "linkItem"
-            }
-          }
-        },
-        "optional": true
-      },
-      "overview": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "problem": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "approach": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "outcome": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "metrics": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "array",
-          "of": {
-            "type": "object",
-            "attributes": {
-              "_key": {
-                "type": "objectAttribute",
-                "value": {
-                  "type": "string"
-                }
-              }
-            },
-            "rest": {
-              "type": "inline",
-              "name": "metric"
-            }
-          }
-        },
-        "optional": true
-      },
-      "sections": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "array",
-          "of": {
-            "type": "object",
-            "attributes": {
-              "_key": {
-                "type": "objectAttribute",
-                "value": {
-                  "type": "string"
-                }
-              }
-            },
-            "rest": {
-              "type": "inline",
-              "name": "contentSection"
             }
           }
         },
@@ -870,14 +816,21 @@
         },
         "optional": true
       },
-      "role": {
+      "statement": {
         "type": "objectAttribute",
         "value": {
           "type": "string"
         },
         "optional": true
       },
-      "roles": {
+      "exploringSince": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "questions": {
         "type": "objectAttribute",
         "value": {
           "type": "array",
@@ -887,14 +840,14 @@
         },
         "optional": true
       },
-      "tagline": {
+      "about": {
         "type": "objectAttribute",
         "value": {
           "type": "string"
         },
         "optional": true
       },
-      "about": {
+      "background": {
         "type": "objectAttribute",
         "value": {
           "type": "string"
@@ -912,16 +865,6 @@
         "type": "objectAttribute",
         "value": {
           "type": "string"
-        },
-        "optional": true
-      },
-      "stack": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "array",
-          "of": {
-            "type": "string"
-          }
         },
         "optional": true
       },

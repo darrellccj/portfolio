@@ -5,11 +5,11 @@ import {notFound} from 'next/navigation';
 import Nav from '@/components/Nav';
 import StudioModeToggle from '@/components/StudioModeToggle';
 import Pager from '@/components/detail/Pager';
-import {Block, TextBlock, Spec, Metrics, Plate, LinkRow} from '@/components/detail/parts';
+import {Block, TextBlock, Spec, Notes, Plate, LinkRow} from '@/components/detail/parts';
 
 import {sanityFetch} from '@/sanity/lib/live';
 import {PROJECT_INDEX_QUERY, PROJECT_DETAIL_QUERY} from '@/sanity/queries';
-import {indexOfSlug, projectPath} from '@/lib/routes';
+import {formatDate, indexOfSlug, logPath, projectPath} from '@/lib/routes';
 
 type Params = {params: Promise<{slug: string}>};
 
@@ -38,7 +38,7 @@ export async function generateMetadata({params}: Params): Promise<Metadata> {
   if (!resolved) return {title: 'Project not found'};
 
   const {project} = resolved;
-  const description = project.overview || project.desc || undefined;
+  const description = project.desc || project.need || project.standing || undefined;
 
   return {
     title: `${project.title} — Darrell`,
@@ -64,14 +64,25 @@ export default async function ProjectPage({params}: Params) {
 
   const sections = project.sections ?? [];
   const gallery = (project.gallery ?? []).filter((plate) => plate?.url);
-  const eyebrow = [project.tag, project.year, project.status].filter(Boolean).join(' · ');
+  const questions = (project.openQuestions ?? []).filter(Boolean);
+  const notes = (project.notes ?? []).filter(Boolean);
+  const entries = project.entries ?? [];
+  const eyebrow = [project.status, project.tag, project.year].filter(Boolean).join(' · ');
 
-  // Long-form fields are all optional, so a project can legitimately have
-  // nothing below the fold yet. Say so plainly rather than ending the page
-  // on an unexplained gap.
-  const hasNarrative = Boolean(
-    project.overview || project.problem || project.approach || project.outcome || sections.length,
-  );
+  // A finished project gets the write-up (docs/direction.md); an idea or a
+  // parked one gets a few honest lines about where it stands. Both sets are
+  // optional, so render whichever exists rather than switching on status.
+  const writeup = [
+    {label: 'The need', text: project.need},
+    {label: 'Their requirements', text: project.requirements},
+    {label: 'Where my judgement differed', text: project.judgement},
+    {label: 'Decisions and trade-offs', text: project.decisions},
+    {label: 'What I would change', text: project.change},
+    {label: 'Where it stands', text: project.standing},
+    ...sections.map((section) => ({label: section.heading, text: section.body})),
+  ].filter((block) => block.text?.trim());
+
+  const hasNarrative = Boolean(writeup.length || questions.length || notes.length);
 
   return (
     <>
@@ -79,11 +90,11 @@ export default async function ProjectPage({params}: Params) {
       <main className="detail">
         <div className="detail__inner">
           <div className="detail__top">
-            <Link className="detail__back" href="/#work">
-              <span aria-hidden="true">←</span> Selected work
+            <Link className="detail__back" href="/projects">
+              <span aria-hidden="true">←</span> Projects
             </Link>
             <span className="detail__count">
-              {String(position + 1).padStart(3, '0')} / {String(list.length).padStart(3, '0')}
+              {String(position + 1).padStart(2, '0')} / {String(list.length).padStart(2, '0')}
             </span>
           </div>
 
@@ -96,36 +107,46 @@ export default async function ProjectPage({params}: Params) {
 
           <Plate image={project.cover} priority sizes="100vw" />
 
-          <Spec
-            items={[
-              {label: 'Role', value: project.role},
-              {label: 'Timeline', value: project.timeline},
-              {label: 'Built with', value: project.stack},
-            ]}
-          />
-
-          <Metrics items={project.metrics} />
+          <Spec items={[{label: 'Timeline', value: project.timeline}]} />
 
           <div className="detail__body">
-            <TextBlock label="Overview" text={project.overview} index={0} />
-            <TextBlock label="Problem" text={project.problem} index={1} />
-            <TextBlock label="Approach" text={project.approach} index={2} />
-            <TextBlock label="Outcome" text={project.outcome} index={3} />
-            {sections.map((section, i) => (
-              <TextBlock
-                key={section.heading ?? i}
-                label={section.heading}
-                text={section.body}
-                index={4 + i}
-              />
+            {writeup.map((block, i) => (
+              <TextBlock key={block.label ?? i} label={block.label} text={block.text} index={i} />
             ))}
+
+            {questions.length ? (
+              <Block label="Open questions" index={writeup.length}>
+                <Notes items={questions} ordered />
+              </Block>
+            ) : null}
+
+            {notes.length ? (
+              <Block label="Notes" index={writeup.length + 1}>
+                <Notes items={notes} />
+              </Block>
+            ) : null}
+
             {hasNarrative ? null : (
               <Block label="Note">
                 <p className="prose__aside">
-                  The write-up for this one is still being written. The short version is above.
+                  Nothing written about this one yet beyond the line above.
                 </p>
               </Block>
             )}
+
+            {entries.length ? (
+              <Block label="In the log" index={writeup.length + 2}>
+                <ul className="d-notes">
+                  {entries.map((entry) => (
+                    <li key={entry._id}>
+                      <Link href={logPath(entry)}>
+                        {formatDate(entry.date)} — {entry.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </Block>
+            ) : null}
           </div>
 
           {gallery.length ? (
@@ -139,8 +160,8 @@ export default async function ProjectPage({params}: Params) {
           <Pager
             prev={prev ? {href: projectPath(prev), title: prev.title} : null}
             next={next ? {href: projectPath(next), title: next.title} : null}
-            backHref="/#work"
-            backLabel="All work"
+            backHref="/projects"
+            backLabel="All projects"
           />
 
           {/* No contact band down here — the page ends on the pager. This

@@ -1,17 +1,16 @@
 import {profile} from './profile'
 import {project} from './project'
-import {kivItem} from './kivItem'
+import {entry} from './entry'
 import {ditherStudy} from './ditherStudy'
-import {linkItem, metric, contentSection, plate} from './objects'
+import {linkItem, contentSection, plate} from './objects'
 
 export const schemaTypes = [
   profile,
   project,
-  kivItem,
+  entry,
   ditherStudy,
   // Shared object types — referenced by name from the documents above.
   linkItem,
-  metric,
   contentSection,
   plate,
 ]

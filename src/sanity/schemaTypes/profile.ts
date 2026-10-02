@@ -1,46 +1,70 @@
 import {defineField, defineType} from 'sanity'
 
+// No role, title or stack fields on purpose — see docs/direction.md. The
+// site carries a question rather than a label.
 export const profile = defineType({
   name: 'profile',
   title: 'Profile',
   type: 'document',
   // Singleton — one document, fixed id, managed via Studio structure.
+  groups: [
+    {name: 'home', title: 'Home', default: true},
+    {name: 'about', title: 'About'},
+    {name: 'contact', title: 'Contact'},
+  ],
   fields: [
-    defineField({name: 'name', type: 'string', validation: (r) => r.required()}),
-    defineField({name: 'role', type: 'string', validation: (r) => r.required()}),
+    defineField({name: 'name', type: 'string', group: 'home', validation: (r) => r.required()}),
     defineField({
-      name: 'roles',
-      title: 'Roles (typewriter)',
-      type: 'array',
-      of: [{type: 'string'}],
-      description:
-        'Optional — short phrases the hero eyebrow cycles through. Falls back to Role above if empty.',
-    }),
-    defineField({
-      name: 'tagline',
+      name: 'statement',
       type: 'text',
-      rows: 3,
-      description: 'Hero line — keep it to one calm sentence.',
+      rows: 2,
+      group: 'home',
+      description: 'The one sentence at the top of the home page. What you are doing, not what you are.',
       validation: (r) => r.required(),
     }),
     defineField({
-      name: 'about',
-      type: 'text',
-      rows: 8,
-      description: 'Longer about paragraph.',
+      name: 'exploringSince',
+      type: 'date',
+      group: 'home',
+      description: 'When this started. Shown next to the statement.',
+      options: {dateFormat: 'MMMM YYYY'},
     }),
-    defineField({name: 'email', type: 'string', validation: (r) => r.required().email()}),
-    defineField({name: 'location', type: 'string'}),
     defineField({
-      name: 'stack',
-      title: 'Building with',
+      name: 'questions',
+      title: 'Currently exploring',
       type: 'array',
       of: [{type: 'string'}],
-      options: {layout: 'tags'},
+      group: 'home',
+      description: 'Two or three open questions. Change them at each checkpoint.',
+      validation: (r) => r.max(3),
     }),
+
+    defineField({
+      name: 'about',
+      type: 'text',
+      rows: 10,
+      group: 'about',
+      description: 'The About page, written as a "now" page — why you started, what you are unsure of. Blank lines separate paragraphs.',
+    }),
+    defineField({
+      name: 'background',
+      type: 'text',
+      rows: 2,
+      group: 'about',
+      description: 'One or two lines. Study, school — nothing more.',
+    }),
+
+    defineField({
+      name: 'email',
+      type: 'string',
+      group: 'contact',
+      validation: (r) => r.required().email(),
+    }),
+    defineField({name: 'location', type: 'string', group: 'contact'}),
     defineField({
       name: 'socials',
       type: 'array',
+      group: 'contact',
       of: [
         {
           type: 'object',
@@ -55,5 +79,5 @@ export const profile = defineType({
       ],
     }),
   ],
-  preview: {select: {title: 'name', subtitle: 'role'}},
+  preview: {select: {title: 'name', subtitle: 'statement'}},
 })

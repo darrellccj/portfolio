@@ -1,149 +1,165 @@
 import {defineField, defineType} from 'sanity'
 
-// `title`, `tag`, `desc`, `year` and `order` drive the card in the pinned
-// scroll on the home page. Everything below `slug` exists only for the
-// detail page at /work/[slug], and every one of those fields is optional:
-// a project with nothing but a card still renders a valid, if short, page.
+export const PROJECT_STATUSES = ['Idea', 'In progress', 'Parked', 'Done'] as const
+
+// A project is something made *for someone* — a client, or yourself with a
+// defined problem. If you can only name what you are curious about, it is
+// a log entry instead (see docs/direction.md).
+//
+// Only `title`, `status` and `desc` are needed for the list. The write-up
+// fields are for projects that have earned one; ideas and parked projects
+// use `standing` and `openQuestions` instead. Every page field is optional,
+// so a project with nothing but a line still renders a valid page.
 export const project = defineType({
   name: 'project',
   title: 'Project',
   type: 'document',
   groups: [
-    {name: 'card', title: 'Card', default: true},
-    {name: 'page', title: 'Detail page'},
-    {name: 'media', title: 'Media'},
+    {name: 'list', title: 'List', default: true},
+    {name: 'writeup', title: 'Write-up'},
+    {name: 'unfinished', title: 'Idea / parked'},
+    {name: 'media', title: 'Media & links'},
   ],
   fields: [
     defineField({
       name: 'title',
       type: 'string',
-      group: 'card',
+      group: 'list',
       validation: (r) => r.required(),
     }),
     defineField({
       name: 'slug',
       type: 'slug',
-      group: 'card',
-      description: 'The URL for this project — /work/<slug>.',
+      group: 'list',
+      description: 'The URL for this project — /projects/<slug>.',
       options: {source: 'title', maxLength: 96},
+    }),
+    defineField({
+      name: 'status',
+      type: 'string',
+      group: 'list',
+      description: 'Where it honestly stands. Unfinished is fine; hiding it is not.',
+      options: {list: [...PROJECT_STATUSES], layout: 'radio', direction: 'horizontal'},
+      initialValue: 'Idea',
+      validation: (r) => r.required(),
+    }),
+    defineField({
+      name: 'desc',
+      title: 'One line',
+      type: 'text',
+      rows: 2,
+      group: 'list',
+      description: 'Who it was for and what it does, in a sentence.',
     }),
     defineField({
       name: 'tag',
       type: 'string',
-      group: 'card',
-      description: 'Category shown above the title, e.g. "AI · Proptech".',
+      group: 'list',
+      description: 'Optional context, e.g. "Proptech".',
     }),
-    defineField({
-      name: 'desc',
-      title: 'Card blurb',
-      type: 'text',
-      rows: 4,
-      group: 'card',
-      description: 'The two or three lines that appear on the card and under the title.',
-    }),
-    defineField({name: 'year', type: 'string', group: 'card'}),
+    defineField({name: 'year', type: 'string', group: 'list'}),
     defineField({
       name: 'order',
       type: 'number',
-      group: 'card',
-      description: 'Lower numbers appear first in the pinned scroll.',
+      group: 'list',
+      description: 'Lower numbers appear first within the same status.',
     }),
 
     defineField({
-      name: 'status',
-      type: 'string',
-      group: 'page',
-      description: 'Where the project stands today.',
-      options: {
-        list: ['Live', 'In development', 'Shipped', 'Prototype', 'Archived'],
-      },
-    }),
-    defineField({
-      name: 'role',
-      type: 'string',
-      group: 'page',
-      description: 'What you did on it, e.g. "Solo — design, engineering, ops".',
-    }),
-    defineField({
-      name: 'timeline',
-      type: 'string',
-      group: 'page',
-      description: 'How long it ran, e.g. "6 weeks, 2025".',
-    }),
-    defineField({
-      name: 'stack',
-      title: 'Built with',
-      type: 'array',
-      of: [{type: 'string'}],
-      options: {layout: 'tags'},
-      group: 'page',
-    }),
-    defineField({
-      name: 'href',
-      title: 'Primary link',
-      type: 'string',
-      group: 'page',
-      description: 'The one link worth putting a button on. Use # if there is nothing to link yet.',
-      initialValue: '#',
-    }),
-    defineField({
-      name: 'links',
-      title: 'Other links',
-      type: 'array',
-      of: [{type: 'linkItem'}],
-      group: 'page',
-      description: 'Repo, case study, press — anything beyond the primary link.',
-    }),
-    defineField({
-      name: 'overview',
+      name: 'need',
+      title: 'The need',
       type: 'text',
       rows: 6,
-      group: 'page',
-      description: 'The opening paragraph on the detail page. Longer than the card blurb.',
+      group: 'writeup',
+      description: 'Who it was for and what they actually needed.',
     }),
     defineField({
-      name: 'problem',
+      name: 'requirements',
+      title: 'Their requirements',
       type: 'text',
       rows: 6,
-      group: 'page',
-      description: 'What was broken, missing, or expensive before this existed.',
+      group: 'writeup',
+      description: 'What the client (or you, as the client) asked for.',
     }),
     defineField({
-      name: 'approach',
+      name: 'judgement',
+      title: 'Where my judgement differed',
       type: 'text',
       rows: 6,
-      group: 'page',
-      description: 'How you built it, and the decisions worth defending.',
+      group: 'writeup',
+      description: 'Where you went against the brief, the client or the AI — and why.',
     }),
     defineField({
-      name: 'outcome',
+      name: 'decisions',
+      title: 'Decisions and trade-offs',
       type: 'text',
       rows: 6,
-      group: 'page',
-      description: 'What shipped, who uses it, what it changed.',
+      group: 'writeup',
     }),
     defineField({
-      name: 'metrics',
-      type: 'array',
-      of: [{type: 'metric'}],
-      group: 'page',
-      description: 'Up to four numbers worth setting in large type.',
-      validation: (r) => r.max(4),
+      name: 'change',
+      title: 'What I would change',
+      type: 'text',
+      rows: 6,
+      group: 'writeup',
     }),
     defineField({
       name: 'sections',
       title: 'Extra sections',
       type: 'array',
       of: [{type: 'contentSection'}],
-      group: 'page',
+      group: 'writeup',
+      description: 'Anything the fields above do not cover.',
     }),
 
+    defineField({
+      name: 'standing',
+      title: 'Where it stands',
+      type: 'text',
+      rows: 5,
+      group: 'unfinished',
+      description: 'What you were trying to figure out, how far it got, and why it stopped (or has not started).',
+    }),
+    defineField({
+      name: 'openQuestions',
+      title: 'Open questions',
+      type: 'array',
+      of: [{type: 'string'}],
+      group: 'unfinished',
+    }),
+    defineField({
+      name: 'notes',
+      type: 'array',
+      of: [{type: 'string'}],
+      group: 'unfinished',
+      description: 'Loose thoughts, one per line.',
+    }),
+
+    defineField({
+      name: 'timeline',
+      type: 'string',
+      group: 'media',
+      description: 'When it ran, e.g. "Aug – Sep 2026".',
+    }),
+    defineField({
+      name: 'href',
+      title: 'Primary link',
+      type: 'string',
+      group: 'media',
+      description: 'The live thing, if there is one. Leave empty or # if not.',
+    }),
+    defineField({
+      name: 'links',
+      title: 'Other links',
+      type: 'array',
+      of: [{type: 'linkItem'}],
+      group: 'media',
+    }),
     defineField({
       name: 'cover',
       title: 'Cover plate',
       type: 'plate',
       group: 'media',
-      description: 'The wide image under the title on the detail page.',
     }),
     defineField({
       name: 'gallery',
@@ -155,5 +171,5 @@ export const project = defineType({
   orderings: [
     {title: 'Display order', name: 'orderAsc', by: [{field: 'order', direction: 'asc'}]},
   ],
-  preview: {select: {title: 'title', subtitle: 'tag', media: 'cover'}},
+  preview: {select: {title: 'title', subtitle: 'status', media: 'cover'}},
 })

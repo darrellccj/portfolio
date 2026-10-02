@@ -3,14 +3,14 @@
 import useReveal from '../hooks/useReveal.js';
 import StudioModeToggle from './StudioModeToggle';
 
-// `label` is overridable because the numbered section prefix only makes
-// sense on the home page, where Contact is the fifth movement.
+// Just an address — no "open to projects", no reply-time promise. This is
+// a place to write to, not a sales funnel (see docs/direction.md).
 //
 // 2026 redesign — reuses the hero's script-plus-bold headline pairing as
 // a deliberate bookend rather than a one-off, and folds the old separate
 // footer band into this same dark section so the ghost wordmark has one
 // place to live instead of two.
-export default function Contact({ profile, label = '05 / Contact' }) {
+export default function Contact({ profile, label = 'Contact' }) {
   const ref = useReveal({ threshold: 0.2 });
 
   return (
@@ -21,11 +21,11 @@ export default function Contact({ profile, label = '05 / Contact' }) {
 
       <div className="contact__inner reveal" ref={ref}>
         <p className="contact__label">{label}</p>
-        <p className="contact__script">Let&rsquo;s make</p>
-        <h2 className="contact__title">something.</h2>
+        <p className="contact__script">Say</p>
+        <h2 className="contact__title">hello.</h2>
         <p className="contact__sub">
-          Open to selected projects and collaborations. I reply to every
-          message, usually within a day.
+          If something here is interesting to you, or you think I&rsquo;ve got
+          it wrong, I&rsquo;d like to hear about it.
         </p>
 
         <a className="contact__email" href={`mailto:${profile.email}`}>
@@ -48,7 +48,7 @@ export default function Contact({ profile, label = '05 / Contact' }) {
 
       <footer className="footer">
         <span>
-          {profile.name} · {profile.location}
+          {[profile.name, profile.location].filter(Boolean).join(' · ')}
         </span>
         <StudioModeToggle />
         <span>© {new Date().getFullYear()}</span>
