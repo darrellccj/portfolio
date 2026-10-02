@@ -312,7 +312,6 @@ export default function StudioModePanel() {
       >
         <div className="studio-panel__bar" onPointerDown={onDragStart}>
           <span className="studio-panel__grip" aria-hidden="true" />
-          <span className="studio-panel__label">Studio Mode</span>
           <div className="studio-panel__actions">
             {status && <span className="studio-panel__status">{STATUS_TEXT[status]}</span>}
             {selection && (

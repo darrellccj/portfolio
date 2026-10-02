@@ -3,7 +3,6 @@ import Link from 'next/link';
 import {notFound} from 'next/navigation';
 
 import Nav from '@/components/Nav';
-import StudioModeToggle from '@/components/StudioModeToggle';
 import Pager from '@/components/detail/Pager';
 import {Block, TextBlock, Spec, Notes, Plate, LinkRow} from '@/components/detail/parts';
 
@@ -164,13 +163,6 @@ export default async function ProjectPage({params}: Params) {
             backLabel="All projects"
           />
 
-          {/* No contact band down here — the page ends on the pager. This
-              carries the Studio Mode toggle alone, because the toggle is
-              the only way into click-to-edit and most of what it edits
-              lives on this page. */}
-          <div className="detail__foot">
-            <StudioModeToggle />
-          </div>
         </div>
       </main>
     </>

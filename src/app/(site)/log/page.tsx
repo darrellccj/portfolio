@@ -3,7 +3,6 @@ import Link from 'next/link';
 
 import Nav from '@/components/Nav';
 import IndexList from '@/components/IndexList';
-import StudioModeToggle from '@/components/StudioModeToggle';
 
 import {sanityFetch} from '@/sanity/lib/live';
 import {ENTRIES_QUERY} from '@/sanity/queries';
@@ -41,9 +40,6 @@ export default async function LogPage() {
 
         <IndexList rows={entries.map(entryRow)} empty="Nothing logged yet." />
 
-        <div className="detail__foot">
-          <StudioModeToggle />
-        </div>
       </main>
     </>
   );

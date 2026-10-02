@@ -3,7 +3,6 @@ import Link from 'next/link';
 
 import Nav from '@/components/Nav';
 import IndexList from '@/components/IndexList';
-import StudioModeToggle from '@/components/StudioModeToggle';
 
 import {sanityFetch} from '@/sanity/lib/live';
 import {PROJECTS_QUERY} from '@/sanity/queries';
@@ -42,9 +41,6 @@ export default async function ProjectsPage() {
 
         <IndexList rows={projects.map(projectRow)} empty="No projects yet." />
 
-        <div className="detail__foot">
-          <StudioModeToggle />
-        </div>
       </main>
     </>
   );

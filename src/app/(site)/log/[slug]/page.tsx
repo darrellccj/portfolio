@@ -3,7 +3,6 @@ import Link from 'next/link';
 import {notFound} from 'next/navigation';
 
 import Nav from '@/components/Nav';
-import StudioModeToggle from '@/components/StudioModeToggle';
 import Pager from '@/components/detail/Pager';
 import {Block, TextBlock, LinkRow} from '@/components/detail/parts';
 
@@ -96,9 +95,6 @@ export default async function EntryPage({params}: Params) {
             backLabel="All entries"
           />
 
-          <div className="detail__foot">
-            <StudioModeToggle />
-          </div>
         </div>
       </main>
     </>

@@ -1497,21 +1497,33 @@ a.d-pager__side:hover .d-pager__dir {
 /* End of page. The detail pages carry no contact band, so the Studio Mode
    toggle has no footer to sit in — it gets a quiet strip of its own, and
    ink tokens, since its own styling is tuned for the inverted band. */
-.detail__foot {
-  display: flex;
-  justify-content: center;
-  padding-top: clamp(2rem, 5vw, 3rem);
-  font-size: 0.64rem;
-  letter-spacing: 0.14em;
+/* Studio Mode toggle — fixed top right on every page. Sits just under the
+   sticky nav (z-index 20) rather than over its right-hand links, and
+   under it in the stack so the mobile menu still opens on top. */
+.studio-float {
+  position: fixed;
+  top: 4.6rem;
+  right: 1.2rem;
+  z-index: 15;
+}
+.studio-float .studio-toggle {
+  padding: 0.55em 0.95em;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  font-family: var(--ui);
+  font-weight: 500;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
-.detail__foot .studio-toggle {
-  color: var(--ink-faint);
-  border-color: var(--line-soft);
+.studio-float .studio-toggle:hover {
+  color: var(--paper);
+  background: var(--ink);
 }
-.detail__foot .studio-toggle:hover {
-  color: var(--ink);
-  border-color: var(--ink);
+.studio-float .studio-toggle[aria-pressed='true'] .studio-toggle__dot {
+  background: var(--studio-accent);
 }
 
 /* Entrance — fires on load, staggered by an inline `--i`. */

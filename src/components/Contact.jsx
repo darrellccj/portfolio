@@ -1,7 +1,6 @@
 'use client';
 
 import useReveal from '../hooks/useReveal.js';
-import StudioModeToggle from './StudioModeToggle';
 
 // Just an address — no "open to projects", no reply-time promise. This is
 // a place to write to, not a sales funnel (see docs/direction.md).
@@ -50,7 +49,6 @@ export default function Contact({ profile, label = 'Contact' }) {
         <span>
           {[profile.name, profile.location].filter(Boolean).join(' · ')}
         </span>
-        <StudioModeToggle />
         <span>© {new Date().getFullYear()}</span>
       </footer>
     </section>
